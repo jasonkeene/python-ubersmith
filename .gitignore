@@ -1,0 +1,14 @@
+# python
+*.pyc
+*.pyo
+__pycache__/
+
+# mac
+._*
+__MACOSX
+.DS_Store
+
+# win
+*~
+Thumbs.db
+desktop.ini
