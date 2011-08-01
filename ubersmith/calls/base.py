@@ -6,6 +6,15 @@ from ubersmith.api import get_default_request_handler as _get_default_handler
 from ubersmith.decorator import decorator as _wrap
 
 
+# ways calls may differ:
+#     method string - class / instance property
+#     input signature - function / class __init__ method
+#     input validation - class validate method
+#     input encoding - actually handled in request_handler not call
+#     response cleaning - class clean method
+#     documentation - function docstring
+
+
 class _BaseCall(object):
     def __init__(self, request_handler):
         self.request_handler = request_handler
