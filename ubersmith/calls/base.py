@@ -1,9 +1,13 @@
 # the base classes for all other calls go here
 
+import datetime as _datetime
+import decimal as _decimal
 import inspect as _inspect
 
-from ubersmith.api import get_default_request_handler as _get_default_handler
-from ubersmith.decorator import decorator as _wrap
+import phpserialize as _phpserialize
+
+import ubersmith.api as _api
+from decorator import decorator as _wrap
 
 
 # ways calls may differ:
@@ -15,22 +19,112 @@ from ubersmith.decorator import decorator as _wrap
 #     documentation - function docstring
 
 
-class _BaseCall(object):
+class BaseCall(object):
+    method = None  # this should be defined on child classes
+    rename_fields = {}  # fields to rename
+    int_fields = ()  # fields to convert to ints
+    decimal_fields = ()  # fields to convert to decimals
+    float_fields = ()   # fields to convert to floats
+    timestamp_fields = ()  # fields to convert to timestamps
+    php_serialized_fields = ()  # fields to convert from php serialized format
+
     def __init__(self, request_handler):
         self.request_handler = request_handler
 
-    def render(self):
+    def validate(self):
         raise NotImplementedError(
-            "No render method defined for {0}".format(self.__class__))
+            "No validate method defined for {0}".format(self.__class__))
 
+    def build_request_data(self):
+        raise NotImplementedError(
+            "No build_request_data method defined for {0}".format(
+                self.__class__))
 
-class _DemoCall(_BaseCall):
-    def __init__(self, request_handler, object_id):
-        super(_DemoCall, self).__init__(request_handler)
-        self.object_id = object_id
+    def request(self):
+        raise NotImplementedError(
+            "No request method defined for {0}".format(self.__class__))
+
+    def clean(self, field_cleaning=False):
+        self.clean_unicode_keys()
+
+        if self.rename_fields:
+            self.clean_rename()
+            field_cleaning = True
+        if self.int_fields:
+            self.clean_ints()
+            field_cleaning = True
+        if self.decimal_fields:
+            self.clean_decimals()
+            field_cleaning = True
+        if self.float_fields:
+            self.clean_floats()
+            field_cleaning = True
+        if self.timestamp_fields:
+            self.clean_timestamps()
+            field_cleaning = True
+        if self.php_serialized_fields:
+            self.clean_php_serialize()
+            field_cleaning = True
+
+        if not field_cleaning:
+            raise NotImplementedError(
+                "No clean method defined for {0}".format(self.__class__))
+        else:
+            return self.process_result
+
+    def clean_unicode_keys(self):
+        for key in self.process_result.keys():
+            if isinstance(key, unicode):
+                tmp_value = self.process_result[key]
+                del self.process_result[key]
+                self.process_result[str(key)] = tmp_value
+
+    def clean_rename(self):
+        for old_key, new_key in self.rename_fields.items():
+            if old_key in self.process_result and \
+                                           new_key not in self.process_result:
+                self.process_result[new_key] = self.process_result[old_key]
+                del self.process_result[old_key]
+
+    def clean_ints(self):
+        for field in self.int_fields:
+            if field in self.process_result:
+                self.process_result[field] = int(self.process_result[field])
+
+    def clean_decimals(self):
+        for field in self.decimal_fields:
+            if field in self.process_result:
+                self.process_result[field] = _decimal.Decimal(
+                            str(self.process_result[field]).replace(',', ''))
+
+    def clean_floats(self):
+        for field in self.float_fields:
+            if field in self.process_result:
+                self.process_result[field] = float(self.process_result[field])
+
+    def clean_timestamps(self):
+        for field in self.timestamp_fields:
+            if field in self.process_result:
+                self.process_result[field] = \
+                    _datetime.datetime.fromtimestamp(
+                        float(self.process_result[field]))
+
+    def clean_php_serialize(self):
+        for field in self.php_serialized_fields:
+            if field in self.process_result:
+                self.process_result[field] = \
+                    _phpserialize.loads(self.process_result[field])
+
+    def process(self):
+        return self.request_handler.process(self.method, self.request_data)
 
     def render(self):
-        return "Render _DemoCall object_id: {0}".format(self.object_id)
+        if not self.validate():
+            return False
+
+        self.build_request_data()
+        self.request()
+        return self.clean()
 
 
 def _signature_position(func, arg_name):
@@ -42,7 +136,7 @@ def _api_call_wrapper(call_func, *args):
     """If caller did not provide a request_handler, use the default."""
     index = _signature_position(call_func, 'request_handler')
     args = list(args)  # convert tuple to a mutable type
-    args[index] = args[index] or _get_default_handler()
+    args[index] = args[index] or _api.get_default_request_handler()
 
     return call_func(*args)
 
@@ -56,39 +150,8 @@ def _api_call_definition_check(call_func):
                                       "argument.".format(call_func.func_name))
 
 
-def _api_call(call_func):
+def api_call(call_func):
     """Decorate API call function."""
     _api_call_definition_check(call_func)
 
     return _wrap(_api_call_wrapper, call_func)
-
-
-# convenience functions w/ proper signatures and documentation
-
-@_api_call
-def demo_call(object_id, request_handler=None):
-    """Awesome doc string!"""
-    return _DemoCall(request_handler, object_id).render()
-
-
-@_api_call
-def demo_call2(object_id, client_id, request_handler=None):
-    """Awesome doc string!2"""
-    return _DemoCall(request_handler, object_id, client_id).render()
-
-
-@_api_call
-def demo_call3(client_id, request_handler=None):
-    """Awesome doc string!3"""
-    return _DemoCall(request_handler, client_id).render()
-
-
-if __name__ == '__main__':
-    # pass
-    help(demo_call3)
-    from ubersmith.api import RequestHandler, set_default_request_handler
-    set_default_request_handler(RequestHandler())
-    print demo_call(765)
-    print demo_call(126)
-    print demo_call(56854, RequestHandler())
-    print demo_call(467, request_handler=RequestHandler())

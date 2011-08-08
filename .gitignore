@@ -12,3 +12,6 @@ __MACOSX
 *~
 Thumbs.db
 desktop.ini
+
+# local tests
+hv_tests.py
