@@ -44,9 +44,9 @@ class RequestHandler(object):
         ...         None
         ...     )
         ...     if passwords:
-        ...         default_realm = passwords.get(None)
-        ...         if default_realm:
-        ...             test_user_pass = default_realm.get((('test1', '/'),))
+        ...         realm = passwords.get('uberhttp')
+        ...         if realm:
+        ...             test_user_pass = realm.get((('test1', '/'),))
         ...             if test_user_pass:
         ...                 print test_user_pass
         ...                 break
@@ -57,9 +57,9 @@ class RequestHandler(object):
         self.password = password
 
         # setup auth for requests
-        pass_manager = _urllib2.HTTPPasswordMgrWithDefaultRealm()
+        pass_manager = _urllib2.HTTPPasswordMgr()
         pass_manager.add_password(
-            None,  # catch-all realm
+            'uberhttp',
             self.base_url,
             self.username,
             self.password
