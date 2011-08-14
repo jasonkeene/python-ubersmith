@@ -1,13 +1,19 @@
 # client calls implemented as documented in api docs go here
 
-import ubersmith.calls.base as _base
+from ubersmith.calls.base import BaseCall, FlatCall, api_call
+from ubersmith.utils import prepend_base
+
+__all__ = [
+    'get',
+    'list_',
+]
 
 _METHOD_BASE = "client"
-_prepend_base = lambda method: '.'.join((_METHOD_BASE, method))
+prepend_base = prepend_base.init(_METHOD_BASE)
 
 
-class _GetCall(_base.BaseCall):
-    method = _prepend_base('get')
+class _GetCall(FlatCall):
+    method = prepend_base('get')
     rename_fields = {
         'clientid': 'client_id',
     }
@@ -57,12 +63,9 @@ class _GetCall(_base.BaseCall):
         if self.disabled:
             self.request_data['allclients'] = 1
 
-    def request(self):
-        self.process_result = self.process()
 
-
-class _ListCall(_base.BaseCall):
-    method = _prepend_base('list')
+class _ListCall(BaseCall):
+    method = prepend_base('list')
 
     def __init__(self, request_handler):
         super(_ListCall, self).__init__(request_handler)
@@ -76,13 +79,10 @@ class _ListCall(_base.BaseCall):
     def clean(self):
         return super(_ListCall, self).clean(True)
 
-    def request(self):
-        self.process_result = self.process()
 
+# call functions w/ proper signatures and documentation
 
-# convenience functions w/ proper signatures and documentation
-
-@_base.api_call
+@api_call
 def get(client_id=None, username=None, email=None, metadata=False,
         disabled=False, request_handler=None):
     """Get a client's details."""
@@ -90,7 +90,7 @@ def get(client_id=None, username=None, email=None, metadata=False,
                     disabled).render()
 
 
-@_base.api_call
-def list(request_handler=None):
+@api_call
+def list_(request_handler=None):
     """Get a list of all active clients in the system."""
     return _ListCall(request_handler).render()

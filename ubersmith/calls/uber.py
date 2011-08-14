@@ -1,15 +1,19 @@
 # uber calls implemented as documented in api docs go here
 
-import ubersmith.api as _api
-import ubersmith.calls.base as _base
+from ubersmith.exceptions import UbersmithResponseError
+from ubersmith.calls.base import BaseCall, api_call
+from ubersmith.utils import prepend_base
 
+__all__ = [
+    'check_login',
+]
 
 _METHOD_BASE = "uber"
-_prepend_base = lambda method: '.'.join((_METHOD_BASE, method))
+prepend_base = prepend_base.init(_METHOD_BASE)
 
 
-class _CheckLoginCall(_base.BaseCall):
-    method = _prepend_base('check_login')
+class _CheckLoginCall(BaseCall):
+    method = prepend_base('check_login')
 
     def __init__(self, request_handler, username, password):
         super(_CheckLoginCall, self).__init__(request_handler)
@@ -28,21 +32,24 @@ class _CheckLoginCall(_base.BaseCall):
 
     def request(self):
         try:
-            self.process_result = self.process()
-        except _api.UbersmithError, e:
-            if e.error_code == 3 and \
-                              e.error_message == 'Invalid login or password.':
-                self.process_result = False
+            super(_CheckLoginCall, self).request()
+        except UbersmithResponseError, exc:
+            if exc.error_code == 3 and \
+                            exc.error_message == 'Invalid login or password.':
+                self.response_data = False
             else:
                 raise  # re-raises the last exception
 
     def clean(self):
-        return bool(self.process_result)
+        self.cleaned = bool(self.response_data)
 
 
-# convenience functions w/ proper signatures and documentation
+# call functions w/ proper signatures and documentation
 
-@_base.api_call
+@api_call
 def check_login(username='', password='', request_handler=None):
     """Check the specified username and password."""
-    return _CheckLoginCall(request_handler, username, password).render()
+    if username and password:
+        return _CheckLoginCall(request_handler, username, password).render()
+    else:
+        return False

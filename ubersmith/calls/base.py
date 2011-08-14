@@ -1,14 +1,20 @@
 # the base classes for all other calls go here
 
-import datetime as _datetime
-import decimal as _decimal
-import inspect as _inspect
+import copy
+from datetime import datetime
+from decimal import Decimal
+import inspect
 
-import phpserialize as _phpserialize
+from decorator import decorator
+import phpserialize
 
-import ubersmith.api as _api
-from decorator import decorator as _wrap
+from ubersmith.exceptions import UbersmithRequestValidationError
+from ubersmith.api import get_default_request_handler
 
+__all__ = [
+    'BaseCall',
+    'api_call',
+]
 
 # ways calls may differ:
 #     method string - class / instance property
@@ -19,8 +25,64 @@ from decorator import decorator as _wrap
 #     documentation - function docstring
 
 
-class BaseCall(object):
+class _AbstractCall(object):
     method = None  # this should be defined on child classes
+
+    def __init__(self, request_handler):
+        """Setup call with provided request_handler."""
+        self.request_handler = request_handler  # processes the request
+        self.request_data = None  # data for the request is stored here
+        self.response_data = None  # response data is stored here
+        self.cleaned = None  # cleaned response data is stored here
+
+    def process(self):
+        """Return result of processing call."""
+        return self.request_handler.process(self.method, self.request_data)
+
+    def render(self):
+        """Validate, process, clean and return the result of the call."""
+        if not self.validate():
+            raise UbersmithRequestValidationError
+
+        self.build_request_data()
+        self.request()
+        self.clean()
+
+        return self.cleaned
+
+    def validate(self):
+        """Validate request data before sending it out. Return True/False."""
+        raise NotImplementedError(
+            "No validate method defined for {0}".format(self.__class__))
+
+    def build_request_data(self):
+        """Setup request data as a dict ready to urlencode."""
+        raise NotImplementedError(
+            "No build_request_data method defined for {0}".format(
+                self.__class__))
+
+    def request(self):
+        """Make the request, handle any exceptions."""
+        raise NotImplementedError(
+            "No request method defined for {0}".format(self.__class__))
+
+    def clean(self):
+        """Clean response data."""
+        raise NotImplementedError(
+            "No clean method defined for {0}".format(self.__class__))
+
+
+class BaseCall(_AbstractCall):
+    def request(self):
+        """Sensible default behavior for request."""
+        self.response_data = self.process()
+
+    def clean(self):
+        """Sensible default behavior for clean."""
+        self.cleaned = copy.deepcopy(self.response_data)
+
+
+class FlatCall(BaseCall):
     rename_fields = {}  # fields to rename
     int_fields = ()  # fields to convert to ints
     decimal_fields = ()  # fields to convert to decimals
@@ -28,115 +90,63 @@ class BaseCall(object):
     timestamp_fields = ()  # fields to convert to timestamps
     php_serialized_fields = ()  # fields to convert from php serialized format
 
-    def __init__(self, request_handler):
-        self.request_handler = request_handler
+    def clean(self):
+        super(FlatCall, self).clean()
 
-    def validate(self):
-        raise NotImplementedError(
-            "No validate method defined for {0}".format(self.__class__))
+        map(self.clean_unicode_key, self.cleaned.keys())
+        map(self.clean_rename, self.rename_fields.items())
+        map(self.clean_int, self.int_fields)
+        map(self.clean_decimal, self.decimal_fields)
+        map(self.clean_float, self.float_fields)
+        map(self.clean_timestamp, self.timestamp_fields)
+        map(self.clean_php_serialize, self.php_serialized_fields)
 
-    def build_request_data(self):
-        raise NotImplementedError(
-            "No build_request_data method defined for {0}".format(
-                self.__class__))
+    def clean_unicode_key(self, key):
+        if isinstance(key, unicode):
+            tmp_ref = self.cleaned[key]
+            del self.cleaned[key]
+            self.cleaned[str(key)] = tmp_ref
 
-    def request(self):
-        raise NotImplementedError(
-            "No request method defined for {0}".format(self.__class__))
+    def clean_rename(self, key_pair):
+        old_key, new_key = key_pair
+        if old_key in self.cleaned and new_key not in self.cleaned:
+            self.cleaned[new_key] = self.cleaned[old_key]
+            del self.cleaned[old_key]
 
-    def clean(self, field_cleaning=False):
-        self.clean_unicode_keys()
+    def clean_field(self, field, func):
+        if field in self.cleaned:
+            self.cleaned[field] = func(self.cleaned[field])
 
-        if self.rename_fields:
-            self.clean_rename()
-            field_cleaning = True
-        if self.int_fields:
-            self.clean_ints()
-            field_cleaning = True
-        if self.decimal_fields:
-            self.clean_decimals()
-            field_cleaning = True
-        if self.float_fields:
-            self.clean_floats()
-            field_cleaning = True
-        if self.timestamp_fields:
-            self.clean_timestamps()
-            field_cleaning = True
-        if self.php_serialized_fields:
-            self.clean_php_serialize()
-            field_cleaning = True
+    def clean_int(self, field):
+        self.clean_field(field, int)
 
-        if not field_cleaning:
-            raise NotImplementedError(
-                "No clean method defined for {0}".format(self.__class__))
-        else:
-            return self.process_result
+    def clean_decimal(self, field):
+        self.clean_field(field, lambda x: Decimal(str(x).replace(',', '')))
 
-    def clean_unicode_keys(self):
-        for key in self.process_result.keys():
-            if isinstance(key, unicode):
-                tmp_value = self.process_result[key]
-                del self.process_result[key]
-                self.process_result[str(key)] = tmp_value
+    def clean_float(self, field):
+        self.clean_field(field, float)
 
-    def clean_rename(self):
-        for old_key, new_key in self.rename_fields.items():
-            if old_key in self.process_result and \
-                                           new_key not in self.process_result:
-                self.process_result[new_key] = self.process_result[old_key]
-                del self.process_result[old_key]
+    def clean_timestamp(self, field):
+        self.clean_field(field, lambda x: datetime.fromtimestamp(float(x)))
 
-    def clean_ints(self):
-        for field in self.int_fields:
-            if field in self.process_result:
-                self.process_result[field] = int(self.process_result[field])
+    def clean_php_serialize(self, field):
+        self.clean_field(field, phpserialize.loads)
 
-    def clean_decimals(self):
-        for field in self.decimal_fields:
-            if field in self.process_result:
-                self.process_result[field] = _decimal.Decimal(
-                            str(self.process_result[field]).replace(',', ''))
 
-    def clean_floats(self):
-        for field in self.float_fields:
-            if field in self.process_result:
-                self.process_result[field] = float(self.process_result[field])
-
-    def clean_timestamps(self):
-        for field in self.timestamp_fields:
-            if field in self.process_result:
-                self.process_result[field] = \
-                    _datetime.datetime.fromtimestamp(
-                        float(self.process_result[field]))
-
-    def clean_php_serialize(self):
-        for field in self.php_serialized_fields:
-            if field in self.process_result:
-                self.process_result[field] = \
-                    _phpserialize.loads(self.process_result[field])
-
-    def process(self):
-        return self.request_handler.process(self.method, self.request_data)
-
-    def render(self):
-        if not self.validate():
-            return False
-
-        self.build_request_data()
-        self.request()
-        return self.clean()
+class FileCall(BaseCall):
+    pass
 
 
 def _signature_position(func, arg_name):
     """Look at func's signature and return the position of arg_name."""
-    return _inspect.getargspec(func).args.index(arg_name)
+    return inspect.getargspec(func).args.index(arg_name)
 
 
 def _api_call_wrapper(call_func, *args):
     """If caller did not provide a request_handler, use the default."""
     index = _signature_position(call_func, 'request_handler')
     args = list(args)  # convert tuple to a mutable type
-    args[index] = args[index] or _api.get_default_request_handler()
+    args[index] = args[index] or get_default_request_handler()
 
     return call_func(*args)
 
@@ -154,4 +164,4 @@ def api_call(call_func):
     """Decorate API call function."""
     _api_call_definition_check(call_func)
 
-    return _wrap(_api_call_wrapper, call_func)
+    return decorator(_api_call_wrapper, call_func)
