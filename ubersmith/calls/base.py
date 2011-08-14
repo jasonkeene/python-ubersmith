@@ -3,13 +3,13 @@
 import copy
 from datetime import datetime
 from decimal import Decimal
-import inspect
 
 from decorator import decorator
 import phpserialize
 
-from ubersmith.exceptions import UbersmithRequestValidationError
 from ubersmith.api import get_default_request_handler
+from ubersmith.exceptions import UbersmithRequestValidationError
+from ubersmith.utils import signature_position
 
 __all__ = [
     'BaseCall',
@@ -137,14 +137,9 @@ class FileCall(BaseCall):
     pass
 
 
-def _signature_position(func, arg_name):
-    """Look at func's signature and return the position of arg_name."""
-    return inspect.getargspec(func).args.index(arg_name)
-
-
 def _api_call_wrapper(call_func, *args):
     """If caller did not provide a request_handler, use the default."""
-    index = _signature_position(call_func, 'request_handler')
+    index = signature_position(call_func, 'request_handler')
     args = list(args)  # convert tuple to a mutable type
     args[index] = args[index] or get_default_request_handler()
 
@@ -154,7 +149,7 @@ def _api_call_wrapper(call_func, *args):
 def _api_call_definition_check(call_func):
     """Check that call_func accepts a request_handler argument."""
     try:
-        _signature_position(call_func, 'request_handler')
+        signature_position(call_func, 'request_handler')
     except ValueError:
         raise Exception("API call '{0}' defined without a request_handler " \
                                       "argument.".format(call_func.func_name))

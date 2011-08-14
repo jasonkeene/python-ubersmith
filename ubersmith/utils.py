@@ -1,5 +1,6 @@
 # utility functions
 
+import inspect
 import urllib
 import urlparse
 
@@ -80,3 +81,7 @@ def islist(value):
 def isstr(value):
     """Return true if the value behaves like a string, false if not."""
     return isinstance(value, basestring)
+
+def signature_position(func, arg_name):
+    """Look at func's signature and return the position of arg_name."""
+    return inspect.getargspec(func).args.index(arg_name)
