@@ -8,7 +8,7 @@ from decorator import decorator
 import phpserialize
 
 from ubersmith.api import get_default_request_handler
-from ubersmith.exceptions import UbersmithRequestValidationError
+from ubersmith.exceptions import ValidationError, ValidationErrorDefault
 from ubersmith.utils import signature_position
 
 __all__ = [
@@ -42,7 +42,7 @@ class _AbstractCall(object):
     def render(self):
         """Validate, process, clean and return the result of the call."""
         if not self.validate():
-            raise UbersmithRequestValidationError
+            raise ValidationError
 
         self.build_request_data()
         self.request()
@@ -73,6 +73,14 @@ class _AbstractCall(object):
 
 
 class BaseCall(_AbstractCall):
+    def validate(self):
+        """Sensible default behavior for validation."""
+        return True
+
+    def build_request_data(self):
+        """Sensible default behavior for building request data."""
+        self.request_data = None
+
     def request(self):
         """Sensible default behavior for request."""
         self.response_data = self.process()
@@ -143,7 +151,10 @@ def _api_call_wrapper(call_func, *args):
     args = list(args)  # convert tuple to a mutable type
     args[index] = args[index] or get_default_request_handler()
 
-    return call_func(*args)
+    try:
+        return call_func(*args)
+    except ValidationErrorDefault, exc:
+        return exc.default
 
 
 def _api_call_definition_check(call_func):
