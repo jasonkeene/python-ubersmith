@@ -4,6 +4,7 @@ __all__ = [
     'BaseError',
     'RequestError',
     'ValidationError',
+    'ValidationErrorDefault',
     'ResponseError',
 ]
 
