@@ -1,4 +1,4 @@
-# uber calls implemented as documented in api docs go here
+"""Uber calls implemented as documented in api docs."""
 
 from ubersmith.api import VALID_METHODS
 from ubersmith.exceptions import (
@@ -100,9 +100,8 @@ class _ClientWelcomeStatsCall(FlatCall):
         self.client_id = client_id
 
     def validate(self):
-        if not self.client_id:
-            raise ValidationError
-        return True
+        if self.client_id:
+            return True
 
     def build_request_data(self):
         self.request_data = {

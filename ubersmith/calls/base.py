@@ -1,4 +1,4 @@
-# the base classes for all other calls go here
+"""Base classes for all other calls."""
 
 from collections import namedtuple
 import copy
@@ -18,20 +18,21 @@ from ubersmith.utils import signature_position
 __all__ = [
     'BaseCall',
     'FlatCall',
+    'GroupCall',
     'FileCall',
     'api_call',
 ]
 
+_CLEANERS = {
+    'int': int,
+    'decimal': lambda x: Decimal(str(x).replace(',', '')),
+    'float': float,
+    'timestamp': lambda x: datetime.datetime.fromtimestamp(float(x)),
+    'date': lambda x: datetime.date(*time.strptime(x, '%b/%d/%Y')[:3]),
+    'php_serialized': phpserialize.loads,
+}
 _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type',
                                               'modified', 'data'])
-
-# ways calls may differ:
-#     method string - class / instance property
-#     input signature - function / class __init__ method
-#     input validation - class validate method
-#     input encoding - actually handled in request_handler not call
-#     response cleaning - class clean method
-#     documentation - function docstring
 
 
 class _AbstractCall(object):
@@ -99,55 +100,40 @@ class BaseCall(_AbstractCall):
         self.cleaned = copy.deepcopy(self.response_data)
 
 
-class FlatCall(BaseCall):
+class _CleanFieldsCall(BaseCall):
     rename_fields = {}  # fields to rename
-    int_fields = ()  # fields to convert to ints
-    decimal_fields = ()  # fields to convert to decimals
-    float_fields = ()   # fields to convert to floats
-    timestamp_fields = ()  # fields to convert to timestamps
-    date_fields = ()  # fields to convert to datetime.date
-    php_serialized_fields = ()  # fields to convert from php serialized format
+    int_fields = []  # fields to convert to ints
+    decimal_fields = []  # fields to convert to decimals
+    float_fields = []   # fields to convert to floats
+    timestamp_fields = []  # fields to convert to timestamps
+    date_fields = []  # fields to convert to datetime.date
+    php_serialized_fields = []  # fields to convert from php serialized format
 
+    def clean_fields(self, struct):
+        for old, new in self.rename_fields.iteritems():
+            _clean_rename(struct, old, unicode(new))
+
+        for name, method in _CLEANERS.iteritems():
+            fields = getattr(self, name + '_fields', [])
+            for field in fields:
+                _clean_field(struct, field, method)
+
+
+class FlatCall(_CleanFieldsCall):
     def clean(self):
         super(FlatCall, self).clean()
+        self.clean_fields(self.cleaned)
 
-        map(self.clean_rename, self.rename_fields.items())
-        map(self.clean_int, self.int_fields)
-        map(self.clean_decimal, self.decimal_fields)
-        map(self.clean_float, self.float_fields)
-        map(self.clean_timestamp, self.timestamp_fields)
-        map(self.clean_date, self.date_fields)
-        map(self.clean_php_serialize, self.php_serialized_fields)
 
-    def clean_rename(self, key_pair):
-        old_key, new_key = key_pair
-        if old_key in self.cleaned and new_key not in self.cleaned:
-            self.cleaned[new_key] = self.cleaned[old_key]
-            del self.cleaned[old_key]
+class GroupCall(_CleanFieldsCall):
+    def clean(self):
+        super(GroupCall, self).clean()
 
-    def clean_field(self, field, func):
-        if field in self.cleaned:
-            self.cleaned[field] = func(self.cleaned[field])
+        for key in self.response_data.iterkeys():
+            _clean_rename(self.cleaned, key, int(key))
 
-    def clean_int(self, field):
-        self.clean_field(field, int)
-
-    def clean_decimal(self, field):
-        self.clean_field(field, lambda x: Decimal(str(x).replace(',', '')))
-
-    def clean_float(self, field):
-        self.clean_field(field, float)
-
-    def clean_timestamp(self, field):
-        self.clean_field(field,
-                          lambda x: datetime.datetime.fromtimestamp(float(x)))
-
-    def clean_date(self, field):
-        self.clean_field(field, 
-                   lambda x: datetime.date(*time.strptime(x, '%b/%d/%Y')[:3]))
-
-    def clean_php_serialize(self, field):
-        self.clean_field(field, phpserialize.loads)
+        for struct in self.cleaned.itervalues():
+            self.clean_fields(struct)
 
 
 class FileCall(BaseCall):
@@ -171,6 +157,17 @@ class FileCall(BaseCall):
 
         self.cleaned = _UbersmithFile(self.filename, self.type, self.modified,
                                       self.data)
+
+
+def _clean_field(struct, field, clean_func):
+    if field in struct:
+        struct[field] = clean_func(struct[field])
+
+
+def _clean_rename(struct, old_name, new_name):
+    if old_name in struct and new_name not in struct:
+        struct[new_name] = struct[old_name]
+        del struct[old_name]
 
 
 def _api_call_wrapper(call_func, *args):

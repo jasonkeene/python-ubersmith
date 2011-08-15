@@ -1,6 +1,6 @@
-# client calls implemented as documented in api docs go here
+"""Client calls implemented as documented in api docs."""
 
-from ubersmith.calls.base import BaseCall, FlatCall, api_call
+from ubersmith.calls.base import BaseCall, FlatCall, GroupCall, api_call
 from ubersmith.utils import prepend_base
 
 __all__ = [
@@ -64,8 +64,26 @@ class _GetCall(FlatCall):
             self.request_data['allclients'] = 1
 
 
-class _ListCall(BaseCall):
+class _ListCall(GroupCall):
     method = prepend_base('list')
+    rename_fields = {
+        'clientid': 'client_id',
+    }
+    int_fields = (
+        'client_id',
+        'class_id',
+    )
+    decimal_fields = (
+        'balance',
+        'discount',
+    )
+    timestamp_fields = (
+        'created',
+        'password_changed',
+    )
+    php_serialized_fields = (
+        'access',
+    )
 
 
 # call functions w/ proper signatures and documentation
