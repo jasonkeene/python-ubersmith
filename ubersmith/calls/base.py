@@ -1,8 +1,12 @@
 # the base classes for all other calls go here
 
+from collections import namedtuple
 import copy
-from datetime import datetime
+import datetime
 from decimal import Decimal
+import re
+import rfc822
+import time
 
 from decorator import decorator
 import phpserialize
@@ -13,8 +17,13 @@ from ubersmith.utils import signature_position
 
 __all__ = [
     'BaseCall',
+    'FlatCall',
+    'FileCall',
     'api_call',
 ]
+
+_UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type',
+                                              'modified', 'data'])
 
 # ways calls may differ:
 #     method string - class / instance property
@@ -96,24 +105,19 @@ class FlatCall(BaseCall):
     decimal_fields = ()  # fields to convert to decimals
     float_fields = ()   # fields to convert to floats
     timestamp_fields = ()  # fields to convert to timestamps
+    date_fields = ()  # fields to convert to datetime.date
     php_serialized_fields = ()  # fields to convert from php serialized format
 
     def clean(self):
         super(FlatCall, self).clean()
 
-        map(self.clean_unicode_key, self.cleaned.keys())
         map(self.clean_rename, self.rename_fields.items())
         map(self.clean_int, self.int_fields)
         map(self.clean_decimal, self.decimal_fields)
         map(self.clean_float, self.float_fields)
         map(self.clean_timestamp, self.timestamp_fields)
+        map(self.clean_date, self.date_fields)
         map(self.clean_php_serialize, self.php_serialized_fields)
-
-    def clean_unicode_key(self, key):
-        if isinstance(key, unicode):
-            tmp_ref = self.cleaned[key]
-            del self.cleaned[key]
-            self.cleaned[str(key)] = tmp_ref
 
     def clean_rename(self, key_pair):
         old_key, new_key = key_pair
@@ -135,14 +139,38 @@ class FlatCall(BaseCall):
         self.clean_field(field, float)
 
     def clean_timestamp(self, field):
-        self.clean_field(field, lambda x: datetime.fromtimestamp(float(x)))
+        self.clean_field(field,
+                          lambda x: datetime.datetime.fromtimestamp(float(x)))
+
+    def clean_date(self, field):
+        self.clean_field(field, 
+                   lambda x: datetime.date(*time.strptime(x, '%b/%d/%Y')[:3]))
 
     def clean_php_serialize(self, field):
         self.clean_field(field, phpserialize.loads)
 
 
 class FileCall(BaseCall):
-    pass
+    def process(self):
+        """Return result of processing call."""
+        return self.request_handler.process(self.method, self.request_data,
+                                                                     raw=True)
+
+    def clean(self):
+        fname = None
+        disposition = self.response_data[0].get('content-disposition')
+        if disposition:
+            fname = re.search(r'filename="(.+?)"', disposition, re.I).group(1)
+            fname = re.sub(r'[^a-z0-9-_\. ]', '-', fname, 0, re.I).lstrip('.')
+
+        self.filename = fname
+        self.type = self.response_data[0].get('content-type')
+        self.modified = datetime.datetime(*rfc822.parsedate_tz(
+                              self.response_data[0].get('last-modified'))[:7])
+        self.data = buffer(self.response_data[1])
+
+        self.cleaned = _UbersmithFile(self.filename, self.type, self.modified,
+                                      self.data)
 
 
 def _api_call_wrapper(call_func, *args):

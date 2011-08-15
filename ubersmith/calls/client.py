@@ -67,18 +67,6 @@ class _GetCall(FlatCall):
 class _ListCall(BaseCall):
     method = prepend_base('list')
 
-    def __init__(self, request_handler):
-        super(_ListCall, self).__init__(request_handler)
-
-    def validate(self):
-        return True
-
-    def build_request_data(self):
-        self.request_data = {}
-
-    def clean(self):
-        return super(_ListCall, self).clean(True)
-
 
 # call functions w/ proper signatures and documentation
 
