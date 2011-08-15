@@ -25,7 +25,7 @@ __all__ = [
 
 _CLEANERS = {
     'int': int,
-    'decimal': lambda x: Decimal(str(x).replace(',', '')),
+    'decimal': lambda x: Decimal(x.replace(',', '')),
     'float': float,
     'timestamp': lambda x: datetime.datetime.fromtimestamp(float(x)),
     'date': lambda x: datetime.date(*time.strptime(x, '%b/%d/%Y')[:3]),
@@ -89,7 +89,8 @@ class BaseCall(_AbstractCall):
 
     def build_request_data(self):
         """Sensible default behavior for building request data."""
-        self.request_data = None
+        if not hasattr(self, 'request_data'):
+            self.request_data = None
 
     def request(self):
         """Sensible default behavior for request."""
@@ -160,7 +161,7 @@ class FileCall(BaseCall):
 
 
 def _clean_field(struct, field, clean_func):
-    if field in struct:
+    if field in struct and isinstance(struct[field], basestring):
         struct[field] = clean_func(struct[field])
 
 

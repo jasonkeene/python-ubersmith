@@ -1,12 +1,11 @@
 """Sales calls implemented as documented in api docs."""
 
-from ubersmith.calls.base import BaseCall, FlatCall, api_call
+from ubersmith.calls.base import BaseCall, FlatCall, GroupCall, api_call
 from ubersmith.utils import prepend_base
 
 __all__ = []
 
-_METHOD_BASE = "sales"
-prepend_base = prepend_base.init(_METHOD_BASE)
+prepend_base = prepend_base.init("sales")
 
 
 # class (BaseCall):

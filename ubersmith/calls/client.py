@@ -8,8 +8,7 @@ __all__ = [
     'list_',
 ]
 
-_METHOD_BASE = "client"
-prepend_base = prepend_base.init(_METHOD_BASE)
+prepend_base = prepend_base.init("client")
 
 
 class _GetCall(FlatCall):
@@ -17,22 +16,22 @@ class _GetCall(FlatCall):
     rename_fields = {
         'clientid': 'client_id',
     }
-    int_fields = (
+    int_fields = [
         'client_id',
         'class_id',
-    )
-    decimal_fields = (
+    ]
+    decimal_fields = [
         'balance',
         'discount',
         'inv_balance',
-    )
-    timestamp_fields = (
+    ]
+    timestamp_fields = [
         'created',
         'password_changed',
-    )
-    php_serialized_fields = (
+    ]
+    php_serialized_fields = [
         'access',
-    )
+    ]
 
     def __init__(self, request_handler, client_id, username, email, metadata,
                  disabled):
@@ -69,21 +68,21 @@ class _ListCall(GroupCall):
     rename_fields = {
         'clientid': 'client_id',
     }
-    int_fields = (
+    int_fields = [
         'client_id',
         'class_id',
-    )
-    decimal_fields = (
+    ]
+    decimal_fields = [
         'balance',
         'discount',
-    )
-    timestamp_fields = (
+    ]
+    timestamp_fields = [
         'created',
         'password_changed',
-    )
-    php_serialized_fields = (
+    ]
+    php_serialized_fields = [
         'access',
-    )
+    ]
 
 
 # call functions w/ proper signatures and documentation

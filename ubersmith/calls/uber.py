@@ -18,8 +18,7 @@ __all__ = [
     'documentation',
 ]
 
-_METHOD_BASE = "uber"
-prepend_base = prepend_base.init(_METHOD_BASE)
+prepend_base = prepend_base.init("uber")
 
 
 class _ApiExportCall(BaseCall):
@@ -49,14 +48,14 @@ class _CheckLoginCall(BaseCall):
 
     def __init__(self, request_handler, username, password):
         super(_CheckLoginCall, self).__init__(request_handler)
+        self.request_data
         self.username = username
         self.password = password
 
     def validate(self):
-        if self.username and self.password:
-            return True
-        else:
+        if not (self.username and self.password):
             raise ValidationErrorDefault(False)
+        return True
 
     def build_request_data(self):
         self.request_data = {
@@ -80,20 +79,20 @@ class _CheckLoginCall(BaseCall):
 
 class _ClientWelcomeStatsCall(FlatCall):
     method = prepend_base('client_welcome_stats')
-    timestamp_fields = (
+    timestamp_fields = [
         'client_activity',
-    )
-    date_fields = (
+    ]
+    date_fields = [
         'next_inv',
-    )
-    int_fields = (
+    ]
+    int_fields = [
         'client_activity_type',
         'closed_count',
         'inv_count',
         'pack_count',
         'ticket',
         'type',
-    )
+    ]
 
     def __init__(self, request_handler, client_id):
         super(_ClientWelcomeStatsCall, self).__init__(request_handler)
@@ -144,7 +143,7 @@ def api_export(table, gzip=False, order_by=None, request_handler=None):
 
 
 @api_call
-def check_login(username='', password='', request_handler=None):
+def check_login(username, password, request_handler=None):
     """Check the specified username and password."""
     return _CheckLoginCall(request_handler, username, password).render()
 
