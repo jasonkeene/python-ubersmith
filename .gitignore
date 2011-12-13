@@ -14,6 +14,7 @@ Thumbs.db
 desktop.ini
 
 # local tests
+hv_shell.py
 hv_tests.py
 
 # httplib2 cache

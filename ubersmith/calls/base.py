@@ -45,9 +45,9 @@ class _AbstractCall(object):
         self.response_data = None  # response data is stored here
         self.cleaned = None  # cleaned response data is stored here
 
-    def process(self):
+    def process_request(self):
         """Return result of processing call."""
-        return self.request_handler.process(self.method, self.request_data)
+        return self.request_handler.process_request(self.method, self.request_data)
 
     def render(self):
         """Validate, process, clean and return the result of the call."""
@@ -94,7 +94,7 @@ class BaseCall(_AbstractCall):
 
     def request(self):
         """Sensible default behavior for request."""
-        self.response_data = self.process()
+        self.response_data = self.process_request()
 
     def clean(self):
         """Sensible default behavior for clean."""
@@ -138,9 +138,9 @@ class GroupCall(_CleanFieldsCall):
 
 
 class FileCall(BaseCall):
-    def process(self):
+    def process_request(self):
         """Return result of processing call."""
-        return self.request_handler.process(self.method, self.request_data,
+        return self.request_handler.process_request(self.method, self.request_data,
                                                                      raw=True)
 
     def clean(self):

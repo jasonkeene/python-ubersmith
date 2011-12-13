@@ -1,6 +1,6 @@
 """Lower level API, configuration, and HTTP stuff."""
 
-import json as json
+import json
 from threading import local
 import urllib
 import urlparse
@@ -12,7 +12,9 @@ from ubersmith.utils import append_qs
 
 __all__ = [
     'VALID_METHODS',
-    'RequestHandler',
+    'HttpRequestHandler',
+    'LogHttpRequestHandler',
+    'TestRequestHandler',
     'get_default_request_handler',
     'set_default_request_handler',
 ]
@@ -61,6 +63,7 @@ VALID_METHODS = [
     'client.metadata_get',
     'client.metadata_single',
     'client.payment_method_list',
+    'client.reactivate',
     'client.renewal_list',
     'client.send_welcome',
     'client.service_add',
@@ -70,6 +73,7 @@ VALID_METHODS = [
     'client.service_list',
     'client.service_metadata_get',
     'client.service_metadata_single',
+    'client.service_module_call',
     'client.service_prorate',
     'client.service_update',
     'client.set_login',
@@ -110,7 +114,9 @@ VALID_METHODS = [
     'device.tag',
     'device.untag',
     'device.update',
+    'device.vlan_get_available',
     'order.cancel',
+    'order.client_respond',
     'order.coupon_get',
     'order.create',
     'order.get',
@@ -131,6 +137,7 @@ VALID_METHODS = [
     'support.ticket_count',
     'support.ticket_get',
     'support.ticket_list',
+    'support.ticket_merge',
     'support.ticket_post_client_response',
     'support.ticket_post_list',
     'support.ticket_post_staff_response',
@@ -167,41 +174,9 @@ VALID_METHODS = [
 ]
 
 
-class RequestHandler(object):
-    """Handles all the HTTP requests and authentication."""
-
-    def __init__(self, base_url, username=None, password=None):
-        """Initialize request handler with authentication.
-
-            base_url: URL to send API requests
-            username: Username for API access
-            password: Password for API access
-
-        >>> handler = RequestHandler('http://127.0.0.1:8088/')
-        >>> 'http' in urlparse.urlparse(handler.base_url).scheme
-        True
-        >>> config = {
-        ...     'base_url': 'test1',
-        ...     'username': 'test2',
-        ...     'password': 'test3',
-        ... }
-        >>> handler = RequestHandler(**config)
-        >>> # test that all config values were set as instance members
-        >>> [False for k, v in config.items()
-        ...     if getattr(handler, k, None) is not config[k]]
-        []
-
-        """
-        self.base_url = base_url
-        self.username = username
-        self.password = password
-
-        self._http = httplib2.Http(".cache")
-        self._http.add_credentials(self.username, self.password,
-                                   urlparse.urlparse(self.base_url)[1])
-
-    def process(self, method, data=None, raw=False):
-        """Send request to ubersmith instance.
+class _AbstractRequestHandler(object):
+    def process_request(self, method, data=None, raw=False):
+        """Process request.
 
             method: Ubersmith API method string
             data: dict of method arguments ready to urllib.urlencode
@@ -209,16 +184,17 @@ class RequestHandler(object):
                  behavior of returning JSON data
 
         """
-        if method not in VALID_METHODS:
-            raise RequestError("Requested method is not valid.")
+        raise NotImplementedError
 
-        url = append_qs(self.base_url, {'method': method})
-        data = data if data is not None else {}
-        body = urllib.urlencode(data)
-        # httplib2 requires that you manually send Content-Type on POSTs :/
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        response, content = self._http.request(url, "POST", body, headers)
+    def _render_response(self, response, content, raw):
+        """Render response as python object.
+        
+            response: dict like object with headers
+            content: raw response string from ubersmith
+            raw: Set to True to return the raw response vs the default
+                 behavior of returning JSON data
 
+        """
         # just return the raw response
         if raw:
             return response, content
@@ -231,10 +207,248 @@ class RequestHandler(object):
         response_dict = json.loads(content)
 
         # test for error in json response
-        if not response_dict['status']:
+        if not response_dict.get('status'):
             raise ResponseError(response=response_dict)
 
         return response_dict['data']
+
+    def _validate_request_method(self, method):
+        """Make sure requested method is valid."""
+        if method not in VALID_METHODS:
+            raise RequestError("Requested method is not valid.")
+
+    def _encode_data(self, data):
+        """URL encode data."""
+        return urllib.urlencode(data if data is not None else {})
+
+
+class HttpRequestHandler(_AbstractRequestHandler):
+    """Handles HTTP requests and authentication."""
+
+    def __init__(self, base_url, username=None, password=None):
+        """Initialize HTTP request handler with optional authentication.
+
+            base_url: URL to send API requests
+            username: Username for API access
+            password: Password for API access
+
+        >>> handler = HttpRequestHandler('http://127.0.0.1:8088/')
+        >>> handler.base_url
+        'http://127.0.0.1:8088/'
+        >>> config = {
+        ...     'base_url': 'http://127.0.0.1/api/',
+        ...     'username': 'admin',
+        ...     'password': 'test_pass',
+        ... }
+        >>> handler = HttpRequestHandler(**config)
+        >>> handler.base_url
+        'http://127.0.0.1/api/'
+        >>> handler.username
+        'admin'
+        >>> handler.password
+        'test_pass'
+
+        """
+        self.base_url = base_url
+        self.username = username
+        self.password = password
+
+        self._http = httplib2.Http(".cache")
+        self._http.add_credentials(self.username, self.password,
+                                   urlparse.urlparse(self.base_url)[1])
+
+    def process_request(self, method, data=None, raw=False):
+        """Process request over HTTP to ubersmith instance.
+
+            method: Ubersmith API method string
+            data: dict of method arguments ready to urllib.urlencode
+            raw: Set to True to return the raw response vs the default
+                 behavior of returning JSON data
+
+        """
+        # make sure requested method is valid
+        self._validate_request_method(method)
+
+        # make the request
+        response, content = self._send_request(method, data)
+
+        # render the response as python object
+        return self._render_response(response, content, raw)
+
+    def _send_request(self, method, data):
+        url = self._construct_url(method)
+        body = self._encode_data(data)
+        # httplib2 requires that you manually send Content-Type on POSTs :/
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        return self._http.request(url, "POST", body, headers)
+
+    def _construct_url(self, method):
+        return append_qs(self.base_url, {'method': method})
+
+
+class LogHttpRequestHandler(HttpRequestHandler):
+    """Logs responses to disk as JSON.
+
+        Log Format:
+            {
+                'ubersmith.method': {
+                    'request_data': {
+                        'status': 200,
+                        'content-type': 'application/json',
+                        'content': <decoded json>
+                    },
+                    'request_data': {
+                        'status': 200,
+                        'content-type': 'application/pdf',
+                        'content': <repr of raw data>
+                    }
+                }
+            }
+
+    """
+    _log_file_path = 'ubersmith/fixtures/logged_call_responses.json'
+
+    def __init__(self, base_url, username=None, password=None,
+                 log_file_path=None):
+        """Initialize logging HTTP request handler w/ optional authentication.
+
+            base_url: URL to send API requests
+            username: Username for API access
+            password: Password for API access
+            log_file_path: Path to log file
+
+        >>> handler = LogHttpRequestHandler('http://127.0.0.1:8088/')
+        >>> handler.base_url
+        'http://127.0.0.1:8088/'
+        >>> handler._log_file_path
+        'ubersmith/fixtures/logged_call_responses.json'
+        >>> config = {
+        ...     'base_url': 'http://127.0.0.1/api/',
+        ...     'username': 'admin',
+        ...     'password': 'test_pass',
+        ...     'log_file_path': 'log_file.json',
+        ... }
+        >>> handler = LogHttpRequestHandler(**config)
+        >>> handler.base_url
+        'http://127.0.0.1/api/'
+        >>> handler.username
+        'admin'
+        >>> handler.password
+        'test_pass'
+        >>> handler._log_file_path
+        'log_file.json'
+
+        """
+        if log_file_path:
+            self._log_file_path = log_file_path
+
+        super(LogHttpRequestHandler, self).__init__(base_url, username, password)
+
+    def process_request(self, method, data=None, raw=False):
+        """Process request over HTTP to ubersmith while logging response.
+
+            method: Ubersmith API method string
+            data: dict of method arguments ready to urllib.urlencode
+            raw: Set to True to return the raw response vs the default
+                 behavior of returning JSON data
+
+        """
+        # make sure request method is valid
+        self._validate_request_method(method)
+
+        # make the request
+        response, content = self._send_request(method, data)
+
+        # log the request
+        self._log_response(method, data, response, content)
+
+        # render the response as python object
+        return self._render_response(response, content, raw)
+
+    def _log_response(self, method, data, response, content):
+        body = self._encode_data(data)
+
+        # read in existing logged data to json_obj
+        try:
+            with open(self._log_file_path, 'r') as f:
+                json_obj = json.load(f)
+        except IOError:
+            json_obj = {}
+
+        # if there are no logged responses for current method create them
+        if method not in json_obj:
+            json_obj[method] = {}
+
+        if response.get('content-type') == 'application/json':
+            # response is encoded json, decode
+            content = json.loads(content)
+        else:
+            # response is string, repr
+            content = repr(content)
+
+        # update existing logged responses with current response
+        json_obj[method].update({
+            body: {
+                'status': response.status,
+                'content-type': response.get('content-type'),
+                'content': content
+            }
+        })
+
+        # write log out to disk
+        with open(self._log_file_path, 'w') as f:
+            json.dump(json_obj, f, sort_keys=True, indent=4)
+
+
+class TestRequestHandler(_AbstractRequestHandler):
+    """Loads responses from fixtures vs making HTTP requests."""
+    _fixture_file_path = 'ubersmith/fixtures/call_responses.json'
+
+    def __init__(self, fixture_file_path=None):
+        if fixture_file_path:
+            self._fixture_file_path = fixture_file_path
+
+    def process_request(self, method, data=None, raw=False):
+        """Process request from fixtures.
+
+            method: Ubersmith API method string
+            data: dict of method arguments ready to urllib.urlencode
+            raw: Set to True to return the raw response vs the default
+                 behavior of returning JSON data
+
+        """
+        # make sure requested method is valid
+        self._validate_request_method(method)
+
+        # load the response from fixtures
+        response, content = self._load_response(method, data)
+
+        # render the response as python object
+        return self._render_response(response, content, raw)
+
+    def _load_response(self, method, data):
+        body = self._encode_data(data)
+        
+        # read in existing fixture data to json_obj
+        with open(self._fixture_file_path, 'r') as f:
+            json_obj = json.load(f)
+
+        try:
+            json_resp = json_obj[method][body]
+        except KeyError:
+            raise Exception('Unable to find fixture for provided method/data.')
+
+        response = {k: v for k, v in json_resp.iteritems() if k != 'content'}
+        content = json_resp['content']
+
+        if response.get('content-type') == 'application/json':
+            # response is decoded json, encode
+            content = json.dumps(content)
+        else:
+            # response is repr, eval
+            content = eval(content)
+
+        return response, content
 
 
 def get_default_request_handler():
@@ -246,7 +460,7 @@ def get_default_request_handler():
 
 def set_default_request_handler(request_handler):
     """Set the local default request handler."""
-    if not isinstance(request_handler, RequestHandler):
+    if not isinstance(request_handler, _AbstractRequestHandler):
         raise TypeError(
             "Attempted to set an invalid request handler as default.")
     _DEFAULT_REQUEST_HANDLER.value = request_handler
