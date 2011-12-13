@@ -6,7 +6,7 @@ from ubersmith.api import (
     TestRequestHandler,
     set_default_request_handler
 )
-from ubersmith.calls import uber
+from ubersmith import uber
 
 
 def main():

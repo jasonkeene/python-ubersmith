@@ -2,7 +2,12 @@
 __all__ = [
     'api',
     'calls',
-    'entities',
+    'client',
+    'device',
     'exceptions',
+    'order',
+    'sales'
+    'support',
+    'uber'
     'utils',
 ]

@@ -1,17 +1,17 @@
 """Device calls implemented as documented in api docs."""
 
-from ubersmith.calls.base import BaseCall, FlatCall, GroupCall, api_call
+from ubersmith.calls.base import FlatCall, GroupCall
 from ubersmith.utils import prepend_base
 
 __all__ = [
-    'get',
-    'list_',
+    'GetCall',
+    'ListCall',
 ]
 
 prepend_base = prepend_base.init("device")
 
 
-class _GetCall(FlatCall):
+class GetCall(FlatCall):
     method = prepend_base('get')
 
     def __init__(self, request_handler, device_id, metadata=None,
@@ -40,7 +40,7 @@ class _GetCall(FlatCall):
             self.request_data['tags'] = self.tags
 
 
-class _ListCall(GroupCall):
+class ListCall(GroupCall):
     method = prepend_base('list')
     rename_fields = {
         'clientid': 'client_id',
@@ -111,26 +111,3 @@ class _ListCall(GroupCall):
             self.request_data['offset'] = self.offset
         if self.limit:
             self.request_data['limit'] = self.limit
-
-
-# call functions with proper signatures and docstrings
-
-@api_call
-def get(device_id, metadata=None, service=None, modules=None, tags=None,
-        request_handler=None):
-    """Get a device's details."""
-    return _GetCall(request_handler, device_id, metadata, service, modules,
-                    tags).render()
-
-
-@api_call
-def list_(parent=None, client_id=None, service_id=None, status=None,
-          label=None, dev_desc=None, devtype_group_id=None, type_id=None,
-          rack_id=None, row_id=None, cage_id=None, zone_id=None, fac_id=None,
-          require_ip=None, metadata=None, order_by=None, direction=None,
-          offset=None, limit=None, request_handler=None):
-    """List devices in the system."""
-    return _ListCall(request_handler, parent, client_id, service_id, status,
-                     label, dev_desc, devtype_group_id, type_id, rack_id,
-                     row_id, cage_id, zone_id, fac_id, require_ip, metadata,
-                     order_by, direction, offset, limit).render()

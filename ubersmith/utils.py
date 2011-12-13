@@ -7,6 +7,10 @@ import urlparse
 __all__ = [
     'append_qs',
     'prepend_base',
+    'isdict',
+    'islist',
+    'isstr',
+    'signature_position',
 ]
 
 
@@ -81,6 +85,7 @@ def islist(value):
 def isstr(value):
     """Return true if the value behaves like a string, false if not."""
     return isinstance(value, basestring)
+
 
 def signature_position(func, arg_name):
     """Look at func's signature and return the position of arg_name."""

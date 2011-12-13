@@ -1,17 +1,17 @@
 """Order calls implemented as documented in api docs."""
 
-from ubersmith.calls.base import BaseCall, FlatCall, GroupCall, api_call
+from ubersmith.calls.base import FlatCall, GroupCall
 from ubersmith.utils import prepend_base
 
 __all__ = [
-    'get',
-    'list_',
+    'GetCall',
+    'ListCall',
 ]
 
 prepend_base = prepend_base.init("order")
 
 
-class _GetCall(FlatCall):
+class GetCall(FlatCall):
     method = prepend_base('get')
 
     def __init__(self, request_handler, order_id=None, hash_=None):
@@ -33,7 +33,7 @@ class _GetCall(FlatCall):
             self.request_data['hash'] = self.hash
 
 
-class _ListCall(GroupCall):
+class ListCall(GroupCall):
     method = prepend_base('list')
 
     def __init__(self, request_handler, order_step_id=None,
@@ -82,22 +82,3 @@ class _ListCall(GroupCall):
             self.request_data['offset'] = self.offset
         if self.limit:
             self.request_data['limit'] = self.limit
-
-
-# call functions with proper signatures and docstrings
-
-@api_call
-def get(order_id=None, hash_=None, request_handler=None):
-    """Get the details of a specified order."""
-    return _GetCall(request_handler, order_id, hash_).render()
-
-
-@api_call
-def list_(order_step_id=None, order_queue_id=None, brand_id=None,
-          step_name=None, min_ts=None, max_ts=None, client_id=None,
-          opportunity_id=None, order_by=None, direction=None, offset=None,
-          limit=None, request_handler=None):
-    """Get a list of orders."""
-    return _ListCall(request_handler, order_step_id, order_queue_id, brand_id,
-                     step_name, min_ts, max_ts, client_id, opportunity_id,
-                     order_by, direction, offset, limit).render()

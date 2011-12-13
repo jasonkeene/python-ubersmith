@@ -6,22 +6,22 @@ from ubersmith.exceptions import (
     ValidationError,
     ValidationErrorDefault,
 )
-from ubersmith.calls.base import BaseCall, FlatCall, FileCall, api_call
+from ubersmith.calls.base import BaseCall, FlatCall, FileCall
 from ubersmith.utils import prepend_base
 
 __all__ = [
-    'api_export',
-    'check_login',
-    'client_welcome_stats',
-    'method_get',
-    'method_list',
-    'documentation',
+    'ApiExportCall',
+    'CheckLoginCall',
+    'ClientWelcomeStatsCall',
+    'MethodGetCall',
+    'MethodListCall',
+    'DocumentationCall',
 ]
 
 prepend_base = prepend_base.init("uber")
 
 
-class _ApiExportCall(BaseCall):
+class ApiExportCall(BaseCall):
     method = prepend_base('api_export')
 
     def __init__(self, request_handler, table, gzip=False, order_by=None):
@@ -43,7 +43,7 @@ class _ApiExportCall(BaseCall):
             self.request_data['order_by'] = self.order_by
 
 
-class _CheckLoginCall(BaseCall):
+class CheckLoginCall(BaseCall):
     method = prepend_base('check_login')
 
     def __init__(self, request_handler, username, password):
@@ -77,7 +77,7 @@ class _CheckLoginCall(BaseCall):
         self.cleaned = bool(self.response_data)
 
 
-class _ClientWelcomeStatsCall(FlatCall):
+class ClientWelcomeStatsCall(FlatCall):
     method = prepend_base('client_welcome_stats')
     timestamp_fields = [
         'client_activity',
@@ -108,7 +108,7 @@ class _ClientWelcomeStatsCall(FlatCall):
         }
 
 
-class _MethodGetCall(BaseCall):
+class MethodGetCall(BaseCall):
     method = prepend_base('method_get')
 
     def __init__(self, request_handler, method_name):
@@ -126,46 +126,9 @@ class _MethodGetCall(BaseCall):
         }
 
 
-class _MethodListCall(BaseCall):
+class MethodListCall(BaseCall):
     method = prepend_base('method_list')
 
 
-class _DocumentationCall(FileCall):
+class DocumentationCall(FileCall):
     method = prepend_base('documentation')
-
-
-# call functions with proper signatures and docstrings
-
-@api_call
-def api_export(table, gzip=False, order_by=None, request_handler=None):
-    """Export table data in CSV format."""
-    return _ApiExportCall(request_handler, table, gzip, order_by).render()
-
-
-@api_call
-def check_login(username, password, request_handler=None):
-    """Check the specified username and password."""
-    return _CheckLoginCall(request_handler, username, password).render()
-
-
-@api_call
-def client_welcome_stats(client_id, request_handler=None):
-    """Output the statistics that are at the top of the client interface."""
-    return _ClientWelcomeStatsCall(request_handler, client_id).render()
-
-
-@api_call
-def method_get(method_name, request_handler=None):
-    """Get the details of an API method."""
-    return _MethodGetCall(request_handler, method_name).render()
-
-
-@api_call
-def method_list(request_handler=None):
-    """Get a list of all available API methods."""
-    return _MethodListCall(request_handler).render()
-
-@api_call
-def documentation(request_handler=None):
-    """Get a PDF document with details of all available API methods."""
-    return _DocumentationCall(request_handler).render()
