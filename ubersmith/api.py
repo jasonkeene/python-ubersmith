@@ -306,7 +306,7 @@ class LogHttpRequestHandler(HttpRequestHandler):
             }
 
     """
-    _log_file_path = 'ubersmith/fixtures/logged_call_responses.json'
+    _log_file_path = 'tests/fixtures/logged_call_responses.json'
 
     def __init__(self, base_url, username=None, password=None,
                  log_file_path=None):
@@ -321,7 +321,7 @@ class LogHttpRequestHandler(HttpRequestHandler):
         >>> handler.base_url
         'http://127.0.0.1:8088/'
         >>> handler._log_file_path
-        'ubersmith/fixtures/logged_call_responses.json'
+        'tests/fixtures/logged_call_responses.json'
         >>> config = {
         ...     'base_url': 'http://127.0.0.1/api/',
         ...     'username': 'admin',
@@ -402,7 +402,7 @@ class LogHttpRequestHandler(HttpRequestHandler):
 
 class TestRequestHandler(_AbstractRequestHandler):
     """Loads responses from fixtures vs making HTTP requests."""
-    _fixture_file_path = 'ubersmith/fixtures/call_responses.json'
+    _fixture_file_path = 'tests/fixtures/call_responses.json'
 
     def __init__(self, fixture_file_path=None):
         if fixture_file_path:
