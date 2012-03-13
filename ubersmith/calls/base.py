@@ -140,8 +140,9 @@ class GroupCall(_CleanFieldsCall):
 class FileCall(BaseCall):
     def process_request(self):
         """Return result of processing call."""
-        return self.request_handler.process_request(self.method, self.request_data,
-                                                                     raw=True)
+        return self.request_handler.process_request(self.method,
+                                                    self.request_data,
+                                                    raw=True)
 
     def clean(self):
         fname = None
@@ -152,8 +153,12 @@ class FileCall(BaseCall):
 
         self.filename = fname
         self.type = self.response_data[0].get('content-type')
-        self.modified = datetime.datetime(*rfc822.parsedate_tz(
-                              self.response_data[0].get('last-modified'))[:7])
+        last_modified = self.response_data[0].get('last-modified')
+        if last_modified:
+            self.modified = datetime.datetime(
+                                      *rfc822.parsedate_tz(last_modified)[:7])
+        else:
+            self.modified = datetime.datetime.now()
         self.data = buffer(self.response_data[1])
 
         self.cleaned = _UbersmithFile(self.filename, self.type, self.modified,
