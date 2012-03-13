@@ -22,6 +22,7 @@ __all__ = [
 ]
 
 _CLEANERS = {
+    'bool': bool,
     'int': int,
     'decimal': lambda x: Decimal(x.replace(',', '')),
     'float': float,
