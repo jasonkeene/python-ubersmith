@@ -15,7 +15,7 @@ from ubersmith.api import get_default_request_handler
 from ubersmith.exceptions import ValidationError, ValidationErrorDefault
 
 __all__ = [
-    'BaseCall',
+    'AbstractCall',
     'FlatCall',
     'GroupCall',
     'FileCall',
@@ -34,20 +34,16 @@ _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type',
                                               'modified', 'data'])
 
 
-class _AbstractCall(object):
+class AbstractCall(object):
     method = None  # this should be defined on child classes
 
-    def __init__(self, request_handler):
-        """Setup call with provided request_handler."""
-        self.request_data = None  # data for the request is stored here
+    def __init__(self, request_data=None, request_handler=None):
+        """Setup call with provided request data and handler."""
+        self.request_data = request_data or {}  # data for the request
         self.request_handler = request_handler or \
                 get_default_request_handler() # handler to fullfil the request
         self.response_data = None  # response data is stored here
         self.cleaned = None  # cleaned response data is stored here
-
-    def process_request(self):
-        """Return result of processing call."""
-        return self.request_handler.process_request(self.method, self.request_data)
 
     def render(self):
         """Validate, process, clean and return the result of the call."""
@@ -59,59 +55,32 @@ class _AbstractCall(object):
             if not valid:
                 raise ValidationError
 
-        self.build_request_data()
-        self.request()
+        self.process_request()
         self.clean()
 
         return self.cleaned
 
     def validate(self):
         """Validate request data before sending it out. Return True/False."""
-        raise NotImplementedError(
-            "No validate method defined for {0}".format(self.__class__))
+        return True
 
-    def build_request_data(self):
-        """Setup request data as a dict ready to urlencode."""
-        raise NotImplementedError(
-            "No build_request_data method defined for {0}".format(
-                self.__class__))
-
-    def request(self):
-        """Make the request, handle any exceptions."""
-        raise NotImplementedError(
-            "No request method defined for {0}".format(self.__class__))
+    def process_request(self):
+        """Processing the call and set response_data."""
+        self.response_data = self.request_handler.process_request(self.method,
+                                                            self.request_data)
 
     def clean(self):
         """Clean response data."""
-        raise NotImplementedError(
-            "No clean method defined for {0}".format(self.__class__))
-
-
-class BaseCall(_AbstractCall):
-    def validate(self):
-        """Sensible default behavior for validation."""
-        return True
-
-    def build_request_data(self):
-        """Sensible default behavior for building request data."""
-        if not hasattr(self, 'request_data'):
-            self.request_data = None
-
-    def request(self):
-        """Sensible default behavior for request."""
-        self.response_data = self.process_request()
-
-    def clean(self):
-        """Sensible default behavior for clean."""
         self.cleaned = copy.deepcopy(self.response_data)
 
 
-class _CleanFieldsCall(BaseCall):
+class _CleanFieldsCall(AbstractCall):
     rename_fields = {}  # fields to rename
+    bool_fields = []  # fields to convert to ints
     int_fields = []  # fields to convert to ints
     decimal_fields = []  # fields to convert to decimals
     float_fields = []   # fields to convert to floats
-    timestamp_fields = []  # fields to convert to timestamps
+    timestamp_fields = []  # fields to convert from timestamps to datetime
     date_fields = []  # fields to convert to datetime.date
     php_serialized_fields = []  # fields to convert from php serialized format
 
@@ -142,12 +111,12 @@ class GroupCall(_CleanFieldsCall):
             self.clean_fields(struct)
 
 
-class FileCall(BaseCall):
+class FileCall(AbstractCall):
     def process_request(self):
-        """Return result of processing call."""
-        return self.request_handler.process_request(self.method,
-                                                    self.request_data,
-                                                    raw=True)
+        """Processing the call and set response_data."""
+        self.response_data = self.request_handler.process_request(self.method,
+                                                            self.request_data,
+                                                            raw=True)
 
     def clean(self):
         fname = None

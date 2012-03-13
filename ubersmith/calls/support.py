@@ -8,5 +8,5 @@ __all__ = []
 prepend_base = prepend_base.init("support")
 
 
-# class (BaseCall):
+# class (AbstractCall):
 #     method = prepend_base('')

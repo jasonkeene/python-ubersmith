@@ -6,7 +6,7 @@ from ubersmith.exceptions import (
     ValidationError,
     ValidationErrorDefault,
 )
-from ubersmith.calls.base import BaseCall, FlatCall, FileCall
+from ubersmith.calls.base import AbstractCall, FlatCall, FileCall
 from ubersmith.utils import prepend_base
 
 __all__ = [
@@ -21,7 +21,7 @@ __all__ = [
 prepend_base = prepend_base.init("uber")
 
 
-class ApiExportCall(BaseCall):
+class ApiExportCall(AbstractCall):
     method = prepend_base('api_export')
 
     def __init__(self, request_handler, table, gzip=False, order_by=None):
@@ -44,7 +44,7 @@ class ApiExportCall(BaseCall):
             self.request_data['order_by'] = self.order_by
 
 
-class CheckLoginCall(BaseCall):
+class CheckLoginCall(AbstractCall):
     method = prepend_base('check_login')
 
     def __init__(self, request_handler, username, password):
@@ -108,7 +108,7 @@ class ClientWelcomeStatsCall(FlatCall):
         }
 
 
-class MethodGetCall(BaseCall):
+class MethodGetCall(AbstractCall):
     method = prepend_base('method_get')
 
     def __init__(self, request_handler, method_name):
@@ -126,7 +126,7 @@ class MethodGetCall(BaseCall):
         }
 
 
-class MethodListCall(BaseCall):
+class MethodListCall(AbstractCall):
     method = prepend_base('method_list')
 
 
