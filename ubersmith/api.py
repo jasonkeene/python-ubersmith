@@ -2,7 +2,6 @@
 
 import base64
 import json
-from threading import local
 import urllib
 import urlparse
 
@@ -20,8 +19,7 @@ __all__ = [
     'set_default_request_handler',
 ]
 
-_DEFAULT_REQUEST_HANDLER = local()
-_DEFAULT_REQUEST_HANDLER.value = None
+_DEFAULT_REQUEST_HANDLER = None
 
 """A list of all methods returned from uber.method_list()"""
 VALID_METHODS = [
@@ -467,15 +465,16 @@ class TestRequestHandler(_AbstractRequestHandler):
 
 
 def get_default_request_handler():
-    """Return the local default request handler."""
-    if not _DEFAULT_REQUEST_HANDLER.value:
+    """Return the default request handler."""
+    if not _DEFAULT_REQUEST_HANDLER:
         raise Exception("Request handler required but no default was found.")
-    return _DEFAULT_REQUEST_HANDLER.value
+    return _DEFAULT_REQUEST_HANDLER
 
 
 def set_default_request_handler(request_handler):
-    """Set the local default request handler."""
+    """Set the default request handler."""
     if not isinstance(request_handler, _AbstractRequestHandler):
         raise TypeError(
             "Attempted to set an invalid request handler as default.")
-    _DEFAULT_REQUEST_HANDLER.value = request_handler
+    global _DEFAULT_REQUEST_HANDLER
+    _DEFAULT_REQUEST_HANDLER = request_handler
