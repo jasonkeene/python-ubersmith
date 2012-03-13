@@ -6,8 +6,8 @@ __all__ = [
     'device',
     'exceptions',
     'order',
-    'sales'
+    'sales',
     'support',
-    'uber'
+    'uber',
     'utils',
 ]
