@@ -51,8 +51,13 @@ class _AbstractCall(object):
 
     def render(self):
         """Validate, process, clean and return the result of the call."""
-        if not self.validate():
-            raise ValidationError
+        try:
+            valid = self.validate()
+        except ValidationErrorDefault, exc:
+            return exc.default
+        else:
+            if not valid:
+                raise ValidationError
 
         self.build_request_data()
         self.request()
@@ -181,11 +186,6 @@ def _api_call_wrapper(call_func, *args):
     index = signature_position(call_func, 'request_handler')
     args = list(args)  # convert tuple to a mutable type
     args[index] = args[index] or get_default_request_handler()
-
-    try:
-        return call_func(*args)
-    except ValidationErrorDefault, exc:
-        return exc.default
 
 
 def api_call(call_func):
