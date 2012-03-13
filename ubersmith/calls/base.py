@@ -188,17 +188,6 @@ def _api_call_wrapper(call_func, *args):
         return exc.default
 
 
-def _api_call_definition_check(call_func):
-    """Check that call_func accepts a request_handler argument."""
-    try:
-        signature_position(call_func, 'request_handler')
-    except ValueError:
-        raise Exception("API call '{0}' defined without a request_handler " \
-                                      "argument.".format(call_func.func_name))
-
-
 def api_call(call_func):
     """Decorate API call function."""
-    _api_call_definition_check(call_func)
-
     return decorator(_api_call_wrapper, call_func)
