@@ -11,75 +11,46 @@ __all__ = [
 prepend_base = prepend_base.init("client")
 
 
-class GetCall(FlatCall):
-    method = prepend_base('get')
+class _ClientCallMixin(object):
     rename_fields = {
         'clientid': 'client_id',
     }
+    bool_fields = [
+        'active',
+    ]
     int_fields = [
         'client_id',
         'class_id',
+        'priority',
     ]
     decimal_fields = [
         'balance',
+        'commission',
+        'commission_rate',
         'discount',
         'inv_balance',
+        'tier_commission',
+        'tier_commission_rate',
     ]
     timestamp_fields = [
         'created',
+        'latest_inv',
         'password_changed',
     ]
     php_serialized_fields = [
         'access',
     ]
 
-    def __init__(self, request_handler, client_id, username, email, metadata,
-                 disabled):
-        super(GetCall, self).__init__(request_handler)
-        self.client_id = client_id
-        self.username = username
-        self.email = email
-        self.metadata = metadata
-        self.disabled = disabled
+
+class GetCall(_ClientCallMixin, FlatCall):
+    method = prepend_base('get')
 
     def validate(self):
-        if self.client_id or self.username or self.email:
+        if self.request_data.get('client_id') or \
+           self.request_data.get('username') or \
+           self.request_data.get('email'):
             return True
 
-    def build_request_data(self):
-        self.request_data = {}
 
-        if self.client_id:
-            self.request_data['client_id'] = self.client_id
-        elif self.username:
-            self.request_data['username'] = self.username
-        elif self.email:
-            self.request_data['email'] = self.email
-
-        if self.metadata:
-            self.request_data['metadata'] = 1
-
-        if self.disabled:
-            self.request_data['allclients'] = 1
-
-
-class ListCall(GroupCall):
+class ListCall(_ClientCallMixin, GroupCall):
     method = prepend_base('list')
-    rename_fields = {
-        'clientid': 'client_id',
-    }
-    int_fields = [
-        'client_id',
-        'class_id',
-    ]
-    decimal_fields = [
-        'balance',
-        'discount',
-    ]
-    timestamp_fields = [
-        'created',
-        'password_changed',
-    ]
-    php_serialized_fields = [
-        'access',
-    ]
