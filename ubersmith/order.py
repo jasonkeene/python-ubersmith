@@ -1,4 +1,3 @@
-from ubersmith.calls.base import api_call
 from ubersmith.calls.order import (
     GetCall,
     ListCall,
@@ -12,13 +11,11 @@ __all__ = [
 
 # call functions with proper signatures and docstrings
 
-@api_call
 def get(order_id=None, hash_=None, request_handler=None):
     """Get the details of a specified order."""
     return GetCall(request_handler, order_id, hash_).render()
 
 
-@api_call
 def list(order_step_id=None, order_queue_id=None, brand_id=None,
           step_name=None, min_ts=None, max_ts=None, client_id=None,
           opportunity_id=None, order_by=None, direction=None, offset=None,

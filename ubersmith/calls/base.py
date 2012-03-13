@@ -13,14 +13,12 @@ import phpserialize
 
 from ubersmith.api import get_default_request_handler
 from ubersmith.exceptions import ValidationError, ValidationErrorDefault
-from ubersmith.utils import signature_position
 
 __all__ = [
     'BaseCall',
     'FlatCall',
     'GroupCall',
     'FileCall',
-    'api_call',
 ]
 
 _CLEANERS = {
@@ -40,8 +38,9 @@ class _AbstractCall(object):
 
     def __init__(self, request_handler):
         """Setup call with provided request_handler."""
-        self.request_handler = request_handler  # processes the request
         self.request_data = None  # data for the request is stored here
+        self.request_handler = request_handler or \
+                get_default_request_handler() # handler to fullfil the request
         self.response_data = None  # response data is stored here
         self.cleaned = None  # cleaned response data is stored here
 
@@ -179,15 +178,3 @@ def _clean_rename(struct, old_name, new_name):
     if old_name in struct and new_name not in struct:
         struct[new_name] = struct[old_name]
         del struct[old_name]
-
-
-def _api_call_wrapper(call_func, *args):
-    """If caller did not provide a request_handler, use the default."""
-    index = signature_position(call_func, 'request_handler')
-    args = list(args)  # convert tuple to a mutable type
-    args[index] = args[index] or get_default_request_handler()
-
-
-def api_call(call_func):
-    """Decorate API call function."""
-    return decorator(_api_call_wrapper, call_func)

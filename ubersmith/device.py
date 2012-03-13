@@ -1,4 +1,3 @@
-from ubersmith.calls.base import api_call
 from ubersmith.calls.device import (
     GetCall,
     ListCall,
@@ -12,7 +11,6 @@ __all__ = [
 
 # call functions with proper signatures and docstrings
 
-@api_call
 def get(device_id, metadata=None, service=None, modules=None, tags=None,
         request_handler=None):
     """Get a device's details."""
@@ -20,7 +18,6 @@ def get(device_id, metadata=None, service=None, modules=None, tags=None,
                     tags).render()
 
 
-@api_call
 def list(parent=None, client_id=None, service_id=None, status=None,
           label=None, dev_desc=None, devtype_group_id=None, type_id=None,
           rack_id=None, row_id=None, cage_id=None, zone_id=None, fac_id=None,
