@@ -1,5 +1,6 @@
 """Lower level API, configuration, and HTTP stuff."""
 
+import base64
 import json
 from threading import local
 import urllib
@@ -293,16 +294,18 @@ class LogHttpRequestHandler(HttpRequestHandler):
 
         Log Format:
             {
-                'ubersmith.method': {
-                    'request_data': {
-                        'status': 200,
-                        'content-type': 'application/json',
-                        'content': <decoded json>
+                "ubersmith.method": {
+                    "request_data": {
+                        "status": 200,
+                        "content-type": "application/json",
+                        "content": <decoded json>
                     },
-                    'request_data': {
-                        'status': 200,
-                        'content-type': 'application/pdf',
-                        'content': <repr of raw data>
+                    "request_data": {
+                        "status": 200,
+                        "content-type": "application/pdf",
+                        "content-disposition": "inline; filename=\"doc.pdf\";",
+                        "last-modified": "Tue, 13 Mar 2012 03:05:36 GMT",
+                        "content": <base64 encoded string>
                     }
                 }
             }
@@ -369,6 +372,7 @@ class LogHttpRequestHandler(HttpRequestHandler):
 
     def _log_response(self, method, data, response, content):
         body = self._encode_data(data)
+        response_dict = {}
 
         # read in existing logged data to json_obj
         try:
@@ -385,16 +389,23 @@ class LogHttpRequestHandler(HttpRequestHandler):
             # response is encoded json, decode
             content = json.loads(content)
         else:
-            # response is string, repr
-            content = repr(content)
+            # response is not json (probably binary file), base64 encode
+            content = base64.b64encode(content)
+            if response.get('content-disposition'):
+                response_dict['content-disposition'] = response.get('content-disposition')
+
+        # response info for all requests
+        response_dict.update({
+            'status': response.status,
+            'content-type': response.get('content-type'),
+            'content': content,
+        })
+        if response.get('last-modified'):
+            response_dict['last-modified'] = response.get('last-modified')
 
         # update existing logged responses with current response
         json_obj[method].update({
-            body: {
-                'status': response.status,
-                'content-type': response.get('content-type'),
-                'content': content
-            }
+            body: response_dict
         })
 
         # write log out to disk
@@ -447,8 +458,8 @@ class TestRequestHandler(_AbstractRequestHandler):
             # response is decoded json, encode
             content = json.dumps(content)
         else:
-            # response is repr, eval
-            content = eval(content)
+            # response is not json (probably binary file), base64 decode
+            content = base64.b64decode(content)
 
         return response, content
 
