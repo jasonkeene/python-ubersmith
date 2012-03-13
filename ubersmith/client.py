@@ -16,11 +16,11 @@ __all__ = [
 def get(client_id=None, username=None, email=None, metadata=False,
         disabled=False, request_handler=None):
     """Get a client's details."""
-    return _GetCall(request_handler, client_id, username, email, metadata,
+    return GetCall(request_handler, client_id, username, email, metadata,
                     disabled).render()
 
 
 @api_call
 def list(request_handler=None):
     """Get a list of all active clients in the system."""
-    return _ListCall(request_handler).render()
+    return ListCall(request_handler).render()

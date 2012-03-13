@@ -191,7 +191,7 @@ class _AbstractRequestHandler(object):
 
     def _render_response(self, response, content, raw):
         """Render response as python object.
-        
+
             response: dict like object with headers
             content: raw response string from ubersmith
             raw: Set to True to return the raw response vs the default
@@ -347,7 +347,8 @@ class LogHttpRequestHandler(HttpRequestHandler):
         if log_file_path:
             self._log_file_path = log_file_path
 
-        super(LogHttpRequestHandler, self).__init__(base_url, username, password)
+        super(LogHttpRequestHandler, self).__init__(base_url, username,
+                                                    password)
 
     def process_request(self, method, data=None, raw=False):
         """Process request over HTTP to ubersmith while logging response.
@@ -392,7 +393,8 @@ class LogHttpRequestHandler(HttpRequestHandler):
             # response is not json (probably binary file), base64 encode
             content = base64.b64encode(content)
             if response.get('content-disposition'):
-                response_dict['content-disposition'] = response.get('content-disposition')
+                response_dict['content-disposition'] = response.get(
+                                                        'content-disposition')
 
         # response info for all requests
         response_dict.update({
@@ -441,7 +443,7 @@ class TestRequestHandler(_AbstractRequestHandler):
 
     def _load_response(self, method, data):
         body = self._encode_data(data)
-        
+
         # read in existing fixture data to json_obj
         with open(self._fixture_file_path, 'r') as f:
             json_obj = json.load(f)

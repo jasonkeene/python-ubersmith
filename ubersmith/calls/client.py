@@ -35,7 +35,7 @@ class GetCall(FlatCall):
 
     def __init__(self, request_handler, client_id, username, email, metadata,
                  disabled):
-        super(_GetCall, self).__init__(request_handler)
+        super(GetCall, self).__init__(request_handler)
         self.client_id = client_id
         self.username = username
         self.email = email

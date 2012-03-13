@@ -25,7 +25,7 @@ class ApiExportCall(BaseCall):
     method = prepend_base('api_export')
 
     def __init__(self, request_handler, table, gzip=False, order_by=None):
-        super(_ApiExportCall, self).__init__(request_handler)
+        super(ApiExportCall, self).__init__(request_handler)
         self.table = table
         self.gzip = gzip
         self.order_by = order_by
@@ -35,8 +35,9 @@ class ApiExportCall(BaseCall):
             return True
 
     def build_request_data(self):
-        self.request_data = {}
-        self.request_data['table'] = self.table
+        self.request_data = {
+            'table': self.table,
+        }
         if self.gzip:
             self.request_data['gzip'] = 1
         if self.order_by:
@@ -47,8 +48,7 @@ class CheckLoginCall(BaseCall):
     method = prepend_base('check_login')
 
     def __init__(self, request_handler, username, password):
-        super(_CheckLoginCall, self).__init__(request_handler)
-        self.request_data
+        super(CheckLoginCall, self).__init__(request_handler)
         self.username = username
         self.password = password
 
@@ -65,7 +65,7 @@ class CheckLoginCall(BaseCall):
 
     def request(self):
         try:
-            super(_CheckLoginCall, self).request()
+            super(CheckLoginCall, self).request()
         except ResponseError, exc:
             if exc.error_code == 3 and \
                             exc.error_message == 'Invalid login or password.':
@@ -95,7 +95,7 @@ class ClientWelcomeStatsCall(FlatCall):
     ]
 
     def __init__(self, request_handler, client_id):
-        super(_ClientWelcomeStatsCall, self).__init__(request_handler)
+        super(ClientWelcomeStatsCall, self).__init__(request_handler)
         self.client_id = client_id
 
     def validate(self):
@@ -112,7 +112,7 @@ class MethodGetCall(BaseCall):
     method = prepend_base('method_get')
 
     def __init__(self, request_handler, method_name):
-        super(_MethodGetCall, self).__init__(request_handler)
+        super(MethodGetCall, self).__init__(request_handler)
         self.method_name = method_name
 
     def validate(self):

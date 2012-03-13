@@ -16,7 +16,7 @@ class GetCall(FlatCall):
 
     def __init__(self, request_handler, device_id, metadata=None,
                  service=None, modules=None, tags=None):
-        super(_GetCall, self).__init__(request_handler)
+        super(GetCall, self).__init__(request_handler)
         self.device_id = device_id
         self.metadata = metadata
         self.service = service
@@ -28,8 +28,9 @@ class GetCall(FlatCall):
             return True
 
     def build_request_data(self):
-        self.request_data = {}
-        self.request_data['device_id'] = self.device_id
+        self.request_data = {
+            'device_id': self.device_id,
+        }
         if self.metadata:
             self.request_data['metadata'] = self.metadata
         if self.service:
@@ -49,8 +50,13 @@ class ListCall(GroupCall):
         'client_id',
     ]
 
-    def __init__(self, request_handler, parent=None, client_id=None, service_id=None, status=None, label=None, dev_desc=None, devtype_group_id=None, type_id=None, rack_id=None, row_id=None, cage_id=None, zone_id=None, fac_id=None, require_ip=None, metadata=None, order_by=None, direction=None, offset=None, limit=None):
-        super(_ListCall, self).__init__(request_handler)
+    def __init__(self, request_handler, parent=None, client_id=None,
+                 service_id=None, status=None, label=None, dev_desc=None,
+                 devtype_group_id=None, type_id=None, rack_id=None,
+                 row_id=None, cage_id=None, zone_id=None, fac_id=None,
+                 require_ip=None, metadata=None, order_by=None,
+                 direction=None, offset=None, limit=None):
+        super(ListCall, self).__init__(request_handler)
         self.parent = parent
         self.client_id = client_id
         self.service_id = service_id

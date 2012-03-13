@@ -15,7 +15,7 @@ class GetCall(FlatCall):
     method = prepend_base('get')
 
     def __init__(self, request_handler, order_id=None, hash_=None):
-        super(_GetCall, self).__init__(request_handler)
+        super(GetCall, self).__init__(request_handler)
 
         self.order_id = order_id
         self.hash = hash_
@@ -41,7 +41,7 @@ class ListCall(GroupCall):
                  min_ts=None, max_ts=None, client_id=None,
                  opportunity_id=None, order_by=None, direction=None,
                  offset=None, limit=None):
-        super(_ListCall, self).__init__(request_handler)
+        super(ListCall, self).__init__(request_handler)
 
         self.order_step_id = order_step_id
         self.order_queue_id = order_queue_id
