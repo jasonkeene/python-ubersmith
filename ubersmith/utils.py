@@ -24,18 +24,9 @@ def append_qs(url, query_string):
         * a list of tuples: [('test3', 'val1'), ('test3', 'val2')]
 
     >>> url = 'http://domain.tld/path/?test1=val&test2#hash'
-    >>> string_qs = 'test3=val1&test3=val2'
-    >>> dict_qs = {'test3': 'val'}
-    >>> nested_dict_qs = {'test3': ['val1', 'val2']}
-    >>> list_qs = [('test3', 'val1'), ('test3', 'val2')]
-    >>> append_qs(url, string_qs)
-    'http://domain.tld/path/?test1=val&test2=&test3=val1&test3=val2#hash'
-    >>> append_qs(url, dict_qs)
+    >>> qs = {'test3': 'val'}
+    >>> append_qs(url, qs)
     'http://domain.tld/path/?test1=val&test2=&test3=val#hash'
-    >>> append_qs(url, nested_dict_qs)
-    'http://domain.tld/path/?test1=val&test2=&test3=val1&test3=val2#hash'
-    >>> append_qs(url, list_qs)
-    'http://domain.tld/path/?test1=val&test2=&test3=val1&test3=val2#hash'
 
     """
     parsed_url = urlparse.urlsplit(url)
@@ -64,10 +55,16 @@ def append_qs(url, query_string):
     ))
 
 
-def urlencode_unicode(data_dict):
+def urlencode_unicode(data):
     """urllib.urlencode can't handle unicode, this is a hack to fix it."""
-    if isdict(data_dict):
-        for key, value in data_dict.iteritems():
+    data_iter = None
+    if isdict(data):
+        data_iter = data.iteritems()
+    elif islist(data):
+        data_iter = data
+
+    if data_iter:
+        for i, (key, value) in enumerate(data_iter):
             if isinstance(value, unicode):
                 # try to convert to str
                 try:
@@ -77,8 +74,12 @@ def urlencode_unicode(data_dict):
                     # if an exception is raised here then idk what to do
                     safe_val = value.encode('utf-8')
                 finally:
-                    data_dict[key] = safe_val
-    return urllib.urlencode(data_dict)
+                    if isdict(data):
+                        data[key] = safe_val
+                    elif islist(data):
+                        data[i] = (key, safe_val)
+
+    return urllib.urlencode(data)
 
 
 def prepend_base(method, base):
