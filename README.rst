@@ -36,4 +36,4 @@ Running Tests
 
     # cd to repository
     pip install -r test-requirements.txt
-    nosetests
+    ./runtests.py
