@@ -3,12 +3,13 @@ from distutils.core import setup
 
 setup(
     name='ubersmith',
-    packages=['ubersmith'],
     version='0.0.1',
-    description='Client library for the Ubersmith API 2.0',
-    long_description=open('README.rst').read(),
     author='Jason Keene',
     author_email='jasonkeene@gmail.com',
+    description='Client library for the Ubersmith API 2.0',
+    long_description=open('README.rst').read(),
+    packages=['ubersmith'],
+    requires=open('requirements.txt').read().strip().split('\n'),
     url='https://github.com/jasonkeene/python-ubersmith',
     license='MIT License',
     keywords=['ubersmith'],
