@@ -1,3 +1,4 @@
+from ubersmith.calls import generate_generic_calls
 from ubersmith.calls.client import (
     GetCall,
     ListCall,
@@ -37,3 +38,6 @@ def get(client_id=None, user_login=None, email=None, request_data=None,
 def list(request_data=None, request_handler=None):
     """Get a list of all active clients in the system."""
     return ListCall(request_data, request_handler).render()
+
+
+generate_generic_calls('client', globals())

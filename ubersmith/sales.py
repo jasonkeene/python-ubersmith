@@ -1,3 +1,4 @@
+from ubersmith.calls import generate_generic_calls
 # from ubersmith.calls.sales import (
 # )
 
@@ -9,3 +10,6 @@ __all__ = []
 # def (, request_handler=None):
 #     """"""
 #     return (request_handler, ).render()
+
+
+generate_generic_calls('sales', globals())

@@ -477,3 +477,9 @@ def set_default_request_handler(request_handler):
             "Attempted to set an invalid request handler as default.")
     global _DEFAULT_REQUEST_HANDLER
     _DEFAULT_REQUEST_HANDLER = request_handler
+
+
+def setup(base_url, username=None, password=None):
+    """Quickly setup ubersmith API via HTTP."""
+    handler = HttpRequestHandler(base_url, username, password)
+    set_default_request_handler(handler)

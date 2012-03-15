@@ -1,3 +1,4 @@
+from ubersmith.calls import generate_generic_calls
 from ubersmith.calls.order import (
     GetCall,
     ListCall,
@@ -54,3 +55,6 @@ def list(order_step_id=None, order_queue_id=None, brand_id=None,
         request_data['limit'] = limit
 
     return ListCall(request_data, request_handler).render()
+
+
+generate_generic_calls('order', globals())

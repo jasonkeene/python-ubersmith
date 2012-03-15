@@ -1,3 +1,4 @@
+from ubersmith.calls import generate_generic_calls
 from ubersmith.calls.uber import (
     ApiExportCall,
     CheckLoginCall,
@@ -60,3 +61,6 @@ def method_list(request_handler=None):
 def documentation(request_handler=None):
     """Get a PDF document with details of all available API methods."""
     return DocumentationCall(None, request_handler).render()
+
+
+generate_generic_calls('uber', globals())

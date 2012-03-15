@@ -1,3 +1,4 @@
+from ubersmith.calls import generate_generic_calls
 from ubersmith.calls.device import (
     GetCall,
     ListCall,
@@ -74,3 +75,6 @@ def list(parent=None, client_id=None, service_id=None, status=None,
         request_data['limit'] = limit
 
     return ListCall(request_data, request_handler).render()
+
+
+generate_generic_calls('device', globals())
