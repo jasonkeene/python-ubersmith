@@ -16,6 +16,7 @@ __all__ = [
     'TestRequestHandler',
     'get_default_request_handler',
     'set_default_request_handler',
+    'quick_setup',
 ]
 
 _DEFAULT_REQUEST_HANDLER = None
@@ -479,7 +480,7 @@ def set_default_request_handler(request_handler):
     _DEFAULT_REQUEST_HANDLER = request_handler
 
 
-def setup(base_url, username=None, password=None):
+def quick_setup(base_url, username=None, password=None):
     """Quickly setup ubersmith API via HTTP."""
     handler = HttpRequestHandler(base_url, username, password)
     set_default_request_handler(handler)

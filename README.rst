@@ -11,8 +11,8 @@ Example Use
 
 First you'll need to setup a request handler with your login credentials::
 
-    from ubersmith import setup
-    setup('http://ubersmith/api/2.0/', 'username', 'password')
+    import ubersmith
+    ubersmith.init('http://ubersmith/api/2.0/', 'username', 'password')
 
 Then you can make API calls::
 
