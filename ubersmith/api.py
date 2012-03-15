@@ -2,13 +2,12 @@
 
 import base64
 import json
-import urllib
 import urlparse
 
 import httplib2
 
 from ubersmith.exceptions import RequestError, ResponseError
-from ubersmith.utils import append_qs
+from ubersmith.utils import append_qs, urlencode_unicode
 
 __all__ = [
     'VALID_METHODS',
@@ -180,7 +179,7 @@ class _AbstractRequestHandler(object):
         """Process request.
 
             method: Ubersmith API method string
-            data: dict of method arguments ready to urllib.urlencode
+            data: dict of method arguments
             raw: Set to True to return the raw response vs the default
                  behavior of returning JSON data
 
@@ -220,7 +219,7 @@ class _AbstractRequestHandler(object):
 
     def _encode_data(self, data):
         """URL encode data."""
-        return urllib.urlencode(data if data is not None else {})
+        return urlencode_unicode(data if data is not None else {})
 
 
 class HttpRequestHandler(_AbstractRequestHandler):
@@ -262,7 +261,7 @@ class HttpRequestHandler(_AbstractRequestHandler):
         """Process request over HTTP to ubersmith instance.
 
             method: Ubersmith API method string
-            data: dict of method arguments ready to urllib.urlencode
+            data: dict of method arguments
             raw: Set to True to return the raw response vs the default
                  behavior of returning JSON data
 
@@ -352,7 +351,7 @@ class LogHttpRequestHandler(HttpRequestHandler):
         """Process request over HTTP to ubersmith while logging response.
 
             method: Ubersmith API method string
-            data: dict of method arguments ready to urllib.urlencode
+            data: dict of method arguments
             raw: Set to True to return the raw response vs the default
                  behavior of returning JSON data
 
@@ -425,7 +424,7 @@ class TestRequestHandler(_AbstractRequestHandler):
         """Process request from fixtures.
 
             method: Ubersmith API method string
-            data: dict of method arguments ready to urllib.urlencode
+            data: dict of method arguments
             raw: Set to True to return the raw response vs the default
                  behavior of returning JSON data
 

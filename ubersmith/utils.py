@@ -59,9 +59,26 @@ def append_qs(url, query_string):
         parsed_url.scheme,
         parsed_url.netloc,
         parsed_url.path,
-        urllib.urlencode(parsed_qs),
+        urlencode_unicode(parsed_qs),
         parsed_url.fragment,
     ))
+
+
+def urlencode_unicode(data_dict):
+    """urllib.urlencode can't handle unicode, this is a hack to fix it."""
+    if isdict(data_dict):
+        for key, value in data_dict.iteritems():
+            if isinstance(value, unicode):
+                # try to convert to str
+                try:
+                    safe_val = str(value)
+                except UnicodeEncodeError:
+                    # try to encode as utf-8
+                    # if an exception is raised here then idk what to do
+                    safe_val = value.encode('utf-8')
+                finally:
+                    data_dict[key] = safe_val
+    return urllib.urlencode(data_dict)
 
 
 def prepend_base(method, base):
