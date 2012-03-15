@@ -25,5 +25,6 @@ Then you can make API calls::
     from ubersmith import uber
     uber.method_list()
 
-These modules match the methods as documented in the
-:doc:`Ubersmith API 2.0 docs <docs/ubersmith_api_docs.pdf>`.
+These modules match the methods as documented in the `Ubersmith API 2.0 docs`_.
+
+.. _Ubersmith API 2.0 docs: https://github.com/jasonkeene/python-ubersmith/raw/master/docs/ubersmith_api_docs.pdf
