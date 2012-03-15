@@ -54,9 +54,9 @@ def method_get(method_name, request_handler=None):
 
 def method_list(request_handler=None):
     """Get a list of all available API methods."""
-    return MethodListCall(request_data, request_handler).render()
+    return MethodListCall(None, request_handler).render()
 
 
 def documentation(request_handler=None):
     """Get a PDF document with details of all available API methods."""
-    return DocumentationCall(request_data, request_handler).render()
+    return DocumentationCall(None, request_handler).render()

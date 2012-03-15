@@ -1,6 +1,5 @@
 # python
-*.pyc
-*.pyo
+*.py[co]
 __pycache__/
 
 # mac

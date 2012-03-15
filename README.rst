@@ -11,19 +11,14 @@ Example Use
 
 First you'll need to setup a request handler with your login credentials::
 
-    from ubersmith.api import HttpRequestHandler, set_default_request_handler
-    api_credentials = {
-        'base_url': 'http://ubersmith/api/2.0/',
-        'username': 'username',
-        'password': 'password',
-    }
-    handler = HttpRequestHandler(**api_credentials)
-    set_default_request_handler(handler)
+    from ubersmith import setup
+    setup('http://ubersmith/api/2.0/', 'username', 'password')
 
 Then you can make API calls::
 
-    from ubersmith import uber
+    from ubersmith import uber, client
     uber.method_list()
+    client.get(email='g.freeman@combineresearch.com')
 
 These modules match the methods as documented in the `Ubersmith API 2.0 docs`_.
 
