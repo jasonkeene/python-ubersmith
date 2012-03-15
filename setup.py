@@ -8,7 +8,7 @@ setup(
     author_email='jasonkeene@gmail.com',
     description='Client library for the Ubersmith API 2.0',
     long_description=open('README.rst').read(),
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests']),
     install_requires=open('requirements.txt').read().strip().split('\n'),
     url='https://github.com/jasonkeene/python-ubersmith',
     license='MIT License',
