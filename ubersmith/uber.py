@@ -20,37 +20,36 @@ __all__ = [
 
 # call functions with proper signatures and docstrings
 
-def api_export(table, gzip=False, order_by=None, request_handler=None):
+def api_export(table, gzip=False, order_by=None, request_handler=None, **kwargs):
     """Export table data in CSV format."""
-    request_data = {'table': table}
+    kwargs.update({
+        'table': table,
+        'order_by': order_by,
+    })
     if gzip:
-        request_data['gzip'] = 1
-    if order_by:
-        request_data['order_by'] = order_by
-
-    return ApiExportCall(request_data, request_handler).render()
+        kwargs['gzip'] = 1
+    return ApiExportCall(kwargs, request_handler).render()
 
 
-def check_login(username, password, request_handler=None):
+def check_login(username, password, request_handler=None, **kwargs):
     """Check the specified username and password."""
-    request_data = {
+    kwargs.update({
         'login': username,
         'pass': password,
-    }
+    })
+    return CheckLoginCall(kwargs, request_handler).render()
 
-    return CheckLoginCall(request_data, request_handler).render()
 
-
-def client_welcome_stats(client_id, request_handler=None):
+def client_welcome_stats(client_id, request_handler=None, **kwargs):
     """Output the statistics that are at the top of the client interface."""
-    request_data = {'client_id': client_id}
-    return ClientWelcomeStatsCall(request_data, request_handler).render()
+    kwargs.update({'client_id': client_id})
+    return ClientWelcomeStatsCall(kwargs, request_handler).render()
 
 
-def method_get(method_name, request_handler=None):
+def method_get(method_name, request_handler=None, **kwargs):
     """Get the details of an API method."""
-    request_data = {'method_name': method_name}
-    return MethodGetCall(request_data, request_handler).render()
+    kwargs.update({'method_name': method_name})
+    return MethodGetCall(kwargs, request_handler).render()
 
 
 def method_list(request_handler=None):
