@@ -24,7 +24,6 @@ def get(client_id=None, user_login=None, email=None, request_data=None,
 
     """
     request_data = request_data or {}
-
     if client_id:
         request_data['client_id'] = client_id
     elif user_login:
