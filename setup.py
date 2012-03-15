@@ -1,13 +1,5 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 
-
-def get_requirements():
-    reqs = open('requirements.txt').read().strip().split('\n')
-    for i, r in enumerate(reqs):
-        for op in ['<', '>', '==', '<=', '>=', '!=']:
-            if op in r:
-                reqs[i] = u'{1} ({0}{2})'.format(op, *r.split(op, 1))
-    return reqs
 
 setup(
     name='ubersmith',
@@ -16,8 +8,8 @@ setup(
     author_email='jasonkeene@gmail.com',
     description='Client library for the Ubersmith API 2.0',
     long_description=open('README.rst').read(),
-    packages=['ubersmith'],
-    requires=get_requirements(),
+    packages=find_packages(),
+    install_requires=open('requirements.txt').read().strip().split('\n'),
     url='https://github.com/jasonkeene/python-ubersmith',
     license='MIT License',
     keywords=['ubersmith'],
