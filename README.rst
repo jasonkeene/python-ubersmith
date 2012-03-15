@@ -28,3 +28,12 @@ Then you can make API calls::
 These modules match the methods as documented in the `Ubersmith API 2.0 docs`_.
 
 .. _Ubersmith API 2.0 docs: https://github.com/jasonkeene/python-ubersmith/raw/master/docs/ubersmith_api_docs.pdf
+
+Running Tests
+=============
+
+::
+
+    # cd to repository
+    pip install -r test-requirements.txt
+    nosetests
