@@ -484,3 +484,4 @@ def quick_setup(base_url, username=None, password=None):
     """Quickly setup ubersmith API via HTTP."""
     handler = HttpRequestHandler(base_url, username, password)
     set_default_request_handler(handler)
+    return handler
