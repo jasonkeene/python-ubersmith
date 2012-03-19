@@ -8,7 +8,6 @@ import re
 import rfc822
 import time
 
-from decorator import decorator
 import phpserialize
 
 from ubersmith.api import get_default_request_handler

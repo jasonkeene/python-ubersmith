@@ -1,3 +1,2 @@
-decorator==3.3.2
 httplib2==0.7.4
 phpserialize==1.3
