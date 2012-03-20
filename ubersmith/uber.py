@@ -30,11 +30,11 @@ def api_export(table, gzip=False, order_by=None, request_handler=None, **kwargs)
     return ApiExportCall(kwargs, request_handler).render()
 
 
-def check_login(username, password, request_handler=None, **kwargs):
+def check_login(login, pass_, request_handler=None, **kwargs):
     """Check the specified username and password."""
     kwargs.update({
-        'login': username,
-        'pass': password,
+        'login': login,
+        'pass': pass_,
     })
     return CheckLoginCall(kwargs, request_handler).render()
 
