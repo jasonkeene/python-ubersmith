@@ -1,12 +1,11 @@
 """Uber calls implemented as documented in api docs."""
 
-from ubersmith.api import VALID_METHODS
 from ubersmith.exceptions import (
     ResponseError,
     ValidationError,
     ValidationErrorDefault,
 )
-from ubersmith.calls.base import AbstractCall, FlatCall, FileCall
+from ubersmith.calls.base import BaseCall, FileCall
 from ubersmith.utils import prepend_base
 
 __all__ = [
@@ -21,27 +20,21 @@ __all__ = [
 prepend_base = prepend_base.init("uber")
 
 
-class ApiExportCall(AbstractCall):
+class ApiExportCall(BaseCall):
     method = prepend_base('api_export')
-
-    def validate(self):
-        return bool(self.request_data.get('table'))
+    required_fields = ['table']
 
 
-class CheckLoginCall(AbstractCall):
+class CheckLoginCall(BaseCall):
     method = prepend_base('check_login')
 
-    def validate(self):
-        if not (self.username and self.password):
-            raise ValidationErrorDefault(False)
-        return True
-
     def process_request(self):
+        # if login invalid just have the call return false
         try:
             super(CheckLoginCall, self).process_request()
-        except ResponseError, exc:
-            if exc.error_code == 3 and \
-                            exc.error_message == 'Invalid login or password.':
+        except ResponseError, e:
+            if e.error_code == 3 and \
+                            e.error_message == 'Invalid login or password.':
                 self.response_data = False
             else:
                 raise  # re-raises the last exception
@@ -50,14 +43,11 @@ class CheckLoginCall(AbstractCall):
         self.cleaned = bool(self.response_data)
 
 
-class ClientWelcomeStatsCall(FlatCall):
+class ClientWelcomeStatsCall(BaseCall):
     method = prepend_base('client_welcome_stats')
-    timestamp_fields = [
-        'client_activity',
-    ]
-    date_fields = [
-        'next_inv',
-    ]
+    required_fields = ['client_id']
+    timestamp_fields = ['client_activity']
+    date_fields = ['next_inv']
     int_fields = [
         'client_activity_type',
         'closed_count',
@@ -67,20 +57,12 @@ class ClientWelcomeStatsCall(FlatCall):
         'type',
     ]
 
-    def validate(self):
-        return self.request_data.get('client_id')
 
-
-class MethodGetCall(AbstractCall):
+class MethodGetCall(BaseCall):
     method = prepend_base('method_get')
 
-    def validate(self):
-        if self.method_name not in VALID_METHODS:
-            raise ValidationError("Invalid method_name.")
-        return True
 
-
-class MethodListCall(AbstractCall):
+class MethodListCall(BaseCall):
     method = prepend_base('method_list')
 
 

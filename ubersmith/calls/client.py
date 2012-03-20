@@ -1,6 +1,6 @@
 """Client calls implemented as documented in api docs."""
 
-from ubersmith.calls.base import FlatCall, GroupCall
+from ubersmith.calls.base import BaseCall, GroupCall
 from ubersmith.utils import prepend_base
 
 __all__ = [
@@ -42,7 +42,7 @@ class _ClientCallMixin(object):
     ]
 
 
-class GetCall(_ClientCallMixin, FlatCall):
+class GetCall(_ClientCallMixin, BaseCall):
     method = prepend_base('get')
 
     def validate(self):
