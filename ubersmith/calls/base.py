@@ -70,7 +70,10 @@ class BaseCall(object):
     def validate(self):
         """Validate request data before sending it out. Return True/False."""
         # check if required_fields aren't present
-        if set(self.required_fields) - set(self.request_data):
+        for field in set(self.required_fields) - set(self.request_data):
+            if not isinstance(field, basestring):
+                # field was a collection, iterate over it and check by OR
+                return bool(set(field) & set(self.request_data))
             return False
         return True
 

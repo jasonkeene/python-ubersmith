@@ -12,12 +12,8 @@ _ = prepend_base("client")
 
 
 class _ClientCallMixin(object):
-    rename_fields = {
-        'clientid': 'client_id',
-    }
-    bool_fields = [
-        'active',
-    ]
+    rename_fields = {'clientid': 'client_id'}
+    bool_fields = ['active']
     int_fields = [
         'client_id',
         'class_id',
@@ -37,19 +33,12 @@ class _ClientCallMixin(object):
         'latest_inv',
         'password_changed',
     ]
-    php_serialized_fields = [
-        'access',
-    ]
+    php_serialized_fields = ['access']
 
 
 class GetCall(_ClientCallMixin, BaseCall):
     method = _('get')
-
-    def validate(self):
-        if self.request_data.get('client_id') or \
-           self.request_data.get('username') or \
-           self.request_data.get('email'):
-            return True
+    required_fields = [('client_id', 'username', 'email')]
 
 
 class ListCall(_ClientCallMixin, GroupCall):

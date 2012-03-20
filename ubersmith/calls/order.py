@@ -13,11 +13,7 @@ _ = prepend_base("order")
 
 class GetCall(BaseCall):
     method = _('get')
-
-    def validate(self):
-        return bool(self.request_data.get('order_id') or
-                    self.request_data.get('hash'))
-
+    required_fields = [('order_id', 'hash')]
 
 
 class ListCall(GroupCall):
