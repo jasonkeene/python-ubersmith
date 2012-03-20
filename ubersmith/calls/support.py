@@ -5,8 +5,8 @@ from ubersmith.utils import prepend_base
 
 __all__ = []
 
-prepend_base = prepend_base.init("support")
+_ = prepend_base("support")
 
 
 # class (BaseCall):
-#     method = prepend_base('')
+#     method = _('')

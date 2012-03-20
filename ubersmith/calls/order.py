@@ -8,11 +8,11 @@ __all__ = [
     'ListCall',
 ]
 
-prepend_base = prepend_base.init("order")
+_ = prepend_base("order")
 
 
 class GetCall(BaseCall):
-    method = prepend_base('get')
+    method = _('get')
 
     def validate(self):
         return bool(self.request_data.get('order_id') or
@@ -21,4 +21,4 @@ class GetCall(BaseCall):
 
 
 class ListCall(GroupCall):
-    method = prepend_base('list')
+    method = _('list')

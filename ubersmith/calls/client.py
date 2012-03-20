@@ -8,7 +8,7 @@ __all__ = [
     'ListCall',
 ]
 
-prepend_base = prepend_base.init("client")
+_ = prepend_base("client")
 
 
 class _ClientCallMixin(object):
@@ -43,7 +43,7 @@ class _ClientCallMixin(object):
 
 
 class GetCall(_ClientCallMixin, BaseCall):
-    method = prepend_base('get')
+    method = _('get')
 
     def validate(self):
         if self.request_data.get('client_id') or \
@@ -53,4 +53,4 @@ class GetCall(_ClientCallMixin, BaseCall):
 
 
 class ListCall(_ClientCallMixin, GroupCall):
-    method = prepend_base('list')
+    method = _('list')

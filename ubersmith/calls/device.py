@@ -8,18 +8,18 @@ __all__ = [
     'ListCall',
 ]
 
-prepend_base = prepend_base.init("device")
+_ = prepend_base("device")
 
 
 class GetCall(BaseCall):
-    method = prepend_base('get')
+    method = _('get')
 
     def validate(self):
         return bool(self.request_data.get('device_id'))
 
 
 class ListCall(GroupCall):
-    method = prepend_base('list')
+    method = _('list')
     rename_fields = {
         'clientid': 'client_id',
     }

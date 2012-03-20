@@ -17,16 +17,16 @@ __all__ = [
     'DocumentationCall',
 ]
 
-prepend_base = prepend_base.init("uber")
+_ = prepend_base("uber")
 
 
 class ApiExportCall(BaseCall):
-    method = prepend_base('api_export')
+    method = _('api_export')
     required_fields = ['table']
 
 
 class CheckLoginCall(BaseCall):
-    method = prepend_base('check_login')
+    method = _('check_login')
 
     def process_request(self):
         # if login invalid just have the call return false
@@ -44,7 +44,7 @@ class CheckLoginCall(BaseCall):
 
 
 class ClientWelcomeStatsCall(BaseCall):
-    method = prepend_base('client_welcome_stats')
+    method = _('client_welcome_stats')
     required_fields = ['client_id']
     timestamp_fields = ['client_activity']
     date_fields = ['next_inv']
@@ -59,12 +59,12 @@ class ClientWelcomeStatsCall(BaseCall):
 
 
 class MethodGetCall(BaseCall):
-    method = prepend_base('method_get')
+    method = _('method_get')
 
 
 class MethodListCall(BaseCall):
-    method = prepend_base('method_list')
+    method = _('method_list')
 
 
 class DocumentationCall(FileCall):
-    method = prepend_base('documentation')
+    method = _('documentation')

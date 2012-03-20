@@ -82,10 +82,9 @@ def urlencode_unicode(data):
     return urllib.urlencode(data)
 
 
-def prepend_base(method, base):
-    """Prepend a method call with a base."""
-    return '.'.join((base, method))
-prepend_base.init = lambda init: lambda method: prepend_base(method, init)
+def prepend_base(base):
+    """Return a callable that will prepend the base string."""
+    return lambda method: '.'.join((base, method))
 
 
 # TODO check against ABCs instead of hasattr
