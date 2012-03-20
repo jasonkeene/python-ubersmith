@@ -12,12 +12,10 @@ __all__ = [
 
 # call functions with proper signatures and docstrings
 
-def get(order_id=None, hash_=None, request_handler=None, **kwargs):
+def get(order_id=None, request_handler=None, **kwargs):
     """Get the details of a specified order."""
-    kwargs.update({
-        'order_id': order_id,
-        'hash': hash_
-    })
+    if order_id is not None:
+        kwargs['order_id'] = order_id
     return GetCall(kwargs, request_handler).render()
 
 

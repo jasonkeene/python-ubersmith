@@ -24,11 +24,11 @@ def get(client_id=None, user_login=None, email=None, request_handler=None,
         Either this, user_login or client_id must be provided.
 
     """
-    kwargs.update({
-        'client_id': client_id,
-        'user_login': user_login,
-        'email': email,
-    })
+    kwargs.update({k: v for k, v in locals().iteritems() if k in {
+        'client_id',
+        'user_login',
+        'email',
+    } and v is not None})
     return GetCall(kwargs, request_handler).render()
 
 

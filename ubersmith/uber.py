@@ -22,12 +22,11 @@ __all__ = [
 
 def api_export(table, gzip=False, order_by=None, request_handler=None, **kwargs):
     """Export table data in CSV format."""
-    kwargs.update({
-        'table': table,
-        'order_by': order_by,
-    })
+    kwargs['table'] = table
     if gzip:
         kwargs['gzip'] = 1
+    if order_by is not None:
+        kwargs['order_by'] = order_by
     return ApiExportCall(kwargs, request_handler).render()
 
 
