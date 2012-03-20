@@ -1,6 +1,6 @@
 """Order calls implemented as documented in api docs."""
 
-from ubersmith.calls.base import BaseCall, GroupCall
+from ubersmith.calls import BaseCall, GroupCall
 from ubersmith.utils import prepend_base
 
 __all__ = [

@@ -1,31 +1,178 @@
+from collections import namedtuple
+import copy
+import datetime
+from decimal import Decimal
+import re
+import rfc822
+import time
+
+import phpserialize
+
 from ubersmith.api import VALID_METHODS, get_default_request_handler
+from ubersmith.exceptions import ValidationError
 
 __all__ = [
-    'base',
+    # call classes
+    'BaseCall',
+    'GroupCall',
+    'FileCall',
+    # generic calls
+    'generate_generic_calls',
+    # sub-packages
     'client',
     'device',
-    'generate_generic_calls',
-    'generic_call',
     'order',
     'sales',
     'support',
     'uber',
 ]
 
+_CLEANERS = {
+    'bool': bool,
+    'int': int,
+    'decimal': lambda x: Decimal(x.replace(',', '')),
+    'float': float,
+    'timestamp': lambda x: datetime.datetime.fromtimestamp(float(x)),
+    'date': lambda x: datetime.date(*time.strptime(x, '%b/%d/%Y')[:3]),
+    'php_serialized': phpserialize.loads,
+}
 
-def generic_call(method, request_handler=None, **kwargs):
-    """Generic function to call out to the ubersmith API."""
-    handler = request_handler or get_default_request_handler()
-    return handler.process_request(method, kwargs)
+
+class BaseCall(object):
+    """Abstract class to implement a call with validation/cleaning/etc."""
+
+    method = ''  # ubersmith method name, should be defined on child classes
+    required_fields = []  # field names that should be present in request_data
+    rename_fields = {}  # fields to rename
+    bool_fields = []  # fields to convert to ints
+    int_fields = []  # fields to convert to ints
+    decimal_fields = []  # fields to convert to decimals
+    float_fields = []   # fields to convert to floats
+    timestamp_fields = []  # fields to convert from timestamps to datetime
+    date_fields = []  # fields to convert to datetime.date
+    php_serialized_fields = []  # fields to convert from php serialized format
+
+    def __init__(self, request_data=None, request_handler=None):
+        """Setup call with provided request data and handler."""
+        self.request_data = request_data or {}  # data for the request
+        self.request_handler = request_handler or \
+            get_default_request_handler()  # handler to fullfil the request
+        self.response_data = None  # response data is stored here
+        self.cleaned = None  # cleaned response data is stored here
+
+    def render(self):
+        """Validate, process, clean and return the result of the call."""
+        if not self.validate():
+            raise ValidationError
+
+        self.process_request()
+        self.clean()
+
+        return self.cleaned
+
+    def validate(self):
+        """Validate request data before sending it out. Return True/False."""
+        # check if required_fields aren't present
+        for field in set(self.required_fields) - set(self.request_data):
+            if not isinstance(field, basestring):
+                # field was a collection, iterate over it and check by OR
+                return bool(set(field) & set(self.request_data))
+            return False
+        return True
+
+    def process_request(self):
+        """Processing the call and set response_data."""
+        self.response_data = self.request_handler.process_request(self.method,
+                                                            self.request_data)
+
+    def clean(self):
+        """Clean response data."""
+        cleaned = copy.deepcopy(self.response_data)
+        _clean_fields(self, cleaned)
+        self.cleaned = cleaned
+
+
+class GroupCall(BaseCall):
+    """Abstract class to implement a call that returns a group of results."""
+
+    def clean(self):
+        cleaned = copy.deepcopy(self.response_data)
+
+        # convert top level keys to ints
+        for key in self.response_data.iterkeys():
+            _rename_key(cleaned, key, int(key))
+
+        # clean fields on each member of the group
+        for member in self.cleaned.itervalues():
+            _clean_fields(self, member)
+
+        self.cleaned = cleaned
+
+
+class FileCall(BaseCall):
+    """Abstract class to implement a call that returns a file."""
+    _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type',
+                                                  'modified', 'data'])
+
+    def process_request(self):
+        """Processing the call and set response_data."""
+        self.response_data = self.request_handler.process_request(self.method,
+                                                            self.request_data,
+                                                            raw=True)
+
+    def clean(self):
+        fname = None
+        disposition = self.response_data[0].get('content-disposition')
+        if disposition:
+            fname = re.search(r'filename="(.+?)"', disposition, re.I).group(1)
+            fname = re.sub(r'[^a-z0-9-_\. ]', '-', fname, 0, re.I).lstrip('.')
+
+        self.filename = fname
+        self.type = self.response_data[0].get('content-type')
+        last_modified = self.response_data[0].get('last-modified')
+        if last_modified:
+            self.modified = datetime.datetime(
+                                      *rfc822.parsedate_tz(last_modified)[:7])
+        else:
+            self.modified = datetime.datetime.now()
+        self.data = buffer(self.response_data[1])
+
+        self.cleaned = _UbersmithFile(self.filename, self.type, self.modified,
+                                      self.data)
+
+
+def _rename_key(d, old, new):
+    """Rename a key on d from old to new."""
+    if old in d and new not in d:
+        d[new] = d[old]
+        del d[old]
+
+
+def _clean_fields(call, d):
+    """Rename and clean fields on d using info on call."""
+    # rename fields
+    for old, new in call.rename_fields.iteritems():
+        _rename_key(d, old, unicode(new))
+
+    # clean fields
+    for name, func in _CLEANERS.iteritems():
+        for field in getattr(call, '{0}_fields'.format(name), []):
+            if field in d and isinstance(d[field], basestring):
+                d[field] = func(d[field])
 
 
 def generate_generic_calls(prefix, ns):
+    def add_generic_call(m, call_name, ns):
+        class GenericCall(BaseCall):
+            method = m
+        ns[call_name] = lambda request_handler=None, **kwargs: \
+                                 GenericCall(kwargs, request_handler).render()
+        ns_all = ns.get('__all__')
+        if ns_all and call_name not in ns_all:
+            ns_all.append(call_name)
+
     for m in VALID_METHODS:
-        if m.startswith(u'{}.'.format(prefix)):
-            call_name = m.split('.', 1)[1]
+        call_prefix, call_name = m.split('.', 1)
+        if prefix == call_prefix:
             if call_name not in ns:
-                ns[call_name] = lambda request_handler=None, **kwargs: \
-                                    generic_call(m, request_handler, **kwargs)
-                all = ns.get('__all__')
-                if all and call_name not in all:
-                    all.append(call_name)
+                add_generic_call(m, call_name, ns)

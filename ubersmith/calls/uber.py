@@ -1,11 +1,7 @@
 """Uber calls implemented as documented in api docs."""
 
-from ubersmith.exceptions import (
-    ResponseError,
-    ValidationError,
-    ValidationErrorDefault,
-)
-from ubersmith.calls.base import BaseCall, FileCall
+from ubersmith.exceptions import ResponseError
+from ubersmith.calls import BaseCall, FileCall
 from ubersmith.utils import prepend_base
 
 __all__ = [

@@ -1,19 +1,18 @@
 # exceptions
 
 __all__ = [
-    'BaseError',
+    'UbersmithError',
     'RequestError',
     'ValidationError',
-    'ValidationErrorDefault',
     'ResponseError',
 ]
 
 
-class BaseError(Exception):
-    msg = None
+class UbersmithError(Exception):
+    msg = "An error occured with the Ubersmith API."
 
     def __init__(self, msg=None):
-        super(BaseError, self).__init__()
+        super(UbersmithError, self).__init__()
         if msg is not None:
             self.msg = msg
 
@@ -21,28 +20,22 @@ class BaseError(Exception):
         return self.msg
 
 
-class RequestError(BaseError):
-    pass
+class RequestError(UbersmithError):
+    msg = "An error occured with the request to the Ubersmith API."
 
 
 class ValidationError(RequestError):
-    msg = "Invalid request data."
+    msg = "The request data was invalid for the Ubersmith request."
 
 
-class ValidationErrorDefault(ValidationError):
-    def __init__(self, default, *args, **kwargs):
-        super(ValidationErrorDefault, self).__init__(*args, **kwargs)
-        self.default = default
-
-
-class ResponseError(BaseError):
+class ResponseError(UbersmithError):
     """Exception for Ubersmith API Response.
 
         msg: optional message to pass along w/ stacktrace
         response: decoded json response w/ error info
 
     """
-    msg = "Error in response from Ubersmith API."
+    msg = "An error occured in the response from the Ubersmith API."
 
     def __init__(self, msg=None, response=None):
         super(ResponseError, self).__init__(msg)
