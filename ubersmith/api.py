@@ -463,7 +463,7 @@ class TestRequestHandler(_AbstractRequestHandler):
         except KeyError:
             raise Exception('Unable to find fixture for provided method/data.')
 
-        response = {k: v for k, v in json_resp.iteritems() if k != 'content'}
+        response = dict((k, v) for k, v in json_resp.iteritems() if k != 'content')
         content = json_resp['content']
 
         if response.get('content-type') == 'application/json':

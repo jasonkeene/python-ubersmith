@@ -17,3 +17,9 @@ desktop.ini
 
 # coverage
 .coverage
+
+# tox
+.tox
+
+# stuff that gets generated from setup.py
+ubersmith.egg-info
