@@ -278,24 +278,18 @@ class HttpRequestHandler(_AbstractRequestHandler):
         # make sure requested method is valid
         self._validate_request_method(method)
 
-        # make the request
-        response, content = self._send_request(method, data)
-
-        # render the response as python object, try 3 times
-        i = 0
-        while True:
-            i += 1
+        # try request 3 times
+        for i in range(3):
+            # make the request
+            response, content = self._send_request(method, data)
             try:
                 # render the response as python object
                 return self._render_response(response, content, raw)
             except UpdatingTokenResponse:
-                if i < 3:
-                    # wait 4 secs before retrying request
-                    time.sleep(4)
-                    # make the request, again
-                    response, content = self._send_request(method, data)
-                else:
-                    raise
+                # wait 4 secs before retrying request
+                time.sleep(4)
+        # if last attempt still threw an exception, reraise it
+        raise
 
     def _send_request(self, method, data):
         url = append_qs(self.base_url, {'method': method})
