@@ -20,7 +20,7 @@ def get(device_id, request_handler=None, **kwargs):
 
 def list(request_handler=None, **kwargs):
     """List devices in the system."""
-    return ListCall(request_handler, kwargs).render()
+    return ListCall(kwargs, request_handler).render()
 
 
 generate_generic_calls('device', globals())
