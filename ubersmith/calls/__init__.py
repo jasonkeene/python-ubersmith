@@ -137,8 +137,8 @@ class FileCall(BaseCall):
             self.modified = datetime.datetime.now()
         self.data = buffer(self.response_data[1])
 
-        self.cleaned = _UbersmithFile(self.filename, self.type, self.modified,
-                                      self.data)
+        self.cleaned = self._UbersmithFile(self.filename, self.type,
+                                           self.modified, self.data)
 
 
 def _rename_key(d, old, new):
