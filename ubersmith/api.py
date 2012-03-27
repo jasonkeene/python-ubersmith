@@ -277,14 +277,11 @@ class HttpRequestHandler(_AbstractRequestHandler):
         return self._render_response(response, content, raw)
 
     def _send_request(self, method, data):
-        url = self._construct_url(method)
+        url = append_qs(self.base_url, {'method': method})
         body = self._encode_data(data)
         # httplib2 requires that you manually send Content-Type on POSTs :/
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         return self._http.request(url, "POST", body, headers)
-
-    def _construct_url(self, method):
-        return append_qs(self.base_url, {'method': method})
 
 
 class LogHttpRequestHandler(HttpRequestHandler):
