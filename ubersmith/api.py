@@ -3,10 +3,15 @@
 import base64
 import json
 import urlparse
+import time
 
 import httplib2
 
-from ubersmith.exceptions import RequestError, ResponseError
+from ubersmith.exceptions import (
+    RequestError,
+    ResponseError,
+    UpdatingTokenResponse,
+)
 from ubersmith.utils import append_qs, urlencode_unicode
 
 __all__ = [
@@ -202,7 +207,10 @@ class _AbstractRequestHandler(object):
 
         # response isn't json
         if response.get('content-type') != 'application/json':
-            ResponseError("Response wasn't application/json")
+            if response.get('content-type') == 'text/html' and \
+                'Updating Token' in content:
+                raise UpdatingTokenResponse
+            raise ResponseError("Response wasn't application/json")
 
         # response is json
         response_dict = json.loads(content)
@@ -273,8 +281,21 @@ class HttpRequestHandler(_AbstractRequestHandler):
         # make the request
         response, content = self._send_request(method, data)
 
-        # render the response as python object
-        return self._render_response(response, content, raw)
+        # render the response as python object, try 3 times
+        i = 0
+        while True:
+            i += 1
+            try:
+                # render the response as python object
+                return self._render_response(response, content, raw)
+            except UpdatingTokenResponse:
+                if i < 3:
+                    # wait 4 secs before retrying request
+                    time.sleep(4)
+                    # make the request, again
+                    response, content = self._send_request(method, data)
+                else:
+                    raise
 
     def _send_request(self, method, data):
         url = append_qs(self.base_url, {'method': method})

@@ -5,6 +5,7 @@ __all__ = [
     'RequestError',
     'ValidationError',
     'ResponseError',
+    'UpdatingTokenResponse',
 ]
 
 
@@ -39,9 +40,12 @@ class ResponseError(UbersmithError):
 
     def __init__(self, msg=None, response=None):
         super(ResponseError, self).__init__(msg)
-        if response is None:
-            response = {}
-        self.response = response
-        self.error_code = response.get('error_code')
-        self.error_message = response.get('error_message')
-        self.msg = '{0.msg} {0.error_code} {0.error_message}'.format(self)
+        if response is not None:
+            self.response = response
+            self.error_code = response.get('error_code')
+            self.error_message = response.get('error_message')
+            self.msg = '{0.msg} {0.error_code} {0.error_message}'.format(self)
+
+
+class UpdatingTokenResponse(ResponseError):
+    msg = "Ubersmith is updating token."
