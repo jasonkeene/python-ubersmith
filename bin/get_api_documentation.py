@@ -4,10 +4,8 @@
 import os
 import sys
 
-from ubersmith.api import (
-    TestRequestHandler,
-    set_default_request_handler
-)
+from tests.handlers import TestRequestHandler
+from ubersmith.api import set_default_request_handler
 from ubersmith import uber
 
 

@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 """Script to check for outdated VALID_METHODS."""
 
-from ubersmith.api import (
-    VALID_METHODS,
-    TestRequestHandler,
-    set_default_request_handler
-)
+from tests.handlers import TestRequestHandler
+from ubersmith.api import VALID_METHODS, set_default_request_handler
 from ubersmith import uber
 
 
