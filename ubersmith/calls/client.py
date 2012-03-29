@@ -8,7 +8,7 @@ __all__ = [
     'ListCall',
 ]
 
-_ = prepend_base("client")
+_ = prepend_base(__name__.split('.')[-1])
 
 
 class _ClientCallMixin(object):

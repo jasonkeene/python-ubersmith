@@ -8,7 +8,7 @@ __all__ = [
     'ListCall',
 ]
 
-_ = prepend_base("device")
+_ = prepend_base(__name__.split('.')[-1])
 
 
 class GetCall(BaseCall):

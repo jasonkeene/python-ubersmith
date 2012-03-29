@@ -5,7 +5,7 @@ from ubersmith.utils import prepend_base
 
 __all__ = []
 
-_ = prepend_base("sales")
+_ = prepend_base(__name__.split('.')[-1])
 
 
 # class (BaseCall):

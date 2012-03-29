@@ -12,7 +12,7 @@ __all__ = [
     'DocumentationCall',
 ]
 
-_ = prepend_base("uber")
+_ = prepend_base(__name__.split('.')[-1])
 
 
 class ApiExportCall(BaseCall):
