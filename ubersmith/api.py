@@ -18,7 +18,6 @@ __all__ = [
     'HttpRequestHandler',
     'get_default_request_handler',
     'set_default_request_handler',
-    'quick_setup',
 ]
 
 _DEFAULT_REQUEST_HANDLER = None
@@ -193,9 +192,10 @@ VALID_METHODS = [
 # 
 # class _RequestHandlerMeta(type):
 #     def __new__(cls, name, bases, attrs):
-#         # add all the call modules to the request handlers
-#         for call_base in set(m.split('.')[0] for m in VALID_METHODS):
-#             attrs[call_base] = property(_make_loader(call_base))
+#         # add all the call modules to the abstract request handler
+#         if bases == (object,):
+#             for call_base in set(m.split('.')[0] for m in VALID_METHODS):
+#                 attrs[call_base] = property(_make_loader(call_base))
 #         return super(_RequestHandlerMeta, cls).__new__(cls, name, bases, attrs)
 
 
@@ -334,10 +334,3 @@ def set_default_request_handler(request_handler):
             "Attempted to set an invalid request handler as default.")
     global _DEFAULT_REQUEST_HANDLER
     _DEFAULT_REQUEST_HANDLER = request_handler
-
-
-def quick_setup(base_url, username=None, password=None):
-    """Quickly setup ubersmith API via HTTP."""
-    handler = HttpRequestHandler(base_url, username, password)
-    set_default_request_handler(handler)
-    return handler
