@@ -161,18 +161,44 @@ def _clean_fields(call, d):
                 d[field] = func(d[field])
 
 
-def generate_generic_calls(prefix, ns):
-    def add_generic_call(m, call_name, ns):
+def _get_call_class(method):
+    """Find the call class for method if it exists else create one."""
+    call_base, call_name = method.split('.', 1)
+    # import the call class's module
+    mod = __import__('ubersmith.calls.{0}'.format(call_base), fromlist=[''])
+    # grab all the public members of the module
+    gen = (getattr(mod, x) for x in dir(mod) if not x.startswith('_'))
+    # filter them down to subclasses of BaseCall
+    gen = (x for x in gen if type(x) is type and issubclass(x, BaseCall))
+    # return first one that matches our method
+    for call_class in gen:
+        if call_class.method == method:
+            return call_class
+    else:
         class GenericCall(BaseCall):
-            method = m
-        ns[call_name] = lambda request_handler=None, **kwargs: \
-                                 GenericCall(kwargs, request_handler).render()
-        ns_all = ns.get('__all__')
-        if ns_all and call_name not in ns_all:
-            ns_all.append(call_name)
+            method = '.'.join((call_base, call_name))
+        return GenericCall
 
-    for m in VALID_METHODS:
-        call_prefix, call_name = m.split('.', 1)
-        if prefix == call_prefix:
-            if call_name not in ns:
-                add_generic_call(m, call_name, ns)
+
+def _make_generic_call(call_class):
+    """Create a call function that is lexically bound to use call_class."""
+    def generic_call(request_handler=None, **kwargs):
+        return call_class(kwargs, request_handler).render()
+    # TODO generate docstrings for generic calls
+    # generic_call.__doc__ = ''
+    return generic_call
+
+
+def generate_generic_calls(base, ns):
+    # get all valid methods with base
+    methods = (m for m in VALID_METHODS if m.split('.', 1)[0] == base)
+    for method in methods:
+        call_name = method.split('.', 1)[1]
+        if call_name not in ns:
+            # find the appropriate class
+            call_class = _get_call_class(method)
+            # create a call function and stick it in the namespace
+            ns[call_name] = _make_generic_call(call_class)
+            # add call to __all__ if needed
+            if '__all__' in ns and call_name not in ns['__all__']:
+                ns['__all__'].append(call_name)
