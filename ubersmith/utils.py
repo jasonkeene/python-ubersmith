@@ -83,8 +83,8 @@ def urlencode_unicode(data):
 
 
 def prepend_base(base):
-    """Return a callable that will prepend the base string."""
-    return lambda method: '.'.join((base, method))
+    """Return a callable that will prepend the base of a method string."""
+    return lambda call: '.'.join((base, call))
 
 
 # TODO check against ABCs instead of hasattr

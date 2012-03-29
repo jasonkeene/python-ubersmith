@@ -9,7 +9,6 @@ __all__ = [
     'CheckLoginCall',
     'ClientWelcomeStatsCall',
     'MethodGetCall',
-    'MethodListCall',
     'DocumentationCall',
 ]
 
@@ -56,10 +55,6 @@ class ClientWelcomeStatsCall(BaseCall):
 
 class MethodGetCall(BaseCall):
     method = _('method_get')
-
-
-class MethodListCall(BaseCall):
-    method = _('method_list')
 
 
 class DocumentationCall(FileCall):

@@ -1,16 +1,8 @@
 from ubersmith.calls import generate_generic_calls
-from ubersmith.calls.client import (
-    GetCall,
-    ListCall,
-)
+from ubersmith.calls.client import GetCall
 
-__all__ = [
-    'get',
-    'list',
-]
+__all__ = ['get']
 
-
-# call functions w/ proper signatures and documentation
 
 def get(client_id=None, user_login=None, email=None, request_handler=None,
                                                                     **kwargs):
@@ -24,17 +16,12 @@ def get(client_id=None, user_login=None, email=None, request_handler=None,
         Either this, user_login or client_id must be provided.
 
     """
-    kwargs.update({k: v for k, v in locals().iteritems() if k in {
+    kwargs.update(dict((k, v) for k, v in locals().iteritems() if k in [
         'client_id',
         'user_login',
         'email',
-    } and v is not None})
+    ] and v is not None))
     return GetCall(kwargs, request_handler).render()
-
-
-def list(request_handler=None, **kwargs):
-    """Get a list of all active clients in the system."""
-    return ListCall(kwargs, request_handler).render()
 
 
 generate_generic_calls('client', globals())
