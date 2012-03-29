@@ -11,4 +11,4 @@ def get(order_id=None, request_handler=None, **kwargs):
     return GetCall(kwargs, request_handler).render()
 
 
-generate_generic_calls('order', globals())
+generate_generic_calls(__name__.split('.')[-1], globals())

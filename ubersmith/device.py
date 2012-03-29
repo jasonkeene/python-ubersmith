@@ -10,4 +10,4 @@ def get(device_id, request_handler=None, **kwargs):
     return GetCall(kwargs, request_handler).render()
 
 
-generate_generic_calls('device', globals())
+generate_generic_calls(__name__.split('.')[-1], globals())

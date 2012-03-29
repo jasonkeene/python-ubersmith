@@ -34,4 +34,4 @@ def method_get(method_name, request_handler=None, **kwargs):
     return MethodGetCall(kwargs, request_handler).render()
 
 
-generate_generic_calls('uber', globals())
+generate_generic_calls(__name__.split('.')[-1], globals())

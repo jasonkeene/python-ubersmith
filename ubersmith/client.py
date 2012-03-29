@@ -24,4 +24,4 @@ def get(client_id=None, user_login=None, email=None, request_handler=None,
     return GetCall(kwargs, request_handler).render()
 
 
-generate_generic_calls('client', globals())
+generate_generic_calls(__name__.split('.')[-1], globals())
