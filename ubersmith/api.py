@@ -177,7 +177,31 @@ VALID_METHODS = [
 ]
 
 
+# TODO it might be a good idea to add the modules onto the handler to make it
+#      easy to access them:
+#          h.uber.method_list() vs uber.method_list(request_handler=h)
+#      this is my first stab at the idea with a meta class and it works but
+#      i'll need to use a proxy object vs just returning the module so you
+#      don't have to explicitly pass in the handler again
+# 
+# def _load_call_module(call_base):
+#     return __import__('ubersmith.{0}'.format(call_base), fromlist=[''])
+# 
+# def _make_loader(call_base):
+#     # need this to lexically scope call_base
+#     return lambda self: _load_call_module(call_base)
+# 
+# class _RequestHandlerMeta(type):
+#     def __new__(cls, name, bases, attrs):
+#         # add all the call modules to the request handlers
+#         for call_base in set(m.split('.')[0] for m in VALID_METHODS):
+#             attrs[call_base] = property(_make_loader(call_base))
+#         return super(_RequestHandlerMeta, cls).__new__(cls, name, bases, attrs)
+
+
 class _AbstractRequestHandler(object):
+    # __metaclass__ = _RequestHandlerMeta
+
     def process_request(self, method, data=None, raw=False):
         """Process request.
 
