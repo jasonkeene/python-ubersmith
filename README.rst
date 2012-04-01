@@ -40,13 +40,20 @@ and then explicitly pass it into any call function::
     uber.method_list(request_handler=h)
     client.get(email='g.freeman@combineresearch.com', request_handler=h)
 
-or you can process the request directly on the handler::
+or you can access the call function directly on the handler and the handler
+will be implicitly passed into the call function for you::
+
+    h.uber.method_list()
+    h.client.get(email='g.freeman@combineresearch.com')
+
+Alternatively you can process the request directly on the handler::
 
     h.process_request('uber.method_list')
     h.process_request('client.get', data={'email': 'g.freeman@combineresearch.com'})
 
-although this will bypass any validation logic and response cleaning and just
-return the JSON data from the ubersmith response as a dict.
+although this will bypass any validation logic and response cleaning provided
+by the call function and just return the JSON data from the ubersmith response
+as a dict.
 
 Running Tests
 =============

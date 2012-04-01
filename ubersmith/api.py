@@ -3,6 +3,7 @@
 import json
 import urlparse
 import time
+from functools import partial
 
 import httplib2
 
@@ -176,31 +177,46 @@ VALID_METHODS = [
 ]
 
 
-# TODO it might be a good idea to add the modules onto the handler to make it
-#      easy to access them:
-#          h.uber.method_list() vs uber.method_list(request_handler=h)
-#      this is my first stab at the idea with a meta class and it works but
-#      i'll need to use a proxy object vs just returning the module so you
-#      don't have to explicitly pass in the handler again
-# 
-# def _load_call_module(call_base):
-#     return __import__('ubersmith.{0}'.format(call_base), fromlist=[''])
-# 
-# def _make_loader(call_base):
-#     # need this to lexically scope call_base
-#     return lambda self: _load_call_module(call_base)
-# 
-# class _RequestHandlerMeta(type):
-#     def __new__(cls, name, bases, attrs):
-#         # add all the call modules to the abstract request handler
-#         if bases == (object,):
-#             for call_base in set(m.split('.')[0] for m in VALID_METHODS):
-#                 attrs[call_base] = property(_make_loader(call_base))
-#         return super(_RequestHandlerMeta, cls).__new__(cls, name, bases, attrs)
+class _GetProxyModule(object):
+    """Gets a proxy module for the handler it was accessed from."""
+    def __init__(self, call_base):
+        # The only bit of state this object needs is a reference to its module
+        # however, to make it load lazily just store its call_base and only
+        # load the module if it is actually accessed.
+        self.call_base = call_base
+        self.module = None
+
+    def __get__(self, handler, type):
+        if self.module is None:
+            self.module = __import__('ubersmith.{0}'.format(self.call_base),
+                                     fromlist=[''])
+        return _ProxyModule(handler, self.module)
+
+
+class _ProxyModule(object):
+    def __init__(self, handler, module):
+        self.handler = handler
+        self.module = module
+
+    def __getattr__(self, call_name):
+        """Return the call `call_name` with `request_handler` prefilled."""
+        call_func = getattr(self.module, call_name)
+        if not callable(call_func):
+            raise AttributeError
+        return partial(call_func, request_handler=self.handler)
+
+
+class _RequestHandlerMeta(type):
+    def __new__(cls, name, bases, attrs):
+        # add all the call module proxies to the abstract request handler
+        if bases == (object,):  # only needs to be on top most request handler
+            for call_base in set(m.split('.')[0] for m in VALID_METHODS):
+                attrs[call_base] = _GetProxyModule(call_base)
+        return super(_RequestHandlerMeta, cls).__new__(cls, name, bases, attrs)
 
 
 class _AbstractRequestHandler(object):
-    # __metaclass__ = _RequestHandlerMeta
+    __metaclass__ = _RequestHandlerMeta
 
     def process_request(self, method, data=None, raw=False):
         """Process request.

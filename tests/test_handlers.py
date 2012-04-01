@@ -5,7 +5,7 @@ from unittest import TestCase
 
 from mock import Mock, patch
 
-from ubersmith.api import HttpRequestHandler
+from ubersmith.api import HttpRequestHandler, VALID_METHODS
 from ubersmith.exceptions import ResponseError, UpdatingTokenResponse
 
 
@@ -61,3 +61,12 @@ class HttpRequestHandlerTestCase(TestCase):
             time.sleep = lambda x: None
             with self.assertRaises(UpdatingTokenResponse):
                 h.process_request('uber.method_list')
+
+    def test_proxy_modules(self):
+        h = HttpRequestHandler('')
+        for call_base, call_name in (m.split('.') for m in VALID_METHODS):
+            self.assertTrue(hasattr(h, call_base))
+            proxy = getattr(h, call_base)
+            partial = getattr(proxy, call_name)
+            self.assertTrue(callable(partial))
+            self.assertEqual(partial.keywords.get('request_handler'), h)
