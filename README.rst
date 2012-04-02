@@ -46,6 +46,9 @@ will be implicitly passed into the call function for you::
     h.uber.method_list()
     h.client.get(email='g.freeman@combineresearch.com')
 
+Raw Processing
+--------------
+
 Alternatively you can process the request directly on the handler::
 
     h.process_request('uber.method_list')
