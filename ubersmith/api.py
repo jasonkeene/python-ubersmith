@@ -190,7 +190,8 @@ class _ProxyModule(object):
             # store partial on proxy so it doesn't have to be created again
             setattr(self, name, call_p)
             return call_p
-        raise AttributeError
+        raise AttributeError("'{0}' object has no attribute '{1}'".format(
+                                                   type(self).__name__, name))
 
 
 class _AbstractRequestHandler(object):
@@ -252,7 +253,8 @@ class _AbstractRequestHandler(object):
             # store proxy on handler so it doesn't have to be created again
             setattr(self, name, proxy)
             return proxy
-        raise AttributeError
+        raise AttributeError("'{0}' object has no attribute '{1}'".format(
+                                                   type(self).__name__, name))
 
 
 class HttpRequestHandler(_AbstractRequestHandler):
