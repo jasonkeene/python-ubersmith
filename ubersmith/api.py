@@ -184,13 +184,14 @@ class _GetProxyModule(object):
         # however, to make it load lazily just store its call_base and only
         # load the module if it is actually accessed.
         self.call_base = call_base
-        self.module = None
 
     def __get__(self, handler, type):
-        if self.module is None:
-            self.module = __import__('ubersmith.{0}'.format(self.call_base),
-                                     fromlist=[''])
-        return _ProxyModule(handler, self.module)
+        module_name = 'ubersmith.{0}'.format(self.call_base)
+        module = __import__(module_name, fromlist=[''])
+        proxy = _ProxyModule(handler, module)
+        # store proxy on handler inst so it doesn't have to be created again
+        setattr(handler, self.call_base, proxy)
+        return proxy
 
 
 class _ProxyModule(object):
