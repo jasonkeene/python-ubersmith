@@ -23,6 +23,7 @@ __all__ = [
 
 _DEFAULT_REQUEST_HANDLER = None
 
+# TODO convert VALID_METHODS into a dict from uber.method_list()
 """A list of all methods returned from uber.method_list()"""
 VALID_METHODS = [
     'client.ach_add',
@@ -221,6 +222,8 @@ class _AbstractRequestHandler(object):
 
         # response isn't json
         if response.get('content-type') != 'application/json':
+            # handle case where ubersmith is 'updating token'
+            # see: https://github.com/jasonkeene/python-ubersmith/issues/1
             if response.get('content-type') == 'text/html' and \
                 'Updating Token' in content:
                 raise UpdatingTokenResponse
