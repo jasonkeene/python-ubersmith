@@ -177,48 +177,23 @@ VALID_METHODS = [
 ]
 
 
-class _GetProxyModule(object):
-    """Gets a proxy module for the handler it was accessed from."""
-    def __init__(self, call_base):
-        # The only bit of state this object needs is a reference to its module
-        # however, to make it load lazily just store its call_base and only
-        # load the module if it is actually accessed.
-        self.call_base = call_base
-
-    def __get__(self, handler, type):
-        module_name = 'ubersmith.{0}'.format(self.call_base)
-        module = __import__(module_name, fromlist=[''])
-        proxy = _ProxyModule(handler, module)
-        # store proxy on handler inst so it doesn't have to be created again
-        setattr(handler, self.call_base, proxy)
-        return proxy
-
-
 class _ProxyModule(object):
     def __init__(self, handler, module):
         self.handler = handler
         self.module = module
 
-    def __getattr__(self, call_name):
-        """Return the call `call_name` with `request_handler` prefilled."""
-        call_func = getattr(self.module, call_name)
-        if not callable(call_func):
-            raise AttributeError
-        return partial(call_func, request_handler=self.handler)
-
-
-class _RequestHandlerMeta(type):
-    def __new__(cls, name, bases, attrs):
-        # add all the call module proxies to the abstract request handler
-        if bases == (object,):  # only needs to be on top most request handler
-            for call_base in set(m.split('.')[0] for m in VALID_METHODS):
-                attrs[call_base] = _GetProxyModule(call_base)
-        return super(_RequestHandlerMeta, cls).__new__(cls, name, bases, attrs)
+    def __getattr__(self, name):
+        """Return the call with request_handler prefilled."""
+        call_func = getattr(self.module, name)
+        if callable(call_func):
+            call_p = partial(call_func, request_handler=self.handler)
+            # store partial on proxy so it doesn't have to be created again
+            setattr(self, name, call_p)
+            return call_p
+        raise AttributeError
 
 
 class _AbstractRequestHandler(object):
-    __metaclass__ = _RequestHandlerMeta
-
     def process_request(self, method, data=None, raw=False):
         """Process request.
 
@@ -267,6 +242,17 @@ class _AbstractRequestHandler(object):
     def _encode_data(self, data):
         """URL encode data."""
         return urlencode_unicode(data if data is not None else {})
+
+    def __getattr__(self, name):
+        """If attribute accessed is a call module, return a proxy."""
+        if name in set(m.split('.')[0] for m in VALID_METHODS):
+            module_name = 'ubersmith.{0}'.format(name)
+            module = __import__(module_name, fromlist=[''])
+            proxy = _ProxyModule(self, module)
+            # store proxy on handler so it doesn't have to be created again
+            setattr(self, name, proxy)
+            return proxy
+        raise AttributeError
 
 
 class HttpRequestHandler(_AbstractRequestHandler):
