@@ -12,13 +12,13 @@ from ubersmith.api import VALID_METHODS, get_default_request_handler
 from ubersmith.exceptions import ValidationError
 
 __all__ = [
-    # call classes
+    # abstract call classes
     'BaseCall',
     'GroupCall',
     'FileCall',
-    # generic calls
+    # generate generic calls
     'generate_generic_calls',
-    # sub-packages
+    # concrete call classes
     'client',
     'device',
     'order',

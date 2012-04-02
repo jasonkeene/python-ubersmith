@@ -1,4 +1,4 @@
-# exceptions
+"""Exceptions for ubersmith library."""
 
 __all__ = [
     'UbersmithError',

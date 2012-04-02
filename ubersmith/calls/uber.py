@@ -1,4 +1,10 @@
-"""Uber calls implemented as documented in api docs."""
+"""Uber call classes.
+
+These classes implement any response cleaning and validation needed.  If a
+call class isn't defined for a given method then one is created using
+ubersmith.calls.BaseCall.
+
+"""
 
 from ubersmith.exceptions import ResponseError
 from ubersmith.calls import BaseCall, FileCall

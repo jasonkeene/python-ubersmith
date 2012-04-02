@@ -1,4 +1,4 @@
-# utility functions
+"""Utility functions used throughout ubersmith library."""
 
 import inspect
 import urllib
@@ -6,6 +6,7 @@ import urlparse
 
 __all__ = [
     'append_qs',
+    'urlencode_unicode',
     'prepend_base',
     'isdict',
     'islist',
@@ -55,6 +56,8 @@ def append_qs(url, query_string):
     ))
 
 
+# TODO this should match the same input as urllib.urlencode so it can be used
+# as a drop in replacement
 def urlencode_unicode(data):
     """urllib.urlencode can't handle unicode, this is a hack to fix it."""
     data_iter = None
@@ -88,12 +91,12 @@ def prepend_base(base):
 
 
 # TODO check against ABCs instead of hasattr
-
 def isdict(value):
     """Return true if the value behaves like a dict, false if not."""
     return hasattr(value, 'keys') and hasattr(value, '__getitem__')
 
 
+# TODO check against ABCs instead of hasattr
 def islist(value):
     """Return true if the value behaves like a list, false if not."""
     return hasattr(value, 'append') and hasattr(value, '__getitem__')

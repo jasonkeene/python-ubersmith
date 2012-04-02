@@ -1,9 +1,11 @@
 from setuptools import setup, find_packages
 
+import ubersmith
+
 
 setup(
     name='ubersmith',
-    version='0.0.1',
+    version=ubersmith.__version__,
     author='Jason Keene',
     author_email='jasonkeene@gmail.com',
     description='Client library for the Ubersmith API 2.0',
