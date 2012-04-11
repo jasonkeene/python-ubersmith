@@ -8,7 +8,7 @@ import time
 
 import phpserialize
 
-from ubersmith.api import VALID_METHODS, get_default_request_handler
+from ubersmith.api import METHODS, get_default_request_handler
 from ubersmith.exceptions import ValidationError
 
 __all__ = [
@@ -191,7 +191,7 @@ def _make_generic_call(call_class):
 
 def generate_generic_calls(base, ns):
     # get all valid methods with base
-    methods = (m for m in VALID_METHODS if m.split('.', 1)[0] == base)
+    methods = (m for m in METHODS if m.split('.', 1)[0] == base)
     for method in methods:
         call_name = method.split('.', 1)[1]
         if call_name not in ns:
