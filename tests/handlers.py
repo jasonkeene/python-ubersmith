@@ -1,3 +1,11 @@
+"""
+This module contains request handlers that log responses to disk and replay
+them for tests.  I've found that simply mocking out dependencies and providing
+test data in the test case seems to be saner but I figured I'd keep these
+around for now.
+
+"""
+
 import json
 import base64
 
