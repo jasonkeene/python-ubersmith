@@ -184,8 +184,6 @@ def _make_generic_call(call_class):
     """Create a call function that is lexically bound to use call_class."""
     def generic_call(request_handler=None, **kwargs):
         return call_class(kwargs, request_handler).render()
-    # TODO generate docstrings for generic calls
-    # generic_call.__doc__ = ''
     return generic_call
 
 
@@ -198,7 +196,12 @@ def generate_generic_calls(base, ns):
             # find the appropriate class
             call_class = _get_call_class(method)
             # create a call function and stick it in the namespace
-            ns[call_name] = _make_generic_call(call_class)
+            generic_call = _make_generic_call(call_class)
+            generic_call.__name__ = str(call_name)
+            generic_call.__doc__ = METHODS[method]
+            # TODO this may or may not be a good idea, see: http://stackoverflow.com/questions/10113892/semantics-of-module
+            # generic_call.__module__ = 'ubersmith.{0}'.format(base)
+            ns[call_name] = generic_call
             # add call to __all__ if needed
             if '__all__' in ns and call_name not in ns['__all__']:
                 ns['__all__'].append(call_name)
