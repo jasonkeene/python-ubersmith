@@ -23,7 +23,7 @@ __all__ = [
 
 _DEFAULT_REQUEST_HANDLER = None
 
-"""A dict all methods to returned from uber.method_list()"""
+"""A dict of all methods returned by uber.method_list()"""
 METHODS = {
     u'client.ach_add': u'Add a New Bank Account',
     u'client.ach_delete': u'Delete a Bank Account',
