@@ -205,3 +205,7 @@ def generate_generic_calls(base, ns):
             # add call to __all__ if needed
             if '__all__' in ns and call_name not in ns['__all__']:
                 ns['__all__'].append(call_name)
+        else:
+            if not ns[call_name].__doc__:
+                print "{} missing __doc__".format(method)
+                ns[call_name].__doc__ = METHODS[method]

@@ -14,7 +14,6 @@ __all__ = ['get']
 
 
 def get(device_id, request_handler=None, **kwargs):
-    """Get a device's details."""
     kwargs.update({'device_id': device_id})
     return GetCall(kwargs, request_handler).render()
 
