@@ -35,13 +35,10 @@ class CheckLoginCall(BaseCall):
             super(CheckLoginCall, self).process_request()
         except ResponseError, e:
             if e.error_code == 3 and \
-                            e.error_message == 'Invalid login or password.':
+               e.error_message == 'Invalid login or password.':
                 self.response_data = False
             else:
                 raise  # re-raises the last exception
-
-    def clean(self):
-        self.cleaned = bool(self.response_data)
 
 
 class ClientWelcomeStatsCall(BaseCall):

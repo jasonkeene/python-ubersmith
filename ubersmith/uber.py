@@ -10,6 +10,7 @@ found one is created using ubersmith.calls.BaseCall.
 from ubersmith.calls import generate_generic_calls
 from ubersmith.calls.uber import (
     ApiExportCall,
+    CheckLoginCall,
     ClientWelcomeStatsCall,
     MethodGetCall,
 )
@@ -41,6 +42,14 @@ def method_get(method_name, request_handler=None, **kwargs):
     """Get the details of an API method."""
     kwargs.update({'method_name': method_name})
     return MethodGetCall(kwargs, request_handler).render()
+
+
+def check_login(username, password, request_handler=None, **kwargs):
+    kwargs.update({
+        'login': username,
+        'pass': password,
+    })
+    return CheckLoginCall(kwargs, request_handler).render()
 
 
 generate_generic_calls(__name__.split('.')[-1], globals())
