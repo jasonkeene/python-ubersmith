@@ -28,6 +28,10 @@ class ApiExportCall(BaseCall):
 
 class CheckLoginCall(BaseCall):
     method = _('check_login')
+    timestamp_fields = [
+        'last_login',
+        'password_changed',
+    ]
 
     def process_request(self):
         # if login invalid just have the call return false
