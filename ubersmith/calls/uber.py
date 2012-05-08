@@ -44,6 +44,13 @@ class CheckLoginCall(BaseCall):
             else:
                 raise  # re-raises the last exception
 
+    def clean(self):
+        # don't clean if response was False
+        if self.response_data:
+            super(CheckLoginCall, self).clean()
+        else:
+            self.cleaned = False
+
 
 class ClientWelcomeStatsCall(BaseCall):
     method = _('client_welcome_stats')
