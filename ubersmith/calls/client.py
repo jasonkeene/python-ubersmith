@@ -44,7 +44,7 @@ class _ClientCallMixin(object):
 
 class GetCall(_ClientCallMixin, BaseCall):
     method = _('get')
-    required_fields = [('client_id', 'username', 'email')]
+    required_fields = [('client_id', 'user_login', 'email')]
 
 
 class ListCall(_ClientCallMixin, GroupCall):
