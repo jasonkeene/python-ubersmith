@@ -12,9 +12,6 @@ __MACOSX
 Thumbs.db
 desktop.ini
 
-# httplib2 cache
-.cache
-
 # coverage
 .coverage
 
