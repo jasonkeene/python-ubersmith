@@ -290,7 +290,7 @@ class HttpRequestHandler(_AbstractRequestHandler):
         self.username = username
         self.password = password
 
-        self._http = httplib2.Http()
+        self._http = httplib2.Http(disable_ssl_certificate_validation=True)
         self._http.add_credentials(self.username, self.password,
                                    urlparse.urlparse(self.base_url)[1])
 
