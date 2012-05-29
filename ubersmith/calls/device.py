@@ -6,12 +6,13 @@ ubersmith.calls.BaseCall.
 
 """
 
-from ubersmith.calls import BaseCall, GroupCall
+from ubersmith.calls import BaseCall, GroupCall, FileCall
 from ubersmith.utils import prepend_base
 
 __all__ = [
     'GetCall',
     'ListCall',
+    'ModuleGraphCall',
 ]
 
 _ = prepend_base(__name__.split('.')[-1])
