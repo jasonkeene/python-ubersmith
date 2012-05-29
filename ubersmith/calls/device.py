@@ -26,3 +26,7 @@ class ListCall(GroupCall):
     method = _('list')
     rename_fields = {'clientid': 'client_id'}
     int_fields = ['client_id']
+
+
+class ModuleGraphCall(FileCall):
+    method = _('module_graph')
