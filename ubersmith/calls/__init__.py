@@ -43,7 +43,6 @@ class BaseCall(object):
 
     method = ''  # ubersmith method name, should be defined on child classes
     required_fields = []  # field names that should be present in request_data
-    rename_fields = {}  # fields to rename
     bool_fields = []  # fields to convert to ints
     int_fields = []  # fields to convert to ints
     decimal_fields = []  # fields to convert to decimals
@@ -149,12 +148,7 @@ def _rename_key(d, old, new):
 
 
 def _clean_fields(call, d):
-    """Rename and clean fields on d using info on call."""
-    # rename fields
-    for old, new in call.rename_fields.iteritems():
-        _rename_key(d, old, unicode(new))
-
-    # clean fields
+    """Clean fields on d using info on call."""
     for name, func in _CLEANERS.iteritems():
         for field in getattr(call, '{0}_fields'.format(name), []):
             if field in d and isinstance(d[field], basestring):
@@ -199,7 +193,8 @@ def generate_generic_calls(base, ns):
             generic_call = _make_generic_call(call_class)
             generic_call.__name__ = str(call_name)
             generic_call.__doc__ = METHODS[method]
-            # TODO this may or may not be a good idea, see: http://stackoverflow.com/questions/10113892/semantics-of-module
+            # TODO this may or may not be a good idea, see:
+            # http://stackoverflow.com/questions/10113892/semantics-of-module
             # generic_call.__module__ = 'ubersmith.{0}'.format(base)
             ns[call_name] = generic_call
             # add call to __all__ if needed

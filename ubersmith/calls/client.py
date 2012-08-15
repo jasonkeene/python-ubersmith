@@ -18,7 +18,6 @@ _ = prepend_base(__name__.split('.')[-1])
 
 
 class _ClientCallMixin(object):
-    rename_fields = {'clientid': 'client_id'}
     bool_fields = ['active']
     int_fields = [
         'client_id',
