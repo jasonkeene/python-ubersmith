@@ -8,15 +8,8 @@ found one is created using ubersmith.calls.BaseCall.
 """
 
 from ubersmith.calls import generate_generic_calls
-from ubersmith.calls.order import GetCall
 
-__all__ = ['get']
-
-
-def get(order_id=None, request_handler=None, **kwargs):
-    if order_id is not None:
-        kwargs['order_id'] = order_id
-    return GetCall(kwargs, request_handler).render()
+__all__ = []
 
 
 generate_generic_calls(__name__.split('.')[-1], globals())

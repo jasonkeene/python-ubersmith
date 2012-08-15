@@ -8,46 +8,8 @@ found one is created using ubersmith.calls.BaseCall.
 """
 
 from ubersmith.calls import generate_generic_calls
-from ubersmith.calls.uber import (
-    ApiExportCall,
-    CheckLoginCall,
-    ClientWelcomeStatsCall,
-    MethodGetCall,
-)
 
-__all__ = [
-    'api_export',
-    'client_welcome_stats',
-    'method_get',
-]
-
-
-def api_export(table, gzip=False, order_by=None, request_handler=None,
-                                                                    **kwargs):
-    kwargs['table'] = table
-    if gzip:
-        kwargs['gzip'] = 1
-    if order_by is not None:
-        kwargs['order_by'] = order_by
-    return ApiExportCall(kwargs, request_handler).render()
-
-
-def client_welcome_stats(client_id, request_handler=None, **kwargs):
-    kwargs.update({'client_id': client_id})
-    return ClientWelcomeStatsCall(kwargs, request_handler).render()
-
-
-def method_get(method_name, request_handler=None, **kwargs):
-    kwargs.update({'method_name': method_name})
-    return MethodGetCall(kwargs, request_handler).render()
-
-
-def check_login(username, password, request_handler=None, **kwargs):
-    kwargs.update({
-        'login': username,
-        'pass': password,
-    })
-    return CheckLoginCall(kwargs, request_handler).render()
+__all__ = []
 
 
 generate_generic_calls(__name__.split('.')[-1], globals())
