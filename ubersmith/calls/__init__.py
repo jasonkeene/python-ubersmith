@@ -102,7 +102,7 @@ class GroupCall(BaseCall):
             _rename_key(cleaned, key, int(key))
 
         # clean fields on each member of the group
-        for member in self.cleaned.itervalues():
+        for member in cleaned.itervalues():
             _clean_fields(self, member)
 
         self.cleaned = cleaned
