@@ -25,7 +25,7 @@ class GetCall(BaseCall):
 
 class ListCall(GroupCall):
     method = _('list')
-    int_fields = ['client_id']
+    int_fields = ['clientid']
 
 
 class ModuleGraphCall(FileCall):

@@ -20,7 +20,7 @@ _ = prepend_base(__name__.split('.')[-1])
 class _ClientCallMixin(object):
     bool_fields = ['active']
     int_fields = [
-        'client_id',
+        'clientid',
         'class_id',
         'priority',
     ]
