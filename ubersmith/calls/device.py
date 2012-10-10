@@ -21,11 +21,18 @@ _ = prepend_base(__name__.split('.')[-1])
 class GetCall(BaseCall):
     method = _('get')
     required_fields = ['device_id']
+    int_fields = ['active', 'cage_id', 'clientid', 'dev', 'devtype_group_id',
+                  'disabled', 'down', 'fac_id', 'height', 'owner', 'parent',
+                  'rack_id', 'row_id', 'total', 'type_id', 'up', 'warn',
+                  'zone_id']
 
 
 class ListCall(GroupCall):
     method = _('list')
-    int_fields = ['clientid']
+    int_fields = ['active', 'cage_id', 'clientid', 'dev', 'devtype_group_id',
+                  'disabled', 'down', 'fac_id', 'height', 'owner', 'parent',
+                  'rack_id', 'row_id', 'total', 'type_id', 'up', 'warn',
+                  'zone_id']
 
 
 class ModuleGraphCall(FileCall):
