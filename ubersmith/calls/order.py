@@ -36,4 +36,4 @@ class QueueListCall(GroupCall):
         for value in self.cleaned.values():
             for k, v in value['steps'].items():
                 _rename_key(value['steps'], k, int(k))
-                # v['count'] = int(v['count'])
+                v['count'] = int(v['count'])
