@@ -24,6 +24,10 @@ class GetCall(BaseCall):
 
 class ListCall(GroupCall):
     method = _('list')
+    int_fields = ['order_id', 'priority', 'order_status', 'client_id',
+                  'order_from_id', 'order_queue_id', 'opportunity_id']
+    decimal_fields = ['total']
+    timestamp_fields = ['activity', 'ts']
 
 
 class QueueListCall(GroupCall):
