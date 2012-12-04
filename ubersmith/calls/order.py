@@ -6,7 +6,7 @@ ubersmith.calls.BaseCall.
 
 """
 
-from ubersmith.calls import BaseCall, GroupCall
+from ubersmith.calls import BaseCall, GroupCall, _rename_key
 from ubersmith.utils import prepend_base
 
 __all__ = [
@@ -28,3 +28,12 @@ class ListCall(GroupCall):
 
 class QueueListCall(GroupCall):
     method = _('queue_list')
+    required_fields = ['brand_id']
+
+    def clean(self):
+        super(QueueListCall, self).clean()
+        # clean additional stuff that is nested in the response
+        for value in self.cleaned.values():
+            for k, v in value['steps']:
+                _rename_key(value, k, int(k))
+                v['count'] = int(v['count'])
