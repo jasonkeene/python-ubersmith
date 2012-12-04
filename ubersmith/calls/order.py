@@ -24,3 +24,7 @@ class GetCall(BaseCall):
 
 class ListCall(GroupCall):
     method = _('list')
+
+
+class QueueListCall(GroupCall):
+    method = _('queue_list')
