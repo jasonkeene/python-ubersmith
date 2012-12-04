@@ -34,6 +34,6 @@ class QueueListCall(GroupCall):
         super(QueueListCall, self).clean()
         # clean additional stuff that is nested in the response
         for value in self.cleaned.values():
-            for k, v in value['steps']:
+            for k, v in value['steps'].items():
                 _rename_key(value, k, int(k))
                 # v['count'] = int(v['count'])
