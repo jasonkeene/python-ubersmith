@@ -22,8 +22,7 @@ class GetCall(BaseCall):
     method = _('get')
     required_fields = [('order_id', 'hash')]
     int_fields = ['order_id', 'priority', 'order_status', 'client_id',
-                  'order_form_id', 'order_queue_id', 'opportunity_id',
-                  'owner']
+                  'order_form_id', 'order_queue_id', 'opportunity_id']
     decimal_fields = ['total']
     timestamp_fields = ['activity', 'ts']
 
@@ -38,8 +37,7 @@ class GetCall(BaseCall):
 class ListCall(GroupCall):
     method = _('list')
     int_fields = ['order_id', 'priority', 'order_status', 'client_id',
-                  'order_form_id', 'order_queue_id', 'opportunity_id',
-                  'owner']
+                  'order_form_id', 'order_queue_id', 'opportunity_id']
     decimal_fields = ['total']
     timestamp_fields = ['activity', 'ts']
 
