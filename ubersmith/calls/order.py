@@ -29,9 +29,11 @@ class GetCall(BaseCall):
     def clean(self):
         super(GetCall, self).clean()
         # clean additional stuff that is nested in the response
-        for k, v in self.cleaned['progress'].items():
-            _rename_key(self.cleaned['progress'], k, int(k))
-            v['ts'] = _CLEANERS['timestamp'](v['ts'])
+        # need to test if there is value for progress cus it might be a list
+        if self.cleaned.get('progress'):
+            for k, v in self.cleaned['progress'].items():
+                _rename_key(self.cleaned['progress'], k, int(k))
+                v['ts'] = _CLEANERS['timestamp'](v['ts'])
 
 
 class ListCall(GroupCall):
