@@ -6,12 +6,13 @@ ubersmith.calls.BaseCall.
 
 """
 
-from ubersmith.calls import BaseCall, GroupCall, _rename_key
+from ubersmith.calls import BaseCall, GroupCall, _rename_key, _CLEANERS
 from ubersmith.utils import prepend_base
 
 __all__ = [
     'GetCall',
     'ListCall',
+    'QueueListCall',
 ]
 
 _ = prepend_base(__name__.split('.')[-1])
@@ -20,12 +21,25 @@ _ = prepend_base(__name__.split('.')[-1])
 class GetCall(BaseCall):
     method = _('get')
     required_fields = [('order_id', 'hash')]
+    int_fields = ['order_id', 'priority', 'order_status', 'client_id',
+                  'order_form_id', 'order_queue_id', 'opportunity_id',
+                  'owner']
+    decimal_fields = ['total']
+    timestamp_fields = ['activity', 'ts']
+
+    def clean(self):
+        super(GetCall, self).clean()
+        # clean additional stuff that is nested in the response
+        for k, v in self.cleaned['progress'].items():
+            _rename_key(self.cleaned['progress'], k, int(k))
+            v['ts'] = _CLEANERS['timestamp'](v['ts'])
 
 
 class ListCall(GroupCall):
     method = _('list')
     int_fields = ['order_id', 'priority', 'order_status', 'client_id',
-                  'order_from_id', 'order_queue_id', 'opportunity_id']
+                  'order_form_id', 'order_queue_id', 'opportunity_id',
+                  'owner']
     decimal_fields = ['total']
     timestamp_fields = ['activity', 'ts']
 
