@@ -48,3 +48,13 @@ class GetCall(_ClientCallMixin, BaseCall):
 
 class ListCall(_ClientCallMixin, GroupCall):
     method = _('list')
+
+
+class InvoiceCountCall(BaseCall):
+    method = _('invoice_count')
+    required_fields = ['client_id']
+
+    def clean(self):
+        super(InvoiceCountCall, self).clean()
+        self.cleaned = int(self.cleaned)
+
