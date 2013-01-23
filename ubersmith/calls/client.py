@@ -12,6 +12,8 @@ from ubersmith.utils import prepend_base
 __all__ = [
     'GetCall',
     'ListCall',
+    'PaymentMethodListCall',
+    'InvoiceCountCall',
 ]
 
 _ = prepend_base(__name__.split('.')[-1])
@@ -48,6 +50,10 @@ class GetCall(_ClientCallMixin, BaseCall):
 
 class ListCall(_ClientCallMixin, GroupCall):
     method = _('list')
+
+
+class PaymentMethodListCall(GroupCall):
+    method = _('payment_method_list')
 
 
 class InvoiceCountCall(BaseCall):
