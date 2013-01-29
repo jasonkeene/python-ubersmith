@@ -28,6 +28,9 @@ class ApiExportCall(BaseCall):
 
 class CheckLoginCall(BaseCall):
     method = _('check_login')
+    int_fields = [
+        'password_expired',
+    ]
     timestamp_fields = [
         'last_login',
         'password_changed',
