@@ -73,8 +73,6 @@ class CreditListCall(GroupCall):
     int_fields = [
         'clientid',
         'active',
-        'amount',
-        'balance',
         'credit_id',
         'order_id',
     ]
