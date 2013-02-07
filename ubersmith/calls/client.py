@@ -78,3 +78,7 @@ class CreditListCall(BaseCall):
         'credit_id',
         'order_id',
     ]
+
+    timestamp_fields = [
+        'date',
+    ]
