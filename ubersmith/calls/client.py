@@ -66,7 +66,7 @@ class InvoiceCountCall(BaseCall):
         self.cleaned = int(self.cleaned)
 
 
-class CreditListCall(BaseCall):
+class CreditListCall(GroupCall):
     method = _('credit_list')
     required_fields = ['client_id']
 
