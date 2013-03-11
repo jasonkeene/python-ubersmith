@@ -22,17 +22,18 @@ class GetCall(BaseCall):
     method = _('get')
     required_fields = ['device_id']
     int_fields = ['active', 'cage_id', 'clientid', 'dev', 'devtype_group_id',
-                  'disabled', 'down', 'fac_id', 'height', 'owner', 'parent',
+                  'disabled', 'down', 'fac_id', 'owner', 'parent',
                   'rack_id', 'row_id', 'total', 'type_id', 'up', 'warn',
                   'zone_id']
-
+    float_fields = ['depth', 'height', 'width']
 
 class ListCall(GroupCall):
     method = _('list')
     int_fields = ['active', 'cage_id', 'clientid', 'dev', 'devtype_group_id',
-                  'disabled', 'down', 'fac_id', 'height', 'owner', 'parent',
+                  'disabled', 'down', 'fac_id', 'owner', 'parent',
                   'rack_id', 'row_id', 'total', 'type_id', 'up', 'warn',
                   'zone_id']
+    float_fields = ['depth', 'height', 'width']
 
 
 class ModuleGraphCall(FileCall):
