@@ -4,7 +4,7 @@ Installation
 
 ::
 
-    pip install -e git+ssh://git@github.com/jasonkeene/python-ubersmith.git#egg=ubersmith
+    pip install ubersmith
 
 Example Use
 ===========
