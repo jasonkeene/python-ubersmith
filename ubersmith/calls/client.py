@@ -15,6 +15,7 @@ __all__ = [
     'PaymentMethodListCall',
     'InvoiceCountCall',
     'CreditListCall',
+    'InvoicePaymentCall',
 ]
 
 _ = prepend_base(__name__.split('.')[-1])
@@ -64,6 +65,15 @@ class InvoiceCountCall(BaseCall):
     def clean(self):
         super(InvoiceCountCall, self).clean()
         self.cleaned = int(self.cleaned)
+
+
+class InvoicePaymentsCall(GroupCall):
+    method = _('invoice_payments')
+    required_fields = ['invoice_id']
+
+    timestamp_fields = [
+        'time',
+    ]
 
 
 class CreditListCall(GroupCall):
