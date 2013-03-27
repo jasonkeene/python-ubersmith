@@ -1,7 +1,10 @@
 """Tests for request handlers."""
 
 import json
-from unittest import TestCase
+try:
+    from unittest2 import TestCase
+except ImportError:
+    from unittest import TestCase
 
 from mock import Mock, patch
 
