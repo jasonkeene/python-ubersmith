@@ -61,6 +61,9 @@ as a dict.
 Running Tests
 =============
 
+.. image:: https://api.travis-ci.org/jasonkeene/python-ubersmith.png?branch=master
+   :target: https://travis-ci.org/jasonkeene/python-ubersmith
+
 ::
 
     # cd to repository
