@@ -33,6 +33,6 @@ def test_method_signature():
             try:
                 signature_position(call_func, 'request_handler')
             except ValueError:
-                err_msg = u"API call '{}' defined without a request_handler."
+                err_msg = u"API call '{0}' defined without a request_handler."
                 assert False, err_msg.format(call_func.func_name)
         yield check, base, call

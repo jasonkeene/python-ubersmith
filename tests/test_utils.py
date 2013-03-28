@@ -13,7 +13,7 @@ UNICODE_STRING = u'\u0bb8\u0bcd\u0bb1\u0bc0\u0ba9\u0bbf\u0bb5\u0bbe\u0bb8 ' \
 class AppendQsTestCase(TestCase):
     def setUp(self):
         self.url = 'http://domain.tld/path/?test1=val&test2#hash'
-        self.result = 'http://domain.tld/path/?test1=val&test2{}#hash'
+        self.result = 'http://domain.tld/path/?test1=val&test2{0}#hash'
 
     def test_string_qs(self):
         qs = 'test3=val1&test3=val2'
