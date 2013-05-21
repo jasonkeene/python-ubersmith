@@ -27,6 +27,7 @@ class GetCall(BaseCall):
                   'zone_id']
     float_fields = ['depth', 'height', 'width']
 
+
 class ListCall(GroupCall):
     method = _('list')
     int_fields = ['active', 'cage_id', 'clientid', 'dev', 'devtype_group_id',
