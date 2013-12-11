@@ -12,6 +12,7 @@ __all__ = [
     'islist',
     'isstr',
     'signature_position',
+    'convert_to_php_post',
 ]
 
 
@@ -83,6 +84,35 @@ def urlencode_unicode(data):
                         data[i] = (key, safe_val)
 
     return urllib.urlencode(data)
+
+
+def convert_to_php_post(data):
+    php_data = {}
+    for key, val in data.iteritems():
+        if islist(val):
+            val = dict(enumerate(val))
+
+        if isdict(val):
+            php_data.update(php_post_flatten_dict(val, key))
+        else:
+            php_data[key] = val
+
+    return php_data
+
+
+def php_post_flatten_dict(d, key=''):
+    flat = {}
+    new_key = lambda k: '{}[{}]'.format(key, k)
+    for k, v in d.iteritems():
+        if islist(v):
+            v = dict(enumerate(v))
+
+        if isdict(v):
+            flat.update(php_post_flatten_dict(v, new_key(k)))
+        else:
+            flat[new_key(k)] = v
+
+    return flat
 
 
 def prepend_base(base):

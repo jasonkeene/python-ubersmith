@@ -40,3 +40,32 @@ class AppendQsTestCase(TestCase):
         utils.append_qs(self.url, qs)
         result = self.result.format('=&test3=%E0%AE%B8%E0%AF%8D%E0%AE%B1%E0%AF%80%E0%AE%A9%E0%AE%BF%E0%AE%B5%E0%AE%BE%E0%AE%B8+%E0%AE%B0%E0%AE%BE%E0%AE%AE%E0%AE%BE%E0%AE%A9%E0%AF%81%E0%AE%9C%E0%AE%A9%E0%AF%8D+%E0%AE%90%E0%AE%AF%E0%AE%99%E0%AF%8D%E0%AE%95%E0%AE%BE%E0%AE%B0%E0%AF%8D')
         self.assertEqual(utils.append_qs(self.url, qs), result)
+
+
+class FlattenDictPhpArrayTestCase(TestCase):
+    def test_single_level_dict(self):
+        data = {'dict': {'key': 'value'}}
+        result = utils.convert_to_php_post(data)
+        self.assertEqual(result, {'dict[key]': 'value'})
+
+    def test_nested_dicts(self):
+        data = {
+            'dict': {
+                'muffin': {
+                    'taco': {
+                        'puffin': 'value'
+                    }
+                }
+            }
+        }
+        result = utils.convert_to_php_post(data)
+        self.assertEqual(result, {'dict[muffin][taco][puffin]': 'value'})
+
+    def test_lists(self):
+        data = {'top': {'list': ['a', 'b', 'c']}}
+        result = utils.convert_to_php_post(data)
+        self.assertEqual(result, {
+            'top[list][0]': 'a',
+            'top[list][1]': 'b',
+            'top[list][2]': 'c',
+        })
