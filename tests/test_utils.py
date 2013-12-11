@@ -45,7 +45,7 @@ class AppendQsTestCase(TestCase):
 class FlattenDictPhpArrayTestCase(TestCase):
     def test_single_level_dict(self):
         data = {'dict': {'key': 'value'}}
-        result = utils.convert_to_php_post(data)
+        result = utils.to_nested_php_args(data)
         self.assertEqual(result, {'dict[key]': 'value'})
 
     def test_nested_dicts(self):
@@ -58,12 +58,12 @@ class FlattenDictPhpArrayTestCase(TestCase):
                 }
             }
         }
-        result = utils.convert_to_php_post(data)
+        result = utils.to_nested_php_args(data)
         self.assertEqual(result, {'dict[muffin][taco][puffin]': 'value'})
 
     def test_lists(self):
         data = {'top': {'list': ['a', 'b', 'c']}}
-        result = utils.convert_to_php_post(data)
+        result = utils.to_nested_php_args(data)
         self.assertEqual(result, {
             'top[list][0]': 'a',
             'top[list][1]': 'b',
@@ -72,7 +72,7 @@ class FlattenDictPhpArrayTestCase(TestCase):
 
     def test_accepts_list_of_tuples(self):
         data = [('top', {'list': ['a', 'b', 'c']})]
-        result = utils.convert_to_php_post(data)
+        result = utils.to_nested_php_args(data)
         self.assertEqual(result, [
             ('top[list][2]', 'c'),
             ('top[list][0]', 'a'),

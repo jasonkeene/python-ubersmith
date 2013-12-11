@@ -12,7 +12,7 @@ from ubersmith.exceptions import (
     ResponseError,
     UpdatingTokenResponse,
 )
-from ubersmith.utils import append_qs, urlencode_unicode, convert_to_php_post
+from ubersmith.utils import append_qs, urlencode_unicode, to_nested_php_args
 
 __all__ = [
     'METHODS',
@@ -245,7 +245,7 @@ class _AbstractRequestHandler(object):
     def _encode_data(self, data):
         """URL encode data."""
         data = data if data is not None else {}
-        data = convert_to_php_post(data)
+        data = to_nested_php_args(data)
         return urlencode_unicode(data)
 
     def __getattr__(self, name):

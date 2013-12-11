@@ -11,7 +11,7 @@ __all__ = [
     'islist',
     'isstr',
     'signature_position',
-    'convert_to_php_post',
+    'to_nested_php_args',
 ]
 
 
@@ -85,47 +85,49 @@ def urlencode_unicode(data):
     return urllib.urlencode(data)
 
 
-def convert_to_php_post(data):
+def _is_leaf(value):
+    """Return if a value is a leaf to an existing object"""
+    return not (isdict(value) or islist(value))
+
+
+def to_nested_php_args(data, prefix_key=None):
+    """
+    This function will take either a dict or list and will recursively loop
+    through the values converting it into a format similar to a PHP array which
+    Ubersmith requires for the info portion of the API's order.create method.
+    """
+    is_root = prefix_key is None
+    prefix_key = prefix_key if prefix_key else ''
+
     if islist(data):
-        data_iter = data
-        php_data = []
+        data_iter = data if is_root else enumerate(data)
+        new_data = [] if is_root else {}
+    elif isdict(data):
+        data_iter = data.iteritems()
+        new_data = {}
+    else:
+        raise TypeError('expected dict or list, got {0}'.format(type(data)))
+
+    if islist(new_data):
         def data_set(k, v):
-            php_data.append((k, v))
+            new_data.append((k, v))
         def data_update(d):
             for k, v in d.iteritems():
-                php_data.append((k, v))
-    else:
-        data_iter = data.iteritems()
-        php_data = {}
+                new_data.append((k, v))
+    elif isdict(new_data):
         def data_set(k, v):
-            php_data[k] = v
-        data_update = php_data.update
+            new_data[k] = v
+        data_update = new_data.update
 
-    for key, val in data_iter:
-        if islist(val):
-            val = dict(enumerate(val))
-
-        if isdict(val):
-            data_update(php_post_flatten_dict(val, key))
+    for key, value in data_iter:
+        end_key = prefix_key + (str(key) if is_root else '[{0}]'.format(key))
+        if _is_leaf(value):
+            data_set(end_key, value)
         else:
-            data_set(key, val)
+            nested_args = to_nested_php_args(value, end_key)
+            data_update(nested_args)
 
-    return php_data
-
-
-def php_post_flatten_dict(d, key=''):
-    flat = {}
-    new_key = lambda k: '{0}[{1}]'.format(key, k)
-    for k, v in d.iteritems():
-        if islist(v):
-            v = dict(enumerate(v))
-
-        if isdict(v):
-            flat.update(php_post_flatten_dict(v, new_key(k)))
-        else:
-            flat[new_key(k)] = v
-
-    return flat
+    return new_data
 
 
 def prepend_base(base):
