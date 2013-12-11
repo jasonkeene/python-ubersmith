@@ -1,5 +1,4 @@
 """Utility functions used throughout ubersmith library."""
-
 import inspect
 import urllib
 import urlparse
@@ -87,22 +86,36 @@ def urlencode_unicode(data):
 
 
 def convert_to_php_post(data):
-    php_data = {}
-    for key, val in data.iteritems():
+    if islist(data):
+        data_iter = data
+        php_data = []
+        def data_set(k, v):
+            php_data.append((k, v))
+        def data_update(d):
+            for k, v in d.iteritems():
+                php_data.append((k, v))
+    else:
+        data_iter = data.iteritems()
+        php_data = {}
+        def data_set(k, v):
+            php_data[k] = v
+        data_update = php_data.update
+
+    for key, val in data_iter:
         if islist(val):
             val = dict(enumerate(val))
 
         if isdict(val):
-            php_data.update(php_post_flatten_dict(val, key))
+            data_update(php_post_flatten_dict(val, key))
         else:
-            php_data[key] = val
+            data_set(key, val)
 
     return php_data
 
 
 def php_post_flatten_dict(d, key=''):
     flat = {}
-    new_key = lambda k: '{}[{}]'.format(key, k)
+    new_key = lambda k: '{0}[{1}]'.format(key, k)
     for k, v in d.iteritems():
         if islist(v):
             v = dict(enumerate(v))

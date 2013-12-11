@@ -69,3 +69,12 @@ class FlattenDictPhpArrayTestCase(TestCase):
             'top[list][1]': 'b',
             'top[list][2]': 'c',
         })
+
+    def test_accepts_list_of_tuples(self):
+        data = [('top', {'list': ['a', 'b', 'c']})]
+        result = utils.convert_to_php_post(data)
+        self.assertEqual(result, [
+            ('top[list][2]', 'c'),
+            ('top[list][0]', 'a'),
+            ('top[list][1]', 'b'),
+        ])
