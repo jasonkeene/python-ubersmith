@@ -39,3 +39,10 @@ class ListCall(GroupCall):
 
 class ModuleGraphCall(FileCall):
     method = _('module_graph')
+
+
+class MonitorListCall(GroupCall):
+    method = _('monitor_list')
+    required_fields = ['protocol']
+    int_fields = ['dev', 'script_id']
+    timestamp_fields = ['last_change', 'last_notified', 'last_poll']

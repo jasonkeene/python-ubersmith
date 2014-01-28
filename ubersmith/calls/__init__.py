@@ -43,7 +43,7 @@ class BaseCall(object):
 
     method = ''  # ubersmith method name, should be defined on child classes
     required_fields = []  # field names that should be present in request_data
-    bool_fields = []  # fields to convert to ints
+    bool_fields = []  # fields to convert to bools
     int_fields = []  # fields to convert to ints
     decimal_fields = []  # fields to convert to decimals
     float_fields = []   # fields to convert to floats
