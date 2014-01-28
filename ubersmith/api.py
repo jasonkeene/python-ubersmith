@@ -259,7 +259,8 @@ class _AbstractRequestHandler(object):
         if not response_dict.get('status'):
             raise ResponseError(response=response_dict)
 
-        return response_dict['data']
+        # make sure to handle condition where empty string is sent for data :/
+        return response_dict['data'] or {}
 
     def _validate_request_method(self, method):
         """Make sure requested method is valid."""
