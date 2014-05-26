@@ -65,8 +65,8 @@ class DescribeToNestedPHPArgs:
 
     def it_flattens_list_of_tuples(self):
         data = [('top', {'list': ['a', 'b', 'c']})]
-        assert to_nested_php_args(data) == [
-            ('top[list][2]', 'c'),
+        assert sorted(to_nested_php_args(data)) == [
             ('top[list][0]', 'a'),
             ('top[list][1]', 'b'),
+            ('top[list][2]', 'c'),
         ]

@@ -233,8 +233,7 @@ class _AbstractRequestHandler(object):
     def _render_response(self, response, raw):
         """Render response as python object.
 
-            response: dict like object with headers
-            content: raw response string from ubersmith
+            response: requests' response object
             raw: Set to True to return the raw response vs the default
                  behavior of returning JSON data
 
@@ -248,7 +247,7 @@ class _AbstractRequestHandler(object):
             # handle case where ubersmith is 'updating token'
             # see: https://github.com/jasonkeene/python-ubersmith/issues/1
             if response.headers.get('content-type') == 'text/html' and \
-                'Updating Token' in content:
+                'Updating Token' in response.content:
                 raise UpdatingTokenResponse
             raise ResponseError("Response wasn't application/json")
 
