@@ -5,7 +5,7 @@ import urlparse
 import time
 from functools import partial
 
-import httplib2
+import requests
 
 from ubersmith.exceptions import (
     RequestError,
@@ -230,7 +230,7 @@ class _AbstractRequestHandler(object):
         """
         raise NotImplementedError
 
-    def _render_response(self, response, content, raw):
+    def _render_response(self, response, raw):
         """Render response as python object.
 
             response: dict like object with headers
@@ -241,19 +241,19 @@ class _AbstractRequestHandler(object):
         """
         # just return the raw response
         if raw:
-            return response, content
+            return response
 
         # response isn't json
-        if response.get('content-type') != 'application/json':
+        if response.headers.get('content-type') != 'application/json':
             # handle case where ubersmith is 'updating token'
             # see: https://github.com/jasonkeene/python-ubersmith/issues/1
-            if response.get('content-type') == 'text/html' and \
+            if response.headers.get('content-type') == 'text/html' and \
                 'Updating Token' in content:
                 raise UpdatingTokenResponse
             raise ResponseError("Response wasn't application/json")
 
         # response is json
-        response_dict = json.loads(content)
+        response_dict = json.loads(response.text)
 
         # test for error in json response
         if not response_dict.get('status'):
@@ -296,30 +296,10 @@ class HttpRequestHandler(_AbstractRequestHandler):
             username: Username for API access
             password: Password for API access
 
-        >>> handler = HttpRequestHandler('http://127.0.0.1:8088/')
-        >>> handler.base_url
-        'http://127.0.0.1:8088/'
-        >>> config = {
-        ...     'base_url': 'http://127.0.0.1/api/',
-        ...     'username': 'admin',
-        ...     'password': 'test_pass',
-        ... }
-        >>> handler = HttpRequestHandler(**config)
-        >>> handler.base_url
-        'http://127.0.0.1/api/'
-        >>> handler.username
-        'admin'
-        >>> handler.password
-        'test_pass'
-
         """
         self.base_url = base_url
         self.username = username
         self.password = password
-
-        self._http = httplib2.Http(disable_ssl_certificate_validation=True)
-        self._http.add_credentials(self.username, self.password,
-                                   urlparse.urlparse(self.base_url)[1])
 
     def process_request(self, method, data=None, raw=False):
         """Process request over HTTP to ubersmith instance.
@@ -327,7 +307,7 @@ class HttpRequestHandler(_AbstractRequestHandler):
             method: Ubersmith API method string
             data: dict of method arguments
             raw: Set to True to return the raw response vs the default
-                 behavior of returning JSON data
+                 behavior of returning JSON decoded data
 
         """
         # make sure requested method is valid
@@ -336,10 +316,10 @@ class HttpRequestHandler(_AbstractRequestHandler):
         # try request 3 times
         for i in range(3):
             # make the request
-            response, content = self._send_request(method, data)
+            response = self._send_request(method, data)
             try:
                 # render the response as python object
-                return self._render_response(response, content, raw)
+                return self._render_response(response, raw)
             except UpdatingTokenResponse:
                 # wait 4 secs before retrying request
                 time.sleep(4)
@@ -349,9 +329,9 @@ class HttpRequestHandler(_AbstractRequestHandler):
     def _send_request(self, method, data):
         url = append_qs(self.base_url, {'method': method})
         body = self._encode_data(data)
-        # httplib2 requires that you manually send Content-Type on POSTs :/
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        return self._http.request(url, "POST", body, headers)
+        return requests.post(url, data=body, headers=headers,
+                             auth=(self.username, self.password), verify=False)
 
 
 def get_default_request_handler():
