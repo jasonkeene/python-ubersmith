@@ -1,18 +1,13 @@
-"""Tests for request handlers."""
-
 import json
-try:
-    from unittest2 import TestCase
-except ImportError:
-    from unittest import TestCase
 
 from mock import Mock, patch
+import pytest
 
 from ubersmith.api import HttpRequestHandler, METHODS
 from ubersmith.exceptions import ResponseError, UpdatingTokenResponse
 
 
-class HttpRequestHandlerTestCase(TestCase):
+class DescribeHttpRequestHandler:
     test_data = 'Testing FTW!'
     test_response = {
         'status': '200',
@@ -28,14 +23,13 @@ class HttpRequestHandlerTestCase(TestCase):
     def test_valid_response(self):
         h = HttpRequestHandler('')
         h._send_request = Mock(return_value=self.test_response)
-        self.assertEqual(self.test_data,
-                         h.process_request('uber.method_list'))
+        assert self.test_data == h.process_request('uber.method_list')
 
     def test_invalid_response(self):
         resp = {'status': '200', 'content-type': 'text/html'}, self.test_data
         h = HttpRequestHandler('')
         h._send_request = Mock(return_value=resp)
-        with self.assertRaises(ResponseError):
+        with pytest.raises(ResponseError):
             h.process_request('uber.method_list')
 
     def test_updating_token_response(self):
@@ -48,8 +42,7 @@ class HttpRequestHandlerTestCase(TestCase):
         h._send_request = Mock(side_effect=lambda *args: returns.pop(0))
         with patch('ubersmith.api.time') as time:
             time.sleep = lambda x: None
-            self.assertEqual(self.test_data,
-                             h.process_request('uber.method_list'))
+            assert self.test_data == h.process_request('uber.method_list')
 
     def test_updating_token_response_exception_after_three_tries(self):
         returns = [
@@ -62,14 +55,14 @@ class HttpRequestHandlerTestCase(TestCase):
         h._send_request = Mock(side_effect=lambda *args: returns.pop(0))
         with patch('ubersmith.api.time') as time:
             time.sleep = lambda x: None
-            with self.assertRaises(UpdatingTokenResponse):
+            with pytest.raises(UpdatingTokenResponse):
                 h.process_request('uber.method_list')
 
     def test_proxy_modules(self):
         h = HttpRequestHandler('')
         for call_base, call_name in (m.split('.') for m in METHODS):
-            self.assertTrue(hasattr(h, call_base))
+            assert hasattr(h, call_base)
             proxy = getattr(h, call_base)
             partial = getattr(proxy, call_name)
-            self.assertTrue(callable(partial))
-            self.assertEqual(partial.keywords.get('request_handler'), h)
+            assert callable(partial)
+            assert partial.keywords.get('request_handler') == h

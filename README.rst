@@ -66,6 +66,5 @@ Running Tests
 
 ::
 
-    # cd to repository
-    pip install -r test-requirements.txt
-    ./runtests.py
+    pip install -r requirements-tests.txt
+    py.test
