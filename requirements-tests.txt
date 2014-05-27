@@ -3,3 +3,5 @@ coverage
 mock
 tox
 pytest
+pytest-cov
+pytest-sugar
