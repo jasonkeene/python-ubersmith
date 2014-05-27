@@ -50,27 +50,6 @@ class LogHttpRequestHandler(api.HttpRequestHandler):
             password: Password for API access
             log_file_path: Path to log file
 
-        >>> handler = LogHttpRequestHandler('http://127.0.0.1:8088/')
-        >>> handler.base_url
-        'http://127.0.0.1:8088/'
-        >>> handler._log_file_path
-        'tests/fixtures/logged_call_responses.json'
-        >>> config = {
-        ...     'base_url': 'http://127.0.0.1/api/',
-        ...     'username': 'admin',
-        ...     'password': 'test_pass',
-        ...     'log_file_path': 'log_file.json',
-        ... }
-        >>> handler = LogHttpRequestHandler(**config)
-        >>> handler.base_url
-        'http://127.0.0.1/api/'
-        >>> handler.username
-        'admin'
-        >>> handler.password
-        'test_pass'
-        >>> handler._log_file_path
-        'log_file.json'
-
         """
         if log_file_path:
             self._log_file_path = log_file_path

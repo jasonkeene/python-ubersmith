@@ -31,11 +31,6 @@ def append_qs(url, query_string):
         * a dict of lists of strings: {'test3': ['val1', 'val2']}
         * a list of tuples: [('test3', 'val1'), ('test3', 'val2')]
 
-    >>> url = 'http://domain.tld/path/?test1=val&test2#hash'
-    >>> qs = {'test3': 'val'}
-    >>> append_qs(url, qs)
-    'http://domain.tld/path/?test1=val&test2=&test3=val#hash'
-
     """
     parsed_url = urlparse.urlsplit(url)
     parsed_qs = urlparse.parse_qsl(parsed_url.query, True)
