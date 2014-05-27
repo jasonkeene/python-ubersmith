@@ -1,7 +1,6 @@
 """Lower level API, configuration, and HTTP stuff."""
 
 import json
-import urlparse
 import time
 from functools import partial
 
@@ -313,17 +312,19 @@ class HttpRequestHandler(_AbstractRequestHandler):
         self._validate_request_method(method)
 
         # try request 3 times
+        last_exception = None
         for i in range(3):
             # make the request
             response = self._send_request(method, data)
             try:
                 # render the response as python object
                 return self._render_response(response, raw)
-            except UpdatingTokenResponse:
+            except UpdatingTokenResponse as e:
                 # wait 4 secs before retrying request
                 time.sleep(4)
+                last_exception = e
         # if last attempt still threw an exception, reraise it
-        raise
+        raise last_exception
 
     def _send_request(self, method, data):
         url = append_qs(self.base_url, {'method': method})

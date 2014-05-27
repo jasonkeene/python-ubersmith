@@ -3,10 +3,11 @@ import copy
 import datetime
 from decimal import Decimal
 import re
-import rfc822
+from email.utils import parsedate_tz
 import time
 
 import phpserialize
+from six import string_types
 
 from ubersmith.api import METHODS, get_default_request_handler
 from ubersmith.exceptions import ValidationError
@@ -73,7 +74,7 @@ class BaseCall(object):
         """Validate request data before sending it out. Return True/False."""
         # check if required_fields aren't present
         for field in set(self.required_fields) - set(self.request_data):
-            if not isinstance(field, basestring):
+            if not isinstance(field, string_types):
                 # field was a collection, iterate over it and check by OR
                 return bool(set(field) & set(self.request_data))
             return False
@@ -131,7 +132,7 @@ class FileCall(BaseCall):
         last_modified = self.response_data[0].get('last-modified')
         if last_modified:
             self.modified = datetime.datetime(
-                                      *rfc822.parsedate_tz(last_modified)[:7])
+                                      *parsedate_tz(last_modified)[:7])
         else:
             self.modified = datetime.datetime.now()
         self.data = buffer(self.response_data[1])
@@ -149,9 +150,9 @@ def _rename_key(d, old, new):
 
 def _clean_fields(call, d):
     """Clean fields on d using info on call."""
-    for name, func in _CLEANERS.iteritems():
+    for name, func in _CLEANERS.items():
         for field in getattr(call, '{0}_fields'.format(name), []):
-            if field in d and isinstance(d[field], basestring):
+            if field in d and isinstance(d[field], string_types):
                 d[field] = func(d[field])
 
 

@@ -1,7 +1,14 @@
 """Utility functions used throughout ubersmith library."""
 import inspect
-import urllib
-import urlparse
+try:
+    from urllib import parse as urlparse
+except ImportError:
+    import urlparse
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
+from six import string_types, text_type
 
 __all__ = [
     'append_qs',
@@ -62,13 +69,13 @@ def urlencode_unicode(data):
     """urllib.urlencode can't handle unicode, this is a hack to fix it."""
     data_iter = None
     if isdict(data):
-        data_iter = data.iteritems()
+        data_iter = data.items()
     elif islist(data):
         data_iter = data
 
     if data_iter:
         for i, (key, value) in enumerate(data_iter):
-            if isinstance(value, unicode):
+            if isinstance(value, text_type):
                 # try to convert to str
                 try:
                     safe_val = str(value)
@@ -82,7 +89,7 @@ def urlencode_unicode(data):
                     elif islist(data):
                         data[i] = (key, safe_val)
 
-    return urllib.urlencode(data)
+    return urlencode(data)
 
 
 def _is_leaf(value):
@@ -103,7 +110,7 @@ def to_nested_php_args(data, prefix_key=None):
         data_iter = data if is_root else enumerate(data)
         new_data = [] if is_root else {}
     elif isdict(data):
-        data_iter = data.iteritems()
+        data_iter = data.items()
         new_data = {}
     else:
         raise TypeError('expected dict or list, got {0}'.format(type(data)))
@@ -112,7 +119,7 @@ def to_nested_php_args(data, prefix_key=None):
         def data_set(k, v):
             new_data.append((k, v))
         def data_update(d):
-            for k, v in d.iteritems():
+            for k, v in d.items():
                 new_data.append((k, v))
     elif isdict(new_data):
         def data_set(k, v):
@@ -149,7 +156,7 @@ def islist(value):
 
 def isstr(value):
     """Return true if the value behaves like a string, false if not."""
-    return isinstance(value, basestring)
+    return isinstance(value, string_types)
 
 
 def signature_position(func, arg_name):
