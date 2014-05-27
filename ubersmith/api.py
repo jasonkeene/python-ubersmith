@@ -287,7 +287,7 @@ class _AbstractRequestHandler(object):
 class HttpRequestHandler(_AbstractRequestHandler):
     """Handles HTTP requests and authentication."""
 
-    def __init__(self, base_url, username=None, password=None):
+    def __init__(self, base_url, username=None, password=None, verify=True):
         """Initialize HTTP request handler with optional authentication.
 
             base_url: URL to send API requests
@@ -298,6 +298,7 @@ class HttpRequestHandler(_AbstractRequestHandler):
         self.base_url = base_url
         self.username = username
         self.password = password
+        self.verify = verify
 
     def process_request(self, method, data=None, raw=False):
         """Process request over HTTP to ubersmith instance.
@@ -331,7 +332,8 @@ class HttpRequestHandler(_AbstractRequestHandler):
         body = self._encode_data(data)
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
         return requests.post(url, data=body, headers=headers,
-                             auth=(self.username, self.password), verify=False)
+                             auth=(self.username, self.password),
+                             verify=self.verify)
 
 
 def get_default_request_handler():

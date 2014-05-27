@@ -99,3 +99,17 @@ class DescribeHttpRequestHandler:
             partial = getattr(proxy, call_name)
             assert callable(partial)
             assert partial.keywords.get('request_handler') == h
+
+    def it_validates_ssl(self, response):
+        h = HttpRequestHandler('')
+        with patch('ubersmith.api.requests') as requests:
+            requests.post.return_value = response
+            h.process_request('uber.method_list')
+            assert requests.post.call_args[1]['verify'] is True
+
+    def it_can_disable_ssl_validation(self, response):
+        h = HttpRequestHandler('', verify=False)
+        with patch('ubersmith.api.requests') as requests:
+            requests.post.return_value = response
+            h.process_request('uber.method_list')
+            assert requests.post.call_args[1]['verify'] is False
