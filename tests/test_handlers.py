@@ -4,6 +4,7 @@ from mock import Mock, patch
 import pytest
 from six import text_type
 
+import ubersmith.uber
 from ubersmith.api import HttpRequestHandler, METHODS
 from ubersmith.exceptions import ResponseError, UpdatingTokenResponse
 
@@ -99,6 +100,22 @@ class DescribeHttpRequestHandler:
             partial = getattr(proxy, call_name)
             assert callable(partial)
             assert partial.keywords.get('request_handler') == h
+
+    def it_does_not_proxy_calls_to_modules_that_do_not_exist(self):
+        h = HttpRequestHandler('')
+        with pytest.raises(AttributeError):
+            h.invalid_module
+
+    def it_does_not_proxy_calls_to_methods_that_do_not_exist(self):
+        h = HttpRequestHandler('')
+        with pytest.raises(AttributeError):
+            h.uber.invalid_method
+
+    def it_does_not_proxy_calls_to_methods_that_are_not_callable(self):
+        h = HttpRequestHandler('')
+        ubersmith.uber.rando = 'X-rando'
+        with pytest.raises(AttributeError):
+            h.uber.rando
 
     def it_validates_ssl(self, response):
         h = HttpRequestHandler('')
