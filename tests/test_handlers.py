@@ -5,8 +5,18 @@ import pytest
 from six import text_type
 
 import ubersmith.uber
-from ubersmith.api import HttpRequestHandler, METHODS
-from ubersmith.exceptions import ResponseError, UpdatingTokenResponse
+import ubersmith.api
+from ubersmith.api import (
+    HttpRequestHandler,
+    METHODS,
+    get_default_request_handler,
+    set_default_request_handler,
+)
+from ubersmith.exceptions import (
+    RequestError,
+    ResponseError,
+    UpdatingTokenResponse,
+)
 
 
 class DescribeHttpRequestHandler:
@@ -45,6 +55,17 @@ class DescribeHttpRequestHandler:
         return response
 
     @pytest.fixture
+    def bad_body_response(self):
+        response = Mock()
+        response.headers = {
+            'status': '200',
+            'content-type': 'application/json',
+        }
+        response.content = json.dumps({})
+        response.text = text_type(response.content)
+        return response
+
+    @pytest.fixture
     def token_response(self):
         response = Mock()
         response.headers = {
@@ -60,9 +81,16 @@ class DescribeHttpRequestHandler:
         h._send_request = Mock(return_value=response)
         assert self.test_data == h.process_request('uber.method_list')
 
-    def it_raises_response_error(self, bad_header_response):
+    def it_raises_response_error_on_bad_headers(self, bad_header_response):
         h = HttpRequestHandler('')
         h._send_request = Mock(return_value=bad_header_response)
+        with pytest.raises(ResponseError) as e:
+            h.process_request('uber.method_list')
+        assert str(e.value) == "Response wasn't application/json"
+
+    def it_raises_response_error_on_bad_body(self, bad_body_response):
+        h = HttpRequestHandler('')
+        h._send_request = Mock(return_value=bad_body_response)
         with pytest.raises(ResponseError):
             h.process_request('uber.method_list')
 
@@ -130,3 +158,33 @@ class DescribeHttpRequestHandler:
             requests.post.return_value = response
             h.process_request('uber.method_list')
             assert requests.post.call_args[1]['verify'] is False
+
+    def it_validates_bad_methods(self):
+        h = HttpRequestHandler('')
+        with pytest.raises(RequestError) as e:
+            h.process_request('boop')
+        assert str(e.value) == "Requested method is not valid."
+
+    def it_allows_for_raw_responses(self, response):
+        h = HttpRequestHandler('')
+        h._send_request = Mock(return_value=response)
+        assert h.process_request('uber.method_list', raw=True) is response
+
+
+def test_get_set_default_handler():
+    h = HttpRequestHandler('')
+    set_default_request_handler(h)
+    assert get_default_request_handler() == h
+    ubersmith.api._DEFAULT_REQUEST_HANDLER = None
+
+
+def test_raise_exception_if_no_default_handler_is_set():
+    with pytest.raises(Exception) as e:
+        get_default_request_handler()
+    assert str(e.value) == "Request handler required but no default was found."
+
+
+def test_raise_exception_if_trying_to_set_non_handler():
+    with pytest.raises(TypeError) as e:
+        set_default_request_handler("not a handler")
+    assert str(e.value) == "Attempted to set an invalid request handler as default."
