@@ -5,4 +5,5 @@ python:
   - "3.3"
   - "3.4"
 install: "pip install -r requirements-tests.txt --use-mirrors"
-script: py.test
+script: "py.test --cov-config .coveragerc --cov ubersmith"
+after_success: coveralls
