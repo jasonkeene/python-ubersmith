@@ -18,8 +18,10 @@ __all__ = [
     'ListCall',
     'PaymentMethodListCall',
     'InvoiceCountCall',
+    'InvoicePaymentsCall',
+    'InvoiceGet',
+    'InvoiceList',
     'CreditListCall',
-    'InvoicePaymentCall',
 ]
 
 _ = prepend_base(__name__.split('.')[-1])
@@ -125,6 +127,19 @@ class InvoiceGet(BaseCall):
 
         self.cleaned = self._UbersmithFile(self.filename, self.type,
                                            self.modified, self.data)
+
+
+class InvoiceList(GroupCall):
+    method = _('invoice_list')
+    int_fields = [
+        'clientid',
+        'invid',
+    ]
+    timestamp_fields = [
+        'date',
+        'datepaid',
+        'due',
+    ]
 
 
 class CreditListCall(GroupCall):
