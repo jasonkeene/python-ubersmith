@@ -64,6 +64,9 @@ Running Tests
 .. image:: https://api.travis-ci.org/jasonkeene/python-ubersmith.png?branch=master
    :target: https://travis-ci.org/jasonkeene/python-ubersmith
 
+.. image:: https://coveralls.io/repos/jasonkeene/python-ubersmith/badge.png?branch=feature-coveralls
+   :target: https://coveralls.io/r/jasonkeene/python-ubersmith?branch=feature-coveralls
+
 ::
 
     pip install -r requirements-tests.txt
