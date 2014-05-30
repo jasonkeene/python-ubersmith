@@ -28,7 +28,7 @@ class DescribeAppendQS:
         qs = [('test3', 'val1'), ('test3', 'val2')]
         assert append_qs(URL, qs) == URL_FMT.format('=&test3=val1&test3=val2')
 
-    def it_raises_value_error_for_bad_query_string_type(self):
+    def it_raises_type_error_for_bad_query_string_type(self):
         with pytest.raises(TypeError) as e:
             append_qs(URL, object())
         assert str(e.value) == 'Unexpected query_string type'
