@@ -47,7 +47,7 @@ def append_qs(url, query_string):
     elif islist(query_string):
         parsed_qs += query_string
     else:
-        raise ValueError('Unexpected query_string value')
+        raise TypeError('Unexpected query_string type')
 
     return urlparse.urlunsplit((
         parsed_url.scheme,
@@ -58,9 +58,7 @@ def append_qs(url, query_string):
     ))
 
 
-# TODO this should match the same input as urllib.urlencode so it can be used
-# as a drop in replacement
-def urlencode_unicode(data):
+def urlencode_unicode(data, doseq=0):
     """urllib.urlencode can't handle unicode, this is a hack to fix it."""
     data_iter = None
     if isdict(data):
@@ -81,10 +79,10 @@ def urlencode_unicode(data):
                 finally:
                     if isdict(data):
                         data[key] = safe_val
-                    elif islist(data):
+                    else:
                         data[i] = (key, safe_val)
 
-    return urlencode(data)
+    return urlencode(data, doseq=doseq)
 
 
 def _is_leaf(value):
@@ -116,7 +114,7 @@ def to_nested_php_args(data, prefix_key=None):
         def data_update(d):
             for k, v in d.items():
                 new_data.append((k, v))
-    elif isdict(new_data):
+    else:
         def data_set(k, v):
             new_data[k] = v
         data_update = new_data.update

@@ -1,4 +1,6 @@
-from ubersmith.utils import append_qs, to_nested_php_args
+import pytest
+
+from ubersmith.utils import append_qs, urlencode_unicode, to_nested_php_args
 
 
 UNICODE_STRING = u'\u0bb8\u0bcd\u0bb1\u0bc0\u0ba9\u0bbf\u0bb5\u0bbe\u0bb8 ' \
@@ -26,6 +28,11 @@ class DescribeAppendQS:
         qs = [('test3', 'val1'), ('test3', 'val2')]
         assert append_qs(URL, qs) == URL_FMT.format('=&test3=val1&test3=val2')
 
+    def it_raises_value_error_for_bad_query_string_type(self):
+        with pytest.raises(TypeError) as e:
+            append_qs(URL, object())
+        assert str(e.value) == 'Unexpected query_string type'
+
     def it_appends_unicode(self):
         qs = {'test3': UNICODE_STRING}
         assert append_qs(URL, qs) == URL_FMT.format(''.join([
@@ -34,6 +41,27 @@ class DescribeAppendQS:
             '%BE%E0%AE%A9%E0%AF%81%E0%AE%9C%E0%AE%A9%E0%AF%8D+%E0%AE%90%E0',
             '%AE%AF%E0%AE%99%E0%AF%8D%E0%AE%95%E0%AE%BE%E0%AE%B0%E0%AF%8D',
         ]))
+
+
+class DescribeUrlencodeUnicode:
+    def it_encodes_dicts(self):
+        assert urlencode_unicode({'test': 'asdf'}) == 'test=asdf'
+
+    def it_encodes_lists(self):
+        assert urlencode_unicode([('test', 'asdf')]) == 'test=asdf'
+
+    def it_encodes_unicode(self):
+        assert urlencode_unicode({"test": UNICODE_STRING}) == ''.join([
+            'test=%E0%AE%B8%E0%AF%8D%E0%AE%B1%E0%AF%80%E0%AE%A9%E0%AE%BF',
+            '%E0%AE%B5%E0%AE%BE%E0%AE%B8+%E0%AE%B0%E0%AE%BE%E0%AE%AE%E0%AE',
+            '%BE%E0%AE%A9%E0%AF%81%E0%AE%9C%E0%AE%A9%E0%AF%8D+%E0%AE%90%E0',
+            '%AE%AF%E0%AE%99%E0%AF%8D%E0%AE%95%E0%AE%BE%E0%AE%B0%E0%AF%8D',
+        ])
+
+    def it_raises_type_error_on_bad_data_types(self):
+        with pytest.raises(TypeError) as e:
+            urlencode_unicode(object())
+        assert str(e.value) == 'not a valid non-string sequence or mapping object'
 
 
 class DescribeToNestedPHPArgs:
@@ -63,10 +91,34 @@ class DescribeToNestedPHPArgs:
             'top[list][2]': 'c',
         }
 
-    def it_flattens_list_of_tuples(self):
-        data = [('top', {'list': ['a', 'b', 'c']})]
-        assert sorted(to_nested_php_args(data)) == [
+    @pytest.mark.parametrize(['data', 'result'], [
+        ([
+            ('x', 'y'),
+        ], [
+            ('x', 'y'),
+        ]),
+        ([
+            ('x', [1, 2, 3]),
+        ], [
+            ('x[0]', 1),
+            ('x[1]', 2),
+            ('x[2]', 3),
+        ]),
+        ([
+            ('top', {
+                'list': ['a', 'b', 'c'],
+            }),
+        ], [
             ('top[list][0]', 'a'),
             ('top[list][1]', 'b'),
             ('top[list][2]', 'c'),
-        ]
+        ]),
+    ])
+    def it_flattens_nested_lists_of_tuples(self, data, result):
+        assert sorted(to_nested_php_args(data)) == result
+
+    def it_raises_type_error_on_bad_data_types(self):
+        x = object()
+        with pytest.raises(TypeError) as e:
+            to_nested_php_args(x)
+        assert str(e.value) == "expected dict or list, got {0}".format(type(x))
