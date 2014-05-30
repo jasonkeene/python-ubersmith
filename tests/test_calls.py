@@ -4,6 +4,7 @@ import pytest
 
 from ubersmith.api import METHODS
 from ubersmith.utils import signature_position
+from ubersmith.calls import generate_generic_calls
 
 
 def setup_module(module):
@@ -28,3 +29,19 @@ def test_method_signature(method):
     mod_name = '.'.join(['ubersmith', base])
     call_func = getattr(sys.modules[mod_name], call)
     assert signature_position(call_func, 'request_handler') == 0
+
+
+class DescribeGenerateGenericCalls:
+    def it_creates_call_funcs(self):
+        base = 'uber'
+        namespace = {}
+        generate_generic_calls(base, namespace)
+        base_funcs = (m.split('.', 1)[1] for m in METHODS if m.startswith(base))
+        assert sorted(namespace.keys()) == list(sorted(base_funcs))
+
+    def it_adds_func_names_to_all(self):
+        base = 'uber'
+        namespace = {'__all__': []}
+        generate_generic_calls(base, namespace)
+        base_funcs = (m.split('.', 1)[1] for m in METHODS if m.startswith(base))
+        assert sorted(namespace['__all__']) == list(sorted(base_funcs))
