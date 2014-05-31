@@ -45,3 +45,18 @@ class DescribeGenerateGenericCalls:
         generate_generic_calls(base, namespace)
         base_funcs = (m.split('.', 1)[1] for m in METHODS if m.startswith(base))
         assert sorted(namespace['__all__']) == list(sorted(base_funcs))
+
+    def it_adds_doc_string_to_funcs_that_already_exist(self):
+        func = lambda: None
+        base = 'uber'
+        namespace = {'method_list': func}
+        generate_generic_calls(base, namespace)
+        assert namespace['method_list'].__doc__ == METHODS['uber.method_list']
+
+    def it_does_not_add_doc_string_to_funcs_that_already_have_them(self):
+        func = lambda: None
+        func.__doc__ = 'foobar'
+        base = 'uber'
+        namespace = {'method_list': func}
+        generate_generic_calls(base, namespace)
+        assert namespace['method_list'].__doc__ == 'foobar'
