@@ -83,4 +83,4 @@ def test_file_call():
     response.headers = {}
     handler.process_request.return_value = response
     uber_file = uber.documentation(request_handler=handler)
-    assert str(uber_file.data) == 'bytes here'
+    assert uber_file.data == 'bytes here'

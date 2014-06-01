@@ -99,11 +99,11 @@ class GroupCall(BaseCall):
         cleaned = copy.deepcopy(self.response_data)
 
         # convert top level keys to ints
-        for key in self.response_data.iterkeys():
+        for key in self.response_data.keys():
             _rename_key(cleaned, key, int(key))
 
         # clean fields on each member of the group
-        for member in cleaned.itervalues():
+        for member in cleaned.values():
             _clean_fields(self, member)
 
         self.cleaned = cleaned
@@ -135,7 +135,7 @@ class FileCall(BaseCall):
                                       *parsedate_tz(last_modified)[:7])
         else:
             self.modified = datetime.datetime.now()
-        self.data = buffer(self.response_data.content)
+        self.data = self.response_data.content
 
         self.cleaned = self._UbersmithFile(self.filename, self.type,
                                            self.modified, self.data)
