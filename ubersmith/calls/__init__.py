@@ -122,20 +122,20 @@ class FileCall(BaseCall):
 
     def clean(self):
         fname = None
-        disposition = self.response_data[0].get('content-disposition')
+        disposition = self.response_data.headers.get('content-disposition')
         if disposition:
             fname = re.search(r'filename="(.+?)"', disposition, re.I).group(1)
             fname = re.sub(r'[^a-z0-9-_\. ]', '-', fname, 0, re.I).lstrip('.')
 
         self.filename = fname
-        self.type = self.response_data[0].get('content-type')
-        last_modified = self.response_data[0].get('last-modified')
+        self.type = self.response_data.headers.get('content-type')
+        last_modified = self.response_data.headers.get('last-modified')
         if last_modified:
             self.modified = datetime.datetime(
                                       *parsedate_tz(last_modified)[:7])
         else:
             self.modified = datetime.datetime.now()
-        self.data = buffer(self.response_data[1])
+        self.data = buffer(self.response_data.content)
 
         self.cleaned = self._UbersmithFile(self.filename, self.type,
                                            self.modified, self.data)

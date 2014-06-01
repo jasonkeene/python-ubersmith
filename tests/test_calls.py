@@ -1,10 +1,12 @@
 import sys
 
+from mock import Mock
 import pytest
 
 from ubersmith.api import METHODS
 from ubersmith.utils import signature_position
 from ubersmith.calls import generate_generic_calls
+from ubersmith import uber, order
 
 
 def setup_module(module):
@@ -60,3 +62,25 @@ class DescribeGenerateGenericCalls:
         namespace = {'method_list': func}
         generate_generic_calls(base, namespace)
         assert namespace['method_list'].__doc__ == 'foobar'
+
+
+def test_json_call():
+    handler = Mock()
+    handler.process_request.return_value = {"test": "blah"}
+    assert uber.method_list(request_handler=handler) == {"test": "blah"}
+
+
+def test_group_call():
+    handler = Mock()
+    handler.process_request.return_value = {"1": {"test": "blah"}}
+    assert order.list(request_handler=handler) == {1: {"test": "blah"}}
+
+
+def test_file_call():
+    handler = Mock()
+    response = Mock()
+    response.content = 'bytes here'
+    response.headers = {}
+    handler.process_request.return_value = response
+    uber_file = uber.documentation(request_handler=handler)
+    assert str(uber_file.data) == 'bytes here'
