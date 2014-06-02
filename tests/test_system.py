@@ -24,8 +24,8 @@ def test_order_list():
     expected = {
         60: {
             u'client_id': 50,
-            u'activity': datetime.datetime(2010, 4, 27, 16, 32, 13),
-            u'ts': datetime.datetime(2010, 4, 27, 16, 32, 13),
+            u'activity': datetime.datetime.fromtimestamp(float("1272400333")),
+            u'ts': datetime.datetime.fromtimestamp(float("1272400333")),
             u'total': Decimal('33.22'),
             u'order_id': 60,
         }
