@@ -59,7 +59,7 @@ by the call function and just return the JSON data from the ubersmith response
 as a dict.
 
 Development
-==========-
+===========
 
 .. image:: https://api.travis-ci.org/jasonkeene/python-ubersmith.png?branch=master
    :target: https://travis-ci.org/jasonkeene/python-ubersmith
