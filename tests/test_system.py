@@ -40,6 +40,38 @@ def response(requests):
     return response
 
 
+def test_responses_can_getitem(response):
+    response.text = json.dumps({
+        "status": True,
+        "error_code": None,
+        "error_message": "",
+        "data": {
+            "foo": "bar",
+            "nested": {
+                "baz": "qux",
+            }
+        },
+    })
+    result = ubersmith.uber.method_list()
+    assert result["foo"] == "bar"
+    assert result["nested"]["baz"] == "qux"
+
+
+def test_responses_can_be_turned_into_dicts(response):
+    response.text = json.dumps({
+        "status": True,
+        "error_code": None,
+        "error_message": "",
+        "data": {
+            "foo": "bar",
+        },
+    })
+    expected = {
+        "foo": "bar",
+    }
+    assert dict(ubersmith.uber.method_list()) == expected
+
+
 def test_invoice_list(response):
     response.text = json.dumps({
         "status": True,
@@ -68,7 +100,7 @@ def test_invoice_list(response):
             u'due': datetime.datetime.fromtimestamp(float("1272400333")),
         }
     }
-    assert ubersmith.client.invoice_list(client_id=50) == expected
+    assert dict(ubersmith.client.invoice_list(client_id=50)) == expected
 
 
 def test_invoice_get_pdf(response):
@@ -121,4 +153,4 @@ def test_order_list(response):
             u'order_id': 60,
         }
     }
-    assert ubersmith.order.list(client_id=50) == expected
+    assert dict(ubersmith.order.list(client_id=50)) == expected
