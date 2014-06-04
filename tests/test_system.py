@@ -53,28 +53,24 @@ def test_invoice_list(response):
                 u'amount_unpaid': u'0.00',
                 u'date': u'1272400333',
                 u'datepaid': u'1272400333',
-                u'due': u'1274414400',
+                u'due': u'1272400333',
             },
         },
     })
-    # TODO: add cleaners to this call
-    # TODO: make this a group call
     expected = {
-        u'60': {
-            u'invid': u'60',
-            u'clientid': u'50',
+        60: {
+            u'invid': 60,
+            u'clientid': 50,
             u'amount': u'50.00',
             u'amount_unpaid': u'0.00',
-            u'date': u'1272400333',
-            u'datepaid': u'1272400333',
-            u'due': u'1274414400',
+            u'date': datetime.datetime.fromtimestamp(float("1272400333")),
+            u'datepaid': datetime.datetime.fromtimestamp(float("1272400333")),
+            u'due': datetime.datetime.fromtimestamp(float("1272400333")),
         }
     }
     assert ubersmith.client.invoice_list(client_id=50) == expected
 
 
-# TODO: need to handle pdf files based on content type header (merge in 0.2.5)
-@pytest.mark.xfail
 def test_invoice_get_pdf(response):
     response.headers = {
         'content-type': 'application/pdf',

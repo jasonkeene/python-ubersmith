@@ -124,7 +124,7 @@ class FileCall(BaseCall):
         fname = None
         disposition = self.response_data.headers.get('content-disposition')
         if disposition:
-            fname = re.search(r'filename="(.+?)"', disposition, re.I).group(1)
+            fname = re.search(r'.*?filename="(.+?)"', disposition, re.I).group(1)
 
         self.filename = fname
         self.type = self.response_data.headers.get('content-type')
