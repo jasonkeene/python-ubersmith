@@ -66,14 +66,14 @@ as a dict.
 Development
 ===========
 
+You'll need to install the development dependencies::
+
+    pip install -r requirements-dev.txt
+
 Running Tests
 -------------
 
-First you'll need to install the test dependencies::
-
-    pip install -r requirements-tests.txt
-
-Then you can run the test by cd'ing into the repo root and running::
+To run the tests::
 
     py.test
 
