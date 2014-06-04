@@ -58,8 +58,8 @@ although this will bypass any validation logic and response cleaning provided
 by the call function and just return the JSON data from the ubersmith response
 as a dict.
 
-Running Tests
-=============
+Development
+==========-
 
 .. image:: https://api.travis-ci.org/jasonkeene/python-ubersmith.png?branch=master
    :target: https://travis-ci.org/jasonkeene/python-ubersmith
@@ -67,7 +67,21 @@ Running Tests
 .. image:: https://coveralls.io/repos/jasonkeene/python-ubersmith/badge.png?branch=master
    :target: https://coveralls.io/r/jasonkeene/python-ubersmith?branch=master
 
-::
+Running Tests
+-------------
+
+First you'll need to install the test dependencies::
 
     pip install -r requirements-tests.txt
+
+Then you can run the test by cd'ing into the repo root and running::
+
     py.test
+
+To run the tests on multiple interpreters::
+
+    tox
+
+To run the tests and generate a coverage report::
+
+    bin/coverage.sh
