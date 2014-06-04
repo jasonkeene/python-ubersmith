@@ -125,7 +125,6 @@ class FileCall(BaseCall):
         disposition = self.response_data.headers.get('content-disposition')
         if disposition:
             fname = re.search(r'filename="(.+?)"', disposition, re.I).group(1)
-            fname = re.sub(r'[^a-z0-9-_\. ]', '-', fname, 0, re.I).lstrip('.')
 
         self.filename = fname
         self.type = self.response_data.headers.get('content-type')
