@@ -1,3 +1,8 @@
+.. image:: https://api.travis-ci.org/jasonkeene/python-ubersmith.png?branch=master
+   :target: https://travis-ci.org/jasonkeene/python-ubersmith
+
+.. image:: https://coveralls.io/repos/jasonkeene/python-ubersmith/badge.png?branch=master
+   :target: https://coveralls.io/r/jasonkeene/python-ubersmith?branch=master
 
 Installation
 ============
@@ -60,12 +65,6 @@ as a dict.
 
 Development
 ===========
-
-.. image:: https://api.travis-ci.org/jasonkeene/python-ubersmith.png?branch=master
-   :target: https://travis-ci.org/jasonkeene/python-ubersmith
-
-.. image:: https://coveralls.io/repos/jasonkeene/python-ubersmith/badge.png?branch=master
-   :target: https://coveralls.io/r/jasonkeene/python-ubersmith?branch=master
 
 Running Tests
 -------------
