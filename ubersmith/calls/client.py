@@ -39,7 +39,6 @@ class _ClientCallMixin(object):
         'commission',
         'commission_rate',
         'discount',
-        'inv_balance',
         'tier_commission',
         'tier_commission_rate',
     ]
@@ -116,6 +115,7 @@ class InvoiceGet(BaseCall):
 
         self.filename = fname
         self.type = self.response_data.headers.get('content-type')
+        # TODO: consider removing all this modified stuff
         last_modified = self.response_data.headers.get('last-modified')
         if last_modified:
             self.modified = datetime.datetime(
