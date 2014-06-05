@@ -35,7 +35,7 @@ _CLEANERS = {
     'float': float,
     'timestamp': lambda x: datetime.datetime.fromtimestamp(float(x)),
     'date': lambda x: datetime.date(*time.strptime(x, '%b/%d/%Y')[:3]),
-    'php_serialized': phpserialize.loads,
+    'php_serialized': lambda x: phpserialize.loads(x.encode("utf-8")),
 }
 
 
