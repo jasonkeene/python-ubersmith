@@ -18,6 +18,43 @@ def teardown_module():
     ubersmith.api._DEFAULT_REQUEST_HANDLER = None
 
 
+def test_order_get(response):
+    response.text = json.dumps({
+        "status": True,
+        "error_code": None,
+        "error_message": "",
+        "data": {
+            "order_id": "60",
+            "progress": {
+                "1": {
+                    "ts": "1272400333",
+                },
+                "2": {
+                    "ts": "1272400333",
+                },
+                "3": {
+                    "ts": "1272400333",
+                },
+            },
+        },
+    })
+    expected = {
+        u'order_id': 60,
+        u'progress': {
+            1: {
+                "ts": datetime.datetime.fromtimestamp(float("1272400333")),
+            },
+            2: {
+                "ts": datetime.datetime.fromtimestamp(float("1272400333")),
+            },
+            3: {
+                "ts": datetime.datetime.fromtimestamp(float("1272400333")),
+            },
+        },
+    }
+    assert dict(ubersmith.order.get(order_id=60)) == expected
+
+
 def test_order_list(response):
     response.text = json.dumps({
         "status": True,
