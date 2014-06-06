@@ -21,8 +21,8 @@ _ = prepend_base(__name__.split('.')[-1])
 class GetCall(BaseCall):
     method = _('get')
     required_fields = [('order_id', 'hash')]
-    int_fields = ['order_id', 'priority', 'order_status', 'client_id',
-                  'order_form_id', 'order_queue_id', 'opportunity_id']
+    int_fields = ['order_id', 'order_status', 'client_id', 'order_form_id',
+                  'order_queue_id', 'opportunity_id']
     decimal_fields = ['total']
     timestamp_fields = ['activity', 'ts']
 
@@ -30,10 +30,12 @@ class GetCall(BaseCall):
         super(GetCall, self).clean()
         # clean additional stuff that is nested in the response
         # need to test if there is value for progress cus it might be a list
-        if self.cleaned.get('progress'):
+        if 'progress' in self.cleaned:
+            new_progress = {}
             for k, v in self.cleaned['progress'].items():
-                _rename_key(self.cleaned['progress'], k, int(k))
+                new_progress[int(k)] = v
                 v['ts'] = _CLEANERS['timestamp'](v['ts'])
+            self.cleaned['progress'] = new_progress
 
 
 class ListCall(GroupCall):
