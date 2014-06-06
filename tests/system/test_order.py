@@ -80,3 +80,32 @@ def test_order_list(response):
         }
     }
     assert dict(ubersmith.order.list(client_id=50)) == expected
+
+
+def test_order_queue_list(response):
+    response.text = json.dumps({
+        "status": True,
+        "error_code": None,
+        "error_message": "",
+        "data": {
+            u'1': {
+                u'name': u'Orders',
+                u'steps': {
+                    u'1': {u'count': u'10', u'name': u'foo'},
+                    u'2': {u'count': u'20', u'name': u'bar'},
+                    u'3': {u'count': u'30', u'name': u'baz'},
+                },
+            },
+        },
+    })
+    expected = {
+        1: {
+            u'name': u'Orders',
+            u'steps': {
+                1: {u'count': 10, u'name': u'foo'},
+                2: {u'count': 20, u'name': u'bar'},
+                3: {u'count': 30, u'name': u'baz'},
+            },
+        },
+    }
+    assert dict(ubersmith.order.queue_list(brand_id=1)) == expected

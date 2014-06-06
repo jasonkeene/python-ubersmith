@@ -1,11 +1,14 @@
+import datetime
+from decimal import Decimal
 import sys
 
 from mock import Mock
 import pytest
 
 from ubersmith.api import METHODS
+from ubersmith.calls import generate_generic_calls, _CLEANERS
+from ubersmith.exceptions import ValidationError
 from ubersmith.utils import signature_position
-from ubersmith.calls import generate_generic_calls
 from ubersmith import uber, order
 
 
@@ -84,3 +87,35 @@ def test_file_call():
     handler.process_request.return_value = response
     uber_file = uber.documentation(request_handler=handler)
     assert uber_file.data == 'bytes here'
+
+
+def test_calls_validate():
+    with pytest.raises(ValidationError):
+        order.get(request_handler='bob')
+
+
+def dict_zip(*dicts):
+    for key in set(dicts[0]).intersection(*dicts[1:]):
+        yield tuple(d[key] for d in dicts)
+
+
+# TODO: should bool cleaner clean '0' into False?
+@pytest.mark.parametrize(['cleaner', 'value', 'result'], dict_zip(_CLEANERS, {
+    'bool': '1',
+    'int': '123',
+    'decimal': '1,234.56',
+    'float': '1.234',
+    'timestamp': '123456789',
+    'date': 'Aug/31/2011',
+    'php_serialized': u'a:1:{s:4:"test";i:123;}',
+}, {
+    'bool': True,
+    'int': 123,
+    'decimal': Decimal('1234.56'),
+    'float': 1.234,
+    'timestamp': datetime.datetime.fromtimestamp(float('123456789')),
+    'date': datetime.date(2011, 8, 31),
+    'php_serialized': {b'test': 123},
+}))
+def test_cleaners(cleaner, value, result):
+    assert cleaner(value) == result
