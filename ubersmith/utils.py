@@ -1,12 +1,16 @@
 """Utility functions used throughout ubersmith library."""
 import inspect
 try:
+    from collections.abc import MutableSequence, MutableMapping
+except ImportError:  # pragma: no cover
+    from collections import MutableSequence, MutableMapping
+try:
     from urllib import parse as urlparse
-except ImportError:
+except ImportError:  # pragma: no cover
     import urlparse
 try:
     from urllib.parse import urlencode
-except ImportError:
+except ImportError:  # pragma: no cover
     from urllib import urlencode
 from six import string_types, text_type
 
@@ -135,16 +139,14 @@ def prepend_base(base):
     return lambda call: '.'.join((base, call))
 
 
-# TODO check against ABCs instead of hasattr
 def isdict(value):
     """Return true if the value behaves like a dict, false if not."""
-    return hasattr(value, 'keys') and hasattr(value, '__getitem__')
+    return isinstance(value, MutableMapping)
 
 
-# TODO check against ABCs instead of hasattr
 def islist(value):
     """Return true if the value behaves like a list, false if not."""
-    return hasattr(value, 'append') and hasattr(value, '__getitem__')
+    return isinstance(value, MutableSequence)
 
 
 def isstr(value):
