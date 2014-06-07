@@ -89,7 +89,12 @@ def test_file_call():
     assert uber_file.data == 'bytes here'
 
 
-def test_calls_validate():
+def test_calls_validates_required_fields():
+    with pytest.raises(ValidationError):
+        order.queue_list(request_handler='bob')
+
+
+def test_calls_validates_or_required_fields():
     with pytest.raises(ValidationError):
         order.get(request_handler='bob')
 
