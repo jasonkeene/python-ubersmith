@@ -95,8 +95,7 @@ class InvoiceGet(BaseCall):
         'overdue',
     ]
 
-    _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type',
-                                                  'modified', 'data'])
+    _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type', 'data'])
 
     def process_request(self):
         """Processing the call and set response_data."""
@@ -115,17 +114,9 @@ class InvoiceGet(BaseCall):
 
         self.filename = fname
         self.type = self.response_data.headers.get('content-type')
-        # TODO: consider removing all this modified stuff
-        last_modified = self.response_data.headers.get('last-modified')
-        if last_modified:
-            self.modified = datetime.datetime(
-                                      *parsedate_tz(last_modified)[:7])
-        else:
-            self.modified = datetime.datetime.now()
         self.data = self.response_data.content
 
-        self.cleaned = self._UbersmithFile(self.filename, self.type,
-                                           self.modified, self.data)
+        self.cleaned = self._UbersmithFile(self.filename, self.type, self.data)
 
 
 class InvoiceList(GroupCall):
