@@ -1,6 +1,11 @@
 import pytest
 
-from ubersmith.utils import append_qs, urlencode_unicode, to_nested_php_args
+from ubersmith.utils import (
+    append_qs,
+    urlencode_unicode,
+    to_nested_php_args,
+    get_filename,
+)
 
 
 UNICODE_STRING = u'\u0bb8\u0bcd\u0bb1\u0bc0\u0ba9\u0bbf\u0bb5\u0bbe\u0bb8 ' \
@@ -122,3 +127,22 @@ class DescribeToNestedPHPArgs:
         with pytest.raises(TypeError) as e:
             to_nested_php_args(x)
         assert str(e.value) == "expected dict or list, got {0}".format(type(x))
+
+
+class DescribeGetFilename:
+    def it_gets_filename(self):
+        assert get_filename('attachment; filename="fname.ext"') == "fname.ext"
+
+    def it_handles_unquoted_filenames(self):
+        assert get_filename('inline; filename=fname.ext') == "fname.ext"
+
+    def it_returns_none_if_none_was_passed_in(self):
+        assert get_filename(None) is None
+
+    @pytest.mark.parametrize('disposition', [
+        'no-params'
+        'inline; no-filename'
+        'inline; param-that-is-not-filename="foobar"'
+    ])
+    def it_returns_none_if_disposition_is_malformed(self, disposition):
+        assert get_filename(disposition) is None

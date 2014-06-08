@@ -11,6 +11,7 @@ from six import string_types
 
 from ubersmith.api import METHODS, get_default_request_handler
 from ubersmith.exceptions import ValidationError
+from ubersmith.utils import get_filename
 
 __all__ = [
     # abstract call classes
@@ -120,12 +121,8 @@ class FileCall(BaseCall):
                                                             raw=True)
 
     def clean(self):
-        fname = None
         disposition = self.response_data.headers.get('content-disposition')
-        if disposition:
-            fname = re.search(r'.*?filename="(.+?)"', disposition, re.I).group(1)
-
-        self.filename = fname
+        self.filename = get_filename(disposition)
         self.type = self.response_data.headers.get('content-type')
         self.data = self.response_data.content
 

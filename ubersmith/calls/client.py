@@ -7,11 +7,9 @@ ubersmith.calls.BaseCall.
 """
 
 from collections import namedtuple
-import datetime
-import re
 
 from ubersmith.calls import BaseCall, GroupCall
-from ubersmith.utils import prepend_base
+from ubersmith.utils import prepend_base, get_filename
 
 __all__ = [
     'GetCall',
@@ -107,12 +105,9 @@ class InvoiceGet(BaseCall):
     def clean(self):
         if not self.raw:
             return super(InvoiceGet, self).clean()
-        fname = None
-        disposition = self.response_data.headers.get('content-disposition')
-        if disposition:
-            fname = re.search(r'.*?filename=(.+)', disposition, re.I).group(1)
 
-        self.filename = fname
+        disposition = self.response_data.headers.get('content-disposition')
+        self.filename = get_filename(disposition)
         self.type = self.response_data.headers.get('content-type')
         self.data = self.response_data.content
 

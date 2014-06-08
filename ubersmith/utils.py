@@ -12,6 +12,7 @@ try:
     from urllib.parse import urlencode
 except ImportError:  # pragma: no cover
     from urllib import urlencode
+
 from six import string_types, text_type
 
 __all__ = [
@@ -157,3 +158,18 @@ def isstr(value):
 def signature_position(func, arg_name):
     """Look at func's signature and return the position of arg_name."""
     return inspect.getargspec(func).args.index(arg_name)
+
+
+def get_filename(disposition):
+    """Parse Content-Disposition header to pull out the filename bit.
+
+    See: http://tools.ietf.org/html/rfc2616#section-19.5.1
+
+    """
+    if disposition:
+        params = [param.strip() for param in disposition.split(';')[1:]]
+        for param in params:
+            if '=' in param:
+                name, value = param.split('=', 1)
+                if name == 'filename':
+                    return value.strip('"')
