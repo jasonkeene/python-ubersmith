@@ -13,6 +13,7 @@ __all__ = [
     'GetCall',
     'ListCall',
     'ModuleGraphCall',
+    'MonitorListCall',
 ]
 
 _ = prepend_base(__name__.split('.')[-1])
