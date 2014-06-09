@@ -16,6 +16,7 @@ from ubersmith.exceptions import (
     RequestError,
     ResponseError,
     UpdatingTokenResponse,
+    MaintenanceResponse,
 )
 
 
@@ -62,6 +63,22 @@ class DescribeHttpRequestHandler:
             'content-type': 'application/json',
         }
         response.content = json.dumps({})
+        response.text = text_type(response.content)
+        return response
+
+    @pytest.fixture
+    def maintenance_response(self):
+        response = Mock()
+        response.headers = {
+            'status': '200',
+            'content-type': 'application/json',
+        }
+        response.content = json.dumps({
+            'status': False,
+            'data': '',
+            'error_message': 'We are currently undergoing maintenance, please check back shortly.',
+            'error_code': 1,
+        })
         response.text = text_type(response.content)
         return response
 
@@ -119,6 +136,12 @@ class DescribeHttpRequestHandler:
             time.sleep = lambda x: None
             with pytest.raises(UpdatingTokenResponse):
                 h.process_request('uber.method_list')
+
+    def it_raises_maintenance_response(self, maintenance_response):
+        h = HttpRequestHandler('')
+        h._send_request = Mock(return_value=maintenance_response)
+        with pytest.raises(MaintenanceResponse):
+            h.process_request('uber.method_list')
 
     def it_is_able_to_proxy_calls_to_modules(self):
         h = HttpRequestHandler('')

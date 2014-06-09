@@ -10,6 +10,7 @@ from ubersmith.exceptions import (
     RequestError,
     ResponseError,
     UpdatingTokenResponse,
+    MaintenanceResponse,
 )
 from ubersmith.utils import append_qs, urlencode_unicode, to_nested_php_args
 
@@ -255,7 +256,12 @@ class _AbstractRequestHandler(object):
 
         # test for error in json response
         if not response_dict.get('status'):
-            raise ResponseError(response=response_dict)
+            if response_dict.get('error_code') == 1 and \
+               response_dict.get('error_message') == u"We are currently " \
+                    "undergoing maintenance, please check back shortly.":
+                raise MaintenanceResponse(response=response_dict)
+            else:
+                raise ResponseError(response=response_dict)
 
         # make sure to handle condition where empty string is sent for data :/
         return response_dict['data'] or {}

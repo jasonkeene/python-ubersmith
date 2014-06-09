@@ -6,6 +6,7 @@ __all__ = [
     'ValidationError',
     'ResponseError',
     'UpdatingTokenResponse',
+    'MaintenanceResponse',
 ]
 
 
@@ -49,3 +50,7 @@ class ResponseError(UbersmithError):
 
 class UpdatingTokenResponse(ResponseError):
     msg = "Ubersmith is updating token."
+
+
+class MaintenanceResponse(ResponseError):
+    msg = "Ubersmith is currently undergoing maintenance."
