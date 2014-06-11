@@ -17,11 +17,11 @@ class DescribeClean:
         assert cleaner([1, 2, 3, 4]) == ['1', '2', '3', '4']
 
     def it_cleans_specific_values_in_list(self):
-        cleaner = clean(list, values=[
-            (1, str),
-            (3, int),
-            (5, Decimal),
-        ])
+        cleaner = clean(list, values={
+            1: str,
+            3: int,
+            5: Decimal,
+        })
         result = cleaner(range(6))
         assert result == [0, '1', 2, 3, 4, Decimal(5)]
         assert type(result[1]) is str
@@ -29,30 +29,30 @@ class DescribeClean:
         assert type(result[5]) is Decimal
 
     def it_silences_index_errors_in_cleaners(self):
-        cleaner = clean(list, values=[
-            (1, str),
-            (3, int),
-            (5, Decimal),
-        ])
+        cleaner = clean(list, values={
+            1: str,
+            3: int,
+            5: Decimal,
+        })
         result = cleaner(range(2))
         assert result == [0, '1']
         assert type(result[1]) is str
 
-    def it_raises_idex_errors_if_asked(self):
-        cleaner = clean(list, values=[
-            (1, str),
-            (3, int),
-            (5, Decimal),
-        ], raises=True)
+    def it_raises_index_errors_if_asked(self):
+        cleaner = clean(list, values={
+            1: str,
+            3: int,
+            5: Decimal,
+        }, raises=True)
         with pytest.raises(IndexError):
             cleaner(range(2))
 
     def it_cleans_recursive_lists(self):
-        cleaner = clean(list, values=[
-            (1, str),
-            (3, int),
-            (5, clean(list, values=int)),
-        ])
+        cleaner = clean(list, values={
+            1: str,
+            3: int,
+            5: clean(list, values=int),
+        })
         result = cleaner([0, 1, 2, 3, 4, ['10', '20', '30']])
         assert result == [0, '1', 2, 3, 4, [10, 20, 30]]
 
@@ -75,11 +75,13 @@ class DescribeClean:
             '200': int,
             300: str,
         })({
-            '200': 'foo',
-            300: 'bar',
+            100: 'foo',
+            '200': 'bar',
+            300: 'baz',
         }) == {
-            200: 'foo',
-            '300': 'bar',
+            100: 'foo',
+            200: 'bar',
+            '300': 'baz',
         }
 
     def it_cleans_keys_and_nested_values(self):

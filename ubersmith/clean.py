@@ -16,38 +16,56 @@ class clean(object):
             return self.cleaner(val)
 
     def _clean_list(self, val):
+        # apply cleaner to val
         result = list(val)
+
+        # clean values
         if self.values is not None:
-            if type(self.values) is list:
-                for i, cleaner in self.values:
+            if callable(self.values):
+                # apply cleaner to all elements
+                cleaner = self.values
+                for i, element in enumerate(result):
+                    result[i] = cleaner(element)
+            else:
+                # apply cleaners to specific values
+                for i, cleaner in self.values.items():
                     try:
                         result[i] = cleaner(result[i])
                     except IndexError as e:
                         if self.raises:
                             raise e
-            else:
-                for i, el in enumerate(result):
-                    result[i] = self.values(el)
+
         return result
 
     def _clean_dict(self, val):
-        val = dict(val)
-        result = {}
-        if self.keys is not None:
-            if type(self.keys) is dict:
-                for k, cleaner in self.keys.items():
-                    result[cleaner(k)] = val[k]
-            else:
-                for k, v in val.items():
-                    result[self.keys(k)] = v
-        else:
-            result = val
+        # apply clceaner to root
+        result = dict(val)
 
+        # clean keys
+        if self.keys is not None:
+            tmp = {}
+            if callable(self.keys):
+                # apply cleaner to all keys
+                cleaner = self.keys
+                for k, v in result.items():
+                    tmp[cleaner(k)] = v
+            else:
+                # apply cleaners to specific keys
+                for k, v in result.items():
+                    cleaner = self.keys.get(k, lambda x: x)
+                    tmp[cleaner(k)] = result[k]
+            result = tmp
+
+        # clean values
         if self.values is not None:
-            if type(self.values) is dict:
+            if callable(self.values):
+                # apply cleaner to all elements
+                cleaner = self.values
+                for k, v in result.items():
+                    result[k] = cleaner(result[k])
+            else:
+                # apply cleaners to specific values
                 for k, cleaner in self.values.items():
                     result[k] = cleaner(result[k])
-            elif isinstance(self.values, clean):
-                for k, v in result.items():
-                    result[k] = self.values(result[k])
+
         return result
