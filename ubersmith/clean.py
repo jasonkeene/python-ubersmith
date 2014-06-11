@@ -7,7 +7,7 @@ class clean(object):
         self.values = values
         self.raises = raises
 
-    def apply(self, val):
+    def __call__(self, val):
         if self.cleaner is list:
             return self._clean_list(val)
         elif self.cleaner is dict:
@@ -21,10 +21,7 @@ class clean(object):
             if type(self.values) is list:
                 for i, cleaner in self.values:
                     try:
-                        if isinstance(cleaner, clean):
-                            result[i] = cleaner.apply(result[i])
-                        else:
-                            result[i] = cleaner(result[i])
+                        result[i] = cleaner(result[i])
                     except IndexError as e:
                         if self.raises:
                             raise e
@@ -49,11 +46,8 @@ class clean(object):
         if self.values is not None:
             if type(self.values) is dict:
                 for k, cleaner in self.values.items():
-                    if isinstance(cleaner, clean):
-                        result[k] = cleaner.apply(result[k])
-                    else:
-                        result[k] = cleaner(result[k])
+                    result[k] = cleaner(result[k])
             elif isinstance(self.values, clean):
                 for k, v in result.items():
-                    result[k] = self.values.apply(result[k])
+                    result[k] = self.values(result[k])
         return result

@@ -7,14 +7,14 @@ from ubersmith.clean import clean
 
 class DescribeClean:
     def it_cleans_ints(self):
-        assert clean(int).apply('123') == 123
+        assert clean(int)('123') == 123
 
     def it_cleans_list(self):
-        assert clean(list).apply([1, 2, 3, 4]) == [1, 2, 3, 4]
+        assert clean(list)([1, 2, 3, 4]) == [1, 2, 3, 4]
 
     def it_cleans_list_values(self):
         cleaner = clean(list, values=str)
-        assert cleaner.apply([1, 2, 3, 4]) == ['1', '2', '3', '4']
+        assert cleaner([1, 2, 3, 4]) == ['1', '2', '3', '4']
 
     def it_cleans_specific_values_in_list(self):
         cleaner = clean(list, values=[
@@ -22,7 +22,7 @@ class DescribeClean:
             (3, int),
             (5, Decimal),
         ])
-        result = cleaner.apply(range(6))
+        result = cleaner(range(6))
         assert result == [0, '1', 2, 3, 4, Decimal(5)]
         assert type(result[1]) is str
         assert type(result[3]) is int
@@ -34,7 +34,7 @@ class DescribeClean:
             (3, int),
             (5, Decimal),
         ])
-        result = cleaner.apply(range(2))
+        result = cleaner(range(2))
         assert result == [0, '1']
         assert type(result[1]) is str
 
@@ -45,7 +45,7 @@ class DescribeClean:
             (5, Decimal),
         ], raises=True)
         with pytest.raises(IndexError):
-            cleaner.apply(range(2))
+            cleaner(range(2))
 
     def it_cleans_recursive_lists(self):
         cleaner = clean(list, values=[
@@ -53,14 +53,14 @@ class DescribeClean:
             (3, int),
             (5, clean(list, values=int)),
         ])
-        result = cleaner.apply([0, 1, 2, 3, 4, ['10', '20', '30']])
+        result = cleaner([0, 1, 2, 3, 4, ['10', '20', '30']])
         assert result == [0, '1', 2, 3, 4, [10, 20, 30]]
 
     def it_cleans_dicts(self):
-        assert clean(dict).apply({'key': 'value'}) == {'key': 'value'}
+        assert clean(dict)({'key': 'value'}) == {'key': 'value'}
 
     def it_cleans_dict_keys(self):
-        assert clean(dict, keys=int).apply({
+        assert clean(dict, keys=int)({
             '10': 'a',
             '20': 'b',
             '30': 'c',
@@ -74,7 +74,7 @@ class DescribeClean:
         assert clean(dict, keys={
             '200': int,
             300: str,
-        }).apply({
+        })({
             '200': 'foo',
             300: 'bar',
         }) == {
@@ -90,7 +90,7 @@ class DescribeClean:
                 'pack_id': int,
                 'amount': Decimal,
             })
-        })).apply({
+        }))({
             '1234': {
                 'amount': '123.45',
                 'object_id': '123',
