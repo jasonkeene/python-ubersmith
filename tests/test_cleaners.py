@@ -111,3 +111,6 @@ class DescribeClean:
                 },
             },
         }
+
+    def it_cleans_php(self):
+        assert clean('php')(u'a:1:{s:3:"foo";s:3:"bar";}') == {b"foo": b"bar"}
