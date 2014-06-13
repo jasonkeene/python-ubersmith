@@ -1,14 +1,11 @@
-#import datetime
+import datetime
+from decimal import Decimal
+import time
 
 import phpserialize
 
 
-_CLEANERS = {
-    # TODO: add in date, timestamp, and decimal cleaners
-    # 'decimal': lambda x: Decimal(x.replace(',', '')),
-    # 'timestamp': lambda x: datetime.datetime.fromtimestamp(float(x)),
-    # 'date': lambda x: datetime.date(*time.strptime(x, '%b/%d/%Y')[:3]),
-}
+_CLEANERS = {}
 
 
 def cleaner(func):
@@ -19,6 +16,26 @@ def cleaner(func):
 @cleaner
 def php(val):
     return phpserialize.loads(val.encode("utf-8"))
+
+
+@cleaner
+def timestamp(val):
+    return datetime.datetime.fromtimestamp(float(val))
+
+
+@cleaner
+def date(val):
+    return datetime.date(*time.strptime(val, '%b/%d/%Y')[:3])
+
+
+@cleaner
+def decimal(val):
+    return Decimal(val.replace(',', ''))
+
+
+@cleaner
+def int(val):
+    return __builtins__['int'](val.replace(',', ''))
 
 
 class clean(object):

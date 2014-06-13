@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 
 import pytest
@@ -114,3 +115,16 @@ class DescribeClean:
 
     def it_cleans_php(self):
         assert clean('php')(u'a:1:{s:3:"foo";s:3:"bar";}') == {b"foo": b"bar"}
+
+    def it_cleans_timestamps(self):
+        assert clean('timestamp')(u'1234567') == \
+            datetime.datetime.fromtimestamp(float(1234567))
+
+    def it_cleans_dates(self):
+        assert clean('date')(u'Apr/01/2014') == datetime.date(2014, 4, 1)
+
+    def it_cleans_decimals_with_commas(self):
+        assert clean('decimal')(u'1,200.21') == Decimal('1200.21')
+
+    def it_cleans_ints_with_commas(self):
+        assert clean('int')(u'1,221') == 1221
