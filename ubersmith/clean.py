@@ -46,64 +46,59 @@ class clean(object):
         self.raises = raises
 
     def __call__(self, val):
+        val = self.cleaner(val)
         if self.cleaner is list:
-            return self._clean_list(val)
+            val = self._clean_list(val)
         elif self.cleaner is dict:
-            return self._clean_dict(val)
-        else:
-            return self.cleaner(val)
+            val = self._clean_dict(val)
+        return val
 
     def _clean_list(self, val):
-        # apply cleaner to val
-        result = list(val)
-
+        # TODO: factor keys/values cleaning out to methods
         # clean values
         if self.values is not None:
             if callable(self.values):
                 # apply cleaner to all elements
                 cleaner = self.values
-                for i, element in enumerate(result):
-                    result[i] = cleaner(element)
+                for i, element in enumerate(val):
+                    val[i] = cleaner(element)
             else:
                 # apply cleaners to specific values
                 for i, cleaner in self.values.items():
                     try:
-                        result[i] = cleaner(result[i])
+                        val[i] = cleaner(val[i])
                     except IndexError as e:
                         if self.raises:
                             raise e
-
-        return result
+        return val
 
     def _clean_dict(self, val):
-        # apply clceaner to root
-        result = dict(val)
-
+        # TODO: factor keys/values cleaning out to methods
         # clean keys
         if self.keys is not None:
             tmp = {}
             if callable(self.keys):
                 # apply cleaner to all keys
                 cleaner = self.keys
-                for k, v in result.items():
+                for k, v in val.items():
                     tmp[cleaner(k)] = v
             else:
                 # apply cleaners to specific keys
-                for k, v in result.items():
+                for k, v in val.items():
                     cleaner = self.keys.get(k, lambda x: x)
-                    tmp[cleaner(k)] = result[k]
-            result = tmp
+                    tmp[cleaner(k)] = val[k]
+            val = tmp
 
+        # TODO: factor keys/values cleaning out to methods
         # clean values
         if self.values is not None:
             if callable(self.values):
                 # apply cleaner to all elements
                 cleaner = self.values
-                for k, v in result.items():
-                    result[k] = cleaner(result[k])
+                for k, v in val.items():
+                    val[k] = cleaner(val[k])
             else:
                 # apply cleaners to specific values
                 for k, cleaner in self.values.items():
-                    result[k] = cleaner(result[k])
-
-        return result
+                    val[k] = cleaner(val[k])
+        return val
