@@ -6,7 +6,8 @@ ubersmith.calls.BaseCall.
 
 """
 
-from ubersmith.calls import BaseCall, GroupCall, _rename_key, _CLEANERS
+from ubersmith.calls import BaseCall, GroupCall, _rename_key
+from ubersmith.clean import clean
 from ubersmith.utils import prepend_base
 
 __all__ = [
@@ -21,21 +22,20 @@ _ = prepend_base(__name__.split('.')[-1])
 class GetCall(BaseCall):
     method = _('get')
     required_fields = [('order_id', 'hash')]
-    int_fields = ['order_id', 'order_status', 'client_id', 'order_form_id',
-                  'order_queue_id', 'opportunity_id']
-    decimal_fields = ['total']
-    timestamp_fields = ['activity', 'ts']
-
-    def clean(self):
-        super(GetCall, self).clean()
-        # clean additional stuff that is nested in the response
-        # need to test if there is value for progress cus it might be a list
-        if 'progress' in self.cleaned:
-            new_progress = {}
-            for k, v in self.cleaned['progress'].items():
-                new_progress[int(k)] = v
-                v['ts'] = _CLEANERS['timestamp'](v['ts'])
-            self.cleaned['progress'] = new_progress
+    cleaner = clean(dict, values={
+        'order_id': 'int',
+        'order_status': 'int',
+        'client_id': 'int',
+        'order_form_id': 'int',
+        'order_queue_id': 'int',
+        'opportunity_id': 'int',
+        'total': 'decimal',
+        'activity': 'timestamp',
+        'ts': 'timestamp',
+        'progress': clean(dict, keys='int', values=clean(dict, values={
+            'ts': 'timestamp',
+        })),
+    })
 
 
 class ListCall(GroupCall):

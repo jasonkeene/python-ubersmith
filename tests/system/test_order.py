@@ -25,6 +25,14 @@ def test_order_get(response):
         "error_message": "",
         "data": {
             "order_id": "60",
+            "order_status": "3",
+            "client_id": "50",
+            "order_form_id": "12",
+            "order_queue_id": "4",
+            "opportunity_id": "243",
+            "total": "1,234.5",
+            "activity": "1272400333",
+            "ts": "1272400333",
             "progress": {
                 "1": {
                     "ts": "1272400333",
@@ -40,6 +48,14 @@ def test_order_get(response):
     })
     expected = {
         u'order_id': 60,
+        u'order_status': 3,
+        u'client_id': 50,
+        u'order_form_id': 12,
+        u'order_queue_id': 4,
+        u'opportunity_id': 243,
+        u'total': Decimal('1234.5'),
+        u'activity': datetime.datetime.fromtimestamp(float('1272400333')),
+        u'ts': datetime.datetime.fromtimestamp(float('1272400333')),
         u'progress': {
             1: {
                 "ts": datetime.datetime.fromtimestamp(float("1272400333")),

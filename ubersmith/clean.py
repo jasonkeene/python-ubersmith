@@ -41,7 +41,20 @@ def int(val):
 class clean(object):
     def __init__(self, cleaner, keys=None, values=None, raises=False):
         self.cleaner = cleaner if callable(cleaner) else _CLEANERS[cleaner]
+        if keys is not None and not callable(keys):
+            if type(keys) is dict:
+                for k, v in keys.items():
+                    keys[k] = v if callable(v) else _CLEANERS[v]
+            else:
+                keys = _CLEANERS[keys]
         self.keys = keys
+        # TODO: write tighter tests to cover these branches
+        if values is not None and not callable(values):
+            if type(values) is dict:
+                for k, v in values.items():
+                    values[k] = v if callable(v) else _CLEANERS[v]
+            else:
+                values = _CLEANERS[values]
         self.values = values
         self.raises = raises
 

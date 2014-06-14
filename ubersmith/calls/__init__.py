@@ -89,7 +89,10 @@ class BaseCall(object):
     def clean(self):
         """Clean response data."""
         cleaned = copy.deepcopy(self.response_data)
-        _clean_fields(self, cleaned)
+        if hasattr(self, 'cleaner'):
+            cleaned = self.cleaner(cleaned)
+        else:
+            _clean_fields(self, cleaned)
         self.cleaned = cleaned
 
 
