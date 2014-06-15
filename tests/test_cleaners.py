@@ -29,7 +29,7 @@ class DescribeClean:
         assert type(result[3]) is int
         assert type(result[5]) is Decimal
 
-    def it_silences_index_errors_in_cleaners(self):
+    def it_silences_index_errors(self):
         cleaner = clean(list, values={
             1: str,
             3: int,
@@ -112,6 +112,21 @@ class DescribeClean:
                 },
             },
         }
+
+    def it_silences_key_errors(self):
+        assert clean(dict, keys={
+            'not_there': int
+        }, values={
+            'not_there': int
+        })({}) == {}
+
+    def it_raises_key_errors_if_asked(self):
+        with pytest.raises(KeyError):
+            clean(dict, keys={
+                'not_there': int
+            }, values={
+                'not_there': int
+            }, raises=True)({})
 
     def it_cleans_php(self):
         assert clean('php')(u'a:1:{s:3:"foo";s:3:"bar";}') == {b"foo": b"bar"}

@@ -38,12 +38,20 @@ class GetCall(BaseCall):
     })
 
 
-class ListCall(GroupCall):
+class ListCall(BaseCall):
     method = _('list')
-    int_fields = ['order_id', 'priority', 'order_status', 'client_id',
-                  'order_form_id', 'order_queue_id', 'opportunity_id']
-    decimal_fields = ['total']
-    timestamp_fields = ['activity', 'ts']
+    cleaner = clean(dict, keys='int', values=clean(dict, values={
+        'order_id': 'int',
+        'priority': 'int',
+        'order_status': 'int',
+        'client_id': 'int',
+        'order_form_id': 'int',
+        'order_queue_id': 'int',
+        'opportunity_id': 'int',
+        'total': 'decimal',
+        'activity': 'timestamp',
+        'ts': 'timestamp',
+    }))
 
 
 class QueueListCall(GroupCall):

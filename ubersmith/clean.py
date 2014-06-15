@@ -113,5 +113,9 @@ class clean(object):
             else:
                 # apply cleaners to specific values
                 for k, cleaner in self.values.items():
-                    val[k] = cleaner(val[k])
+                    try:
+                        val[k] = cleaner(val[k])
+                    except KeyError as e:
+                        if self.raises:
+                            raise e
         return val
