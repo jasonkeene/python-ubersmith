@@ -9,6 +9,7 @@ ubersmith.calls.BaseCall.
 from collections import namedtuple
 
 from ubersmith.calls import BaseCall, GroupCall
+from ubersmith.clean import clean
 from ubersmith.utils import prepend_base, get_filename
 
 __all__ = [
@@ -25,73 +26,65 @@ __all__ = [
 _ = prepend_base(__name__.split('.')[-1])
 
 
-class _ClientCallMixin(object):
-    bool_fields = ['active']
-    int_fields = [
-        'clientid',
-        'class_id',
-        'priority',
-    ]
-    decimal_fields = [
-        'balance',
-        'commission',
-        'commission_rate',
-        'discount',
-        'tier_commission',
-        'tier_commission_rate',
-    ]
-    timestamp_fields = [
-        'created',
-        'latest_inv',
-        'password_changed',
-    ]
-    php_serialized_fields = ['access']
+_CLIENT_CLEANER = clean(dict, values={
+    'active': bool,
+    'clientid': 'int',
+    'class_id': 'int',
+    'priority': 'int',
+    'balance': 'decimal',
+    'commission': 'decimal',
+    'commission_rate': 'decimal',
+    'discount': 'decimal',
+    'tier_commission': 'decimal',
+    'tier_commission_rate': 'decimal',
+    'created': 'timestamp',
+    'latest_inv': 'timestamp',
+    'password_changed': 'timestamp',
+    'access': 'php',
+})
 
 
-class GetCall(_ClientCallMixin, BaseCall):
+class GetCall(BaseCall):
     method = _('get')
     required_fields = [('client_id', 'user_login', 'email')]
+    cleaner = _CLIENT_CLEANER
 
 
-class ListCall(_ClientCallMixin, GroupCall):
+class ListCall(BaseCall):
     method = _('list')
+    cleaner = clean(dict, keys='int', values=_CLIENT_CLEANER)
 
 
-class PaymentMethodListCall(GroupCall):
+class PaymentMethodListCall(BaseCall):
     method = _('payment_method_list')
+    cleaner = clean(dict, keys='int')
 
 
 class InvoiceCountCall(BaseCall):
     method = _('invoice_count')
     required_fields = ['client_id']
-
-    def clean(self):
-        super(InvoiceCountCall, self).clean()
-        self.cleaned = int(self.cleaned)
+    cleaner = int
 
 
-class InvoicePaymentsCall(GroupCall):
+class InvoicePaymentsCall(BaseCall):
     method = _('invoice_payments')
     required_fields = ['invoice_id']
-
-    timestamp_fields = [
-        'time',
-    ]
+    cleaner = clean(dict, keys='int', values=clean(dict, values={
+        'time': 'timestamp',
+    }))
 
 
 class InvoiceGet(BaseCall):
     method = _('invoice_get')
     required_fields = ['invoice_id']
-    int_fields = [
-        'clientid',
-        'invid',
-    ]
-    timestamp_fields = [
-        'date',
-        'datepaid',
-        'due',
-        'overdue',
-    ]
+    cleaner = clean(dict, values={
+        'clientid': 'int',
+        'invid': 'int',
+        'date': 'timestamp',
+        'datepaid': 'timestamp',
+        'due': 'timestamp',
+        'overdue': 'timestamp',
+    })
 
     _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type', 'data'])
 
@@ -106,6 +99,7 @@ class InvoiceGet(BaseCall):
         if not self.raw:
             return super(InvoiceGet, self).clean()
 
+        # TODO: this should not be done as part of cleaning :/
         disposition = self.response_data.headers.get('content-disposition')
         self.filename = get_filename(disposition)
         self.type = self.response_data.headers.get('content-type')
@@ -114,30 +108,24 @@ class InvoiceGet(BaseCall):
         self.cleaned = self._UbersmithFile(self.filename, self.type, self.data)
 
 
-class InvoiceList(GroupCall):
+class InvoiceList(BaseCall):
     method = _('invoice_list')
-    int_fields = [
-        'clientid',
-        'invid',
-    ]
-    timestamp_fields = [
-        'date',
-        'datepaid',
-        'due',
-    ]
+    cleaner = clean(dict, keys='int', values=clean(dict, values={
+        'clientid': 'int',
+        'invid': 'int',
+        'date': 'timestamp',
+        'datepaid': 'timestamp',
+        'due': 'timestamp',
+    }))
 
 
-class CreditListCall(GroupCall):
+class CreditListCall(BaseCall):
     method = _('credit_list')
     required_fields = ['client_id']
-
-    int_fields = [
-        'clientid',
-        'active',
-        'credit_id',
-        'order_id',
-    ]
-
-    timestamp_fields = [
-        'date',
-    ]
+    cleaner = clean(dict, keys='int', values=clean(dict, values={
+        'clientid': 'int',
+        'active': 'int',
+        'credit_id': 'int',
+        'order_id': 'int',
+        'date': 'timestamp',
+    }))
