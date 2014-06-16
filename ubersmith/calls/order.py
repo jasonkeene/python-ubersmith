@@ -54,14 +54,11 @@ class ListCall(BaseCall):
     }))
 
 
-class QueueListCall(GroupCall):
+class QueueListCall(BaseCall):
     method = _('queue_list')
     required_fields = ['brand_id']
-
-    def clean(self):
-        super(QueueListCall, self).clean()
-        # clean additional stuff that is nested in the response
-        for value in self.cleaned.values():
-            for k, v in value['steps'].items():
-                _rename_key(value['steps'], k, int(k))
-                v['count'] = int(v['count'])
+    cleaner = clean(dict, keys='int', values=clean(dict, values={
+        'steps': clean(dict, keys='int', values=clean(dict, values={
+            'count': 'int',
+        })),
+    }))
