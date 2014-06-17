@@ -8,7 +8,7 @@ ubersmith.calls.BaseCall.
 
 from collections import namedtuple
 
-from ubersmith.calls import BaseCall, GroupCall
+from ubersmith.calls import BaseCall
 from ubersmith.clean import clean
 from ubersmith.utils import prepend_base, get_filename
 

@@ -6,7 +6,8 @@ ubersmith.calls.BaseCall.
 
 """
 
-from ubersmith.calls import BaseCall, GroupCall, FileCall
+from ubersmith.calls import BaseCall, FileCall
+from ubersmith.clean import clean
 from ubersmith.utils import prepend_base
 
 __all__ = [
@@ -19,31 +20,52 @@ __all__ = [
 _ = prepend_base(__name__.split('.')[-1])
 
 
+_DEVICE_CLEANER = clean(dict, values={
+    'active': 'int',
+    'cage_id': 'int',
+    'clientid': 'int',
+    'dev': 'int',
+    'devtype_group_id': 'int',
+    'disabled': 'int',
+    'down': 'int',
+    'fac_id': 'int',
+    'owner': 'int',
+    'parent': 'int',
+    'rack_id': 'int',
+    'row_id': 'int',
+    'total': 'int',
+    'type_id': 'int',
+    'up': 'int',
+    'warn': 'int',
+    'zone_id': 'int',
+    'depth': float,
+    'height': float,
+    'width': float,
+})
+
+
 class GetCall(BaseCall):
     method = _('get')
     required_fields = ['device_id']
-    int_fields = ['active', 'cage_id', 'clientid', 'dev', 'devtype_group_id',
-                  'disabled', 'down', 'fac_id', 'owner', 'parent',
-                  'rack_id', 'row_id', 'total', 'type_id', 'up', 'warn',
-                  'zone_id']
-    float_fields = ['depth', 'height', 'width']
+    cleaner = _DEVICE_CLEANER
 
 
-class ListCall(GroupCall):
+class ListCall(BaseCall):
     method = _('list')
-    int_fields = ['active', 'cage_id', 'clientid', 'dev', 'devtype_group_id',
-                  'disabled', 'down', 'fac_id', 'owner', 'parent',
-                  'rack_id', 'row_id', 'total', 'type_id', 'up', 'warn',
-                  'zone_id']
-    float_fields = ['depth', 'height', 'width']
+    cleaner = clean(dict, keys='int', values=_DEVICE_CLEANER)
 
 
 class ModuleGraphCall(FileCall):
     method = _('module_graph')
 
 
-class MonitorListCall(GroupCall):
+class MonitorListCall(BaseCall):
     method = _('monitor_list')
     required_fields = ['protocol']
-    int_fields = ['dev', 'script_id']
-    timestamp_fields = ['last_change', 'last_notified', 'last_poll']
+    cleaner = clean(dict, keys='int', values=clean(dict, values={
+        'dev': 'int',
+        'script_id': 'int',
+        'last_change': 'timestamp',
+        'last_notified': 'timestamp',
+        'last_poll': 'timestamp',
+    }))
