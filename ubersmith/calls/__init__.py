@@ -1,12 +1,6 @@
 from collections import namedtuple
 import copy
-import datetime
-from decimal import Decimal
-import re
-from email.utils import parsedate_tz
-import time
 
-import phpserialize
 from six import string_types
 
 from ubersmith.api import METHODS, get_default_request_handler
@@ -16,7 +10,6 @@ from ubersmith.utils import get_filename
 __all__ = [
     # abstract call classes
     'BaseCall',
-    'GroupCall',
     'FileCall',
     # generate generic calls
     'generate_generic_calls',
@@ -29,29 +22,13 @@ __all__ = [
     'uber',
 ]
 
-_CLEANERS = {
-    'bool': bool,
-    'int': int,
-    'decimal': lambda x: Decimal(x.replace(',', '')),
-    'float': float,
-    'timestamp': lambda x: datetime.datetime.fromtimestamp(float(x)),
-    'date': lambda x: datetime.date(*time.strptime(x, '%b/%d/%Y')[:3]),
-    'php_serialized': lambda x: phpserialize.loads(x.encode("utf-8")),
-}
-
 
 class BaseCall(object):
     """Abstract class to implement a call with validation/cleaning/etc."""
 
     method = ''  # ubersmith method name, should be defined on child classes
     required_fields = []  # field names that should be present in request_data
-    bool_fields = []  # fields to convert to bools
-    int_fields = []  # fields to convert to ints
-    decimal_fields = []  # fields to convert to decimals
-    float_fields = []   # fields to convert to floats
-    timestamp_fields = []  # fields to convert from timestamps to datetime
-    date_fields = []  # fields to convert to datetime.date
-    php_serialized_fields = []  # fields to convert from php serialized format
+    cleaner = None  # function to clean response (see ubersmith.clean)
 
     def __init__(self, request_data=None, request_handler=None):
         """Setup call with provided request data and handler."""
@@ -89,27 +66,8 @@ class BaseCall(object):
     def clean(self):
         """Clean response data."""
         cleaned = copy.deepcopy(self.response_data)
-        if hasattr(self, 'cleaner'):
+        if self.cleaner is not None:
             cleaned = self.cleaner(cleaned)
-        else:
-            _clean_fields(self, cleaned)
-        self.cleaned = cleaned
-
-
-class GroupCall(BaseCall):
-    """Abstract class to implement a call that returns a group of results."""
-
-    def clean(self):
-        cleaned = copy.deepcopy(self.response_data)
-
-        # convert top level keys to ints
-        for key in self.response_data.keys():
-            _rename_key(cleaned, key, int(key))
-
-        # clean fields on each member of the group
-        for member in cleaned.values():
-            _clean_fields(self, member)
-
         self.cleaned = cleaned
 
 
@@ -130,21 +88,6 @@ class FileCall(BaseCall):
         self.data = self.response_data.content
 
         self.cleaned = self._UbersmithFile(self.filename, self.type, self.data)
-
-
-def _rename_key(d, old, new):
-    """Rename a key on d from old to new."""
-    if old in d and new not in d:
-        d[new] = d[old]
-        del d[old]
-
-
-def _clean_fields(call, d):
-    """Clean fields on d using info on call."""
-    for name, func in _CLEANERS.items():
-        for field in getattr(call, '{0}_fields'.format(name), []):
-            if field in d and isinstance(d[field], string_types):
-                d[field] = func(d[field])
 
 
 def _get_call_class(method):

@@ -6,7 +6,8 @@ from mock import Mock
 import pytest
 
 from ubersmith.api import METHODS
-from ubersmith.calls import generate_generic_calls, _CLEANERS
+from ubersmith.calls import generate_generic_calls
+from ubersmith.clean import _CLEANERS
 from ubersmith.exceptions import ValidationError
 from ubersmith.utils import signature_position
 from ubersmith import uber, order
