@@ -6,7 +6,7 @@ ubersmith.calls.BaseCall.
 
 """
 
-from ubersmith.calls import BaseCall, GroupCall, _rename_key
+from ubersmith.calls import BaseCall
 from ubersmith.clean import clean
 from ubersmith.utils import prepend_base
 

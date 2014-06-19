@@ -6,8 +6,8 @@ ubersmith.calls.BaseCall.
 
 """
 
-from ubersmith.exceptions import ResponseError
 from ubersmith.calls import BaseCall, FileCall
+from ubersmith.clean import clean
 from ubersmith.utils import prepend_base
 
 __all__ = [
@@ -28,28 +28,26 @@ class ApiExportCall(BaseCall):
 
 class CheckLoginCall(BaseCall):
     method = _('check_login')
-    int_fields = [
-        'password_expired',
-    ]
-    timestamp_fields = [
-        'last_login',
-        'password_changed',
-    ]
+    cleaner = clean(dict, values={
+        'password_expired': 'int',
+        'last_login': 'timestamp',
+        'password_changed': 'timestamp',
+    })
 
 
 class ClientWelcomeStatsCall(BaseCall):
     method = _('client_welcome_stats')
     required_fields = ['client_id']
-    timestamp_fields = ['client_activity']
-    date_fields = ['next_inv']
-    int_fields = [
-        'client_activity_type',
-        'closed_count',
-        'inv_count',
-        'pack_count',
-        'ticket',
-        'type',
-    ]
+    cleaner = clean(dict, values={
+        'client_activity_type': 'int',
+        'closed_count': 'int',
+        'inv_count': 'int',
+        'pack_count': 'int',
+        'ticket': 'int',
+        'type': 'int',
+        'client_activity': 'timestamp',
+        'next_inv': 'date',
+    })
 
 
 class MethodGetCall(BaseCall):
