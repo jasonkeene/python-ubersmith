@@ -1,6 +1,10 @@
 import datetime
 from decimal import Decimal
 import time
+try:
+    import __builtin__ as builtins
+except ImportError:  # pragma: no cover
+    import builtins
 
 import phpserialize
 
@@ -35,7 +39,7 @@ def decimal(val):
 
 @cleaner
 def int(val):
-    return __builtins__['int'](val.replace(',', ''))
+    return builtins.int(val.replace(',', ''))
 
 
 class clean(object):
