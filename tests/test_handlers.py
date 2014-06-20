@@ -150,7 +150,7 @@ class DescribeHttpRequestHandler:
             proxy = getattr(h, call_base)
             partial = getattr(proxy, call_name)
             assert callable(partial)
-            assert partial.keywords.get('request_handler') == h
+            assert partial.request_handler == h
 
     def it_does_not_proxy_calls_to_modules_that_do_not_exist(self):
         h = HttpRequestHandler('')

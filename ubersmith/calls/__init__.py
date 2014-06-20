@@ -109,11 +109,17 @@ def _get_call_class(method):
         return GenericCall
 
 
-def _make_generic_call(call_class):
-    """Create a call function that is lexically bound to use call_class."""
-    def generic_call(request_handler=None, **kwargs):
-        return call_class(kwargs, request_handler).render()
-    return generic_call
+class GenericCall(object):
+    def __init__(self, call_class, request_handler=None):
+        self.call_class = call_class
+        self.request_handler = request_handler
+
+    def handler(self, request_handler):
+        """Return new GenericCall that is bound to a request handler."""
+        return GenericCall(self.call_class, request_handler)
+
+    def __call__(self, **kwargs):
+        return self.call_class(kwargs, self.request_handler).render()
 
 
 def generate_generic_calls(base, ns):
@@ -125,7 +131,7 @@ def generate_generic_calls(base, ns):
             # find the appropriate class
             call_class = _get_call_class(method)
             # create a call function and stick it in the namespace
-            generic_call = _make_generic_call(call_class)
+            generic_call = GenericCall(call_class)
             generic_call.__name__ = str(call_name)
             generic_call.__doc__ = METHODS[method]
             # this may or may not be a good idea, see:

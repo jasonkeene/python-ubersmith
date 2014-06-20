@@ -42,8 +42,8 @@ instantiate the request handler manually::
 and then explicitly pass it into any call function::
 
     from ubersmith import uber, client
-    uber.method_list(request_handler=h)
-    client.get(email='g.freeman@combineresearch.com', request_handler=h)
+    uber.method_list.handler(h)()
+    client.get.handler(h)(email='g.freeman@combineresearch.com')
 
 or you can access the call function directly on the handler and the handler
 will be implicitly passed into the call function for you::

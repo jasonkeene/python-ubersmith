@@ -210,7 +210,7 @@ class _ProxyModule(object):
         """Return the call with request_handler prefilled."""
         call_func = getattr(self.module, name)
         if callable(call_func):
-            call_p = partial(call_func, request_handler=self.handler)
+            call_p = call_func.handler(self.handler)
             # store partial on proxy so it doesn't have to be created again
             setattr(self, name, call_p)
             return call_p

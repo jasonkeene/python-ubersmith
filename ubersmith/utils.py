@@ -23,7 +23,6 @@ __all__ = [
     'isdict',
     'islist',
     'isstr',
-    'signature_position',
     'get_filename'
 ]
 
@@ -154,11 +153,6 @@ def islist(value):
 def isstr(value):
     """Return true if the value behaves like a string, false if not."""
     return isinstance(value, string_types)
-
-
-def signature_position(func, arg_name):
-    """Look at func's signature and return the position of arg_name."""
-    return inspect.getargspec(func).args.index(arg_name)
 
 
 def get_filename(disposition):

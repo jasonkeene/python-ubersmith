@@ -9,7 +9,6 @@ from ubersmith.api import METHODS
 from ubersmith.calls import generate_generic_calls
 from ubersmith.clean import _CLEANERS
 from ubersmith.exceptions import ValidationError
-from ubersmith.utils import signature_position
 from ubersmith import uber, order
 
 
@@ -27,14 +26,6 @@ def test_method_exists(method):
     base, call = method.split('.', 1)
     mod_name = '.'.join(['ubersmith', base])
     assert hasattr(sys.modules[mod_name], call)
-
-
-@pytest.mark.parametrize('method', METHODS)
-def test_method_signature(method):
-    base, call = method.split('.', 1)
-    mod_name = '.'.join(['ubersmith', base])
-    call_func = getattr(sys.modules[mod_name], call)
-    assert signature_position(call_func, 'request_handler') == 0
 
 
 class DescribeGenerateGenericCalls:
@@ -71,13 +62,13 @@ class DescribeGenerateGenericCalls:
 def test_json_call():
     handler = Mock()
     handler.process_request.return_value = {"test": "blah"}
-    assert uber.method_list(request_handler=handler) == {"test": "blah"}
+    assert uber.method_list.handler(handler)() == {"test": "blah"}
 
 
 def test_group_call():
     handler = Mock()
     handler.process_request.return_value = {"1": {"test": "blah"}}
-    assert order.list(request_handler=handler) == {1: {"test": "blah"}}
+    assert order.list.handler(handler)() == {1: {"test": "blah"}}
 
 
 def test_file_call():
@@ -86,18 +77,18 @@ def test_file_call():
     response.content = 'bytes here'
     response.headers = {}
     handler.process_request.return_value = response
-    uber_file = uber.documentation(request_handler=handler)
+    uber_file = uber.documentation.handler(handler)()
     assert uber_file.data == 'bytes here'
 
 
 def test_calls_validates_required_fields():
     with pytest.raises(ValidationError):
-        order.queue_list(request_handler='bob')
+        order.queue_list.handler('bob')()
 
 
 def test_calls_validates_or_required_fields():
     with pytest.raises(ValidationError):
-        order.get(request_handler='bob')
+        order.get.handler('bob')()
 
 
 def dict_zip(*dicts):
