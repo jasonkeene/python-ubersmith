@@ -1,8 +1,7 @@
 -r requirements.txt
-coverage
 mock
 tox
 pytest
+coverage
 pytest-cov
-pytest-sugar
 coveralls
