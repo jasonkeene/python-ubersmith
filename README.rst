@@ -36,8 +36,8 @@ ubersmith.init creates and stores a request handler with your login credentials.
 If for some reason you'd prefer to not have this module state then you can
 instantiate the request handler manually::
 
-    from ubersmith.api import HttpRequestHandler
-    h = HttpRequestHandler('http://ubersmith/api/2.0/', 'username', 'password')
+    from ubersmith.api import RequestHandler
+    h = RequestHandler('http://ubersmith/api/2.0/', 'username', 'password')
 
 and then explicitly pass it into any call function::
 

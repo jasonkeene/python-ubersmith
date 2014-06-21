@@ -16,7 +16,7 @@ from ubersmith.utils import append_qs, urlencode_unicode, to_nested_php_args
 
 __all__ = [
     'METHODS',
-    'HttpRequestHandler',
+    'RequestHandler',
     'get_default_request_handler',
     'set_default_request_handler',
 ]
@@ -290,7 +290,7 @@ class _AbstractRequestHandler(object):
                                                    type(self).__name__, name))
 
 
-class HttpRequestHandler(_AbstractRequestHandler):
+class RequestHandler(_AbstractRequestHandler):
     """Handles HTTP requests and authentication."""
 
     def __init__(self, base_url, username=None, password=None, verify=True):

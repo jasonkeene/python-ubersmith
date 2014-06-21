@@ -7,7 +7,7 @@ from six import text_type
 import ubersmith.uber
 import ubersmith.api
 from ubersmith.api import (
-    HttpRequestHandler,
+    RequestHandler,
     METHODS,
     get_default_request_handler,
     set_default_request_handler,
@@ -20,7 +20,7 @@ from ubersmith.exceptions import (
 )
 
 
-class DescribeHttpRequestHandler:
+class DescribeRequestHandler:
     test_data = 'this is some data'
 
     @pytest.fixture
@@ -94,19 +94,19 @@ class DescribeHttpRequestHandler:
         return response
 
     def it_handles_normal_responses(self, response):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         h._send_request = Mock(return_value=response)
         assert self.test_data == h.process_request('uber.method_list')
 
     def it_raises_response_error_on_bad_headers(self, bad_header_response):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         h._send_request = Mock(return_value=bad_header_response)
         with pytest.raises(ResponseError) as e:
             h.process_request('uber.method_list')
         assert str(e.value) == "Response wasn't application/json"
 
     def it_raises_response_error_on_bad_body(self, bad_body_response):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         h._send_request = Mock(return_value=bad_body_response)
         with pytest.raises(ResponseError):
             h.process_request('uber.method_list')
@@ -117,7 +117,7 @@ class DescribeHttpRequestHandler:
             token_response,
             response,
         ]
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         h._send_request = Mock(side_effect=lambda *args: returns.pop(0))
         with patch('ubersmith.api.time') as time:
             time.sleep = lambda x: None
@@ -130,7 +130,7 @@ class DescribeHttpRequestHandler:
             token_response,
             response,
         ]
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         h._send_request = Mock(side_effect=lambda *args: returns.pop(0))
         with patch('ubersmith.api.time') as time:
             time.sleep = lambda x: None
@@ -138,13 +138,13 @@ class DescribeHttpRequestHandler:
                 h.process_request('uber.method_list')
 
     def it_raises_maintenance_response(self, maintenance_response):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         h._send_request = Mock(return_value=maintenance_response)
         with pytest.raises(MaintenanceResponse):
             h.process_request('uber.method_list')
 
     def it_is_able_to_proxy_calls_to_modules(self):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         for call_base, call_name in (m.split('.') for m in METHODS):
             assert hasattr(h, call_base)
             proxy = getattr(h, call_base)
@@ -153,49 +153,49 @@ class DescribeHttpRequestHandler:
             assert partial.request_handler == h
 
     def it_does_not_proxy_calls_to_modules_that_do_not_exist(self):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         with pytest.raises(AttributeError):
             h.invalid_module
 
     def it_does_not_proxy_calls_to_methods_that_do_not_exist(self):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         with pytest.raises(AttributeError):
             h.uber.invalid_method
 
     def it_does_not_proxy_calls_to_methods_that_are_not_callable(self):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         ubersmith.uber.rando = 'X-rando'
         with pytest.raises(AttributeError):
             h.uber.rando
 
     def it_validates_ssl(self, response):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         with patch('ubersmith.api.requests') as requests:
             requests.post.return_value = response
             h.process_request('uber.method_list')
             assert requests.post.call_args[1]['verify'] is True
 
     def it_can_disable_ssl_validation(self, response):
-        h = HttpRequestHandler('', verify=False)
+        h = RequestHandler('', verify=False)
         with patch('ubersmith.api.requests') as requests:
             requests.post.return_value = response
             h.process_request('uber.method_list')
             assert requests.post.call_args[1]['verify'] is False
 
     def it_validates_bad_methods(self):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         with pytest.raises(RequestError) as e:
             h.process_request('boop')
         assert str(e.value) == "Requested method is not valid."
 
     def it_allows_for_raw_responses(self, response):
-        h = HttpRequestHandler('')
+        h = RequestHandler('')
         h._send_request = Mock(return_value=response)
         assert h.process_request('uber.method_list', raw=True) is response
 
 
 def test_get_set_default_handler():
-    h = HttpRequestHandler('')
+    h = RequestHandler('')
     set_default_request_handler(h)
     assert get_default_request_handler() == h
     ubersmith.api._DEFAULT_REQUEST_HANDLER = None
