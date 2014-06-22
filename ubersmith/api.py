@@ -218,30 +218,62 @@ class _ProxyModule(object):
                                                    type(self).__name__, name))
 
 
-class _AbstractRequestHandler(object):
-    def process_request(self, method, data=None, raw=False):
-        """Process request.
+class RequestHandler(object):
+    """Handles HTTP requests and authentication."""
+
+    def __init__(self, base_url, username=None, password=None, verify=True):
+        """Initialize HTTP request handler with optional authentication.
+
+            base_url: URL to send API requests
+            username: Username for API access
+            password: Password for API access
+            verify: Verify HTTPS certificate
+
+        """
+        self.base_url = base_url
+        self.username = username
+        self.password = password
+        self.verify = verify
+
+    def process_request(self, method, data=None):
+        """Process request over HTTP to ubersmith instance.
 
             method: Ubersmith API method string
             data: dict of method arguments
-            raw: Set to True to return the raw response vs the default
-                 behavior of returning JSON data
 
         """
-        raise NotImplementedError
+        # make sure requested method is valid
+        self._validate_request_method(method)
 
-    def _render_response(self, response, raw):
+        # try request 3 times
+        last_exception = None
+        for i in range(3):
+            # make the request
+            response = self._send_request(method, data)
+            try:
+                # render the response as python object
+                return self._render_response(response)
+            except UpdatingTokenResponse as e:
+                # wait 4 secs before retrying request
+                time.sleep(4)
+                last_exception = e
+        # if last attempt still threw an exception, reraise it
+        raise last_exception
+
+    def _send_request(self, method, data):
+        url = append_qs(self.base_url, {'method': method})
+        body = self._encode_data(data)
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        return requests.post(url, data=body, headers=headers,
+                             auth=(self.username, self.password),
+                             verify=self.verify)
+
+    def _render_response(self, response):
         """Render response as python object.
 
             response: requests' response object
-            raw: Set to True to return the raw response vs the default
-                 behavior of returning JSON data
 
         """
-        # just return the raw response
-        if raw:
-            return response
-
         # response isn't json
         if response.headers.get('content-type') != 'application/json':
             # handle case where ubersmith is 'updating token'
@@ -290,56 +322,26 @@ class _AbstractRequestHandler(object):
                                                    type(self).__name__, name))
 
 
-class RequestHandler(_AbstractRequestHandler):
-    """Handles HTTP requests and authentication."""
+class Request(object):
+    pass
 
-    def __init__(self, base_url, username=None, password=None, verify=True):
-        """Initialize HTTP request handler with optional authentication.
 
-            base_url: URL to send API requests
-            username: Username for API access
-            password: Password for API access
+class _AbstractResponse(object):
+    """Wraps response object and emulates different types."""
+    def __init__(self, response):
+        self.response = response  # requests' response object
 
-        """
-        self.base_url = base_url
-        self.username = username
-        self.password = password
-        self.verify = verify
 
-    def process_request(self, method, data=None, raw=False):
-        """Process request over HTTP to ubersmith instance.
+class DictResponse(_AbstractResponse):
+    pass
 
-            method: Ubersmith API method string
-            data: dict of method arguments
-            raw: Set to True to return the raw response vs the default
-                 behavior of returning JSON decoded data
 
-        """
-        # make sure requested method is valid
-        self._validate_request_method(method)
+class IntResponse(_AbstractResponse):
+    pass
 
-        # try request 3 times
-        last_exception = None
-        for i in range(3):
-            # make the request
-            response = self._send_request(method, data)
-            try:
-                # render the response as python object
-                return self._render_response(response, raw)
-            except UpdatingTokenResponse as e:
-                # wait 4 secs before retrying request
-                time.sleep(4)
-                last_exception = e
-        # if last attempt still threw an exception, reraise it
-        raise last_exception
 
-    def _send_request(self, method, data):
-        url = append_qs(self.base_url, {'method': method})
-        body = self._encode_data(data)
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        return requests.post(url, data=body, headers=headers,
-                             auth=(self.username, self.password),
-                             verify=self.verify)
+class FileResponse(_AbstractResponse):
+    pass
 
 
 def get_default_request_handler():
@@ -351,7 +353,7 @@ def get_default_request_handler():
 
 def set_default_request_handler(request_handler):
     """Set the default request handler."""
-    if not isinstance(request_handler, _AbstractRequestHandler):
+    if not isinstance(request_handler, RequestHandler):
         raise TypeError(
             "Attempted to set an invalid request handler as default.")
     global _DEFAULT_REQUEST_HANDLER

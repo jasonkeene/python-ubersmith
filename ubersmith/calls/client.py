@@ -86,27 +86,6 @@ class InvoiceGet(BaseCall):
         'overdue': 'timestamp',
     })
 
-    _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type', 'data'])
-
-    def process_request(self):
-        """Processing the call and set response_data."""
-        self.raw = self.request_data.get('format') not in [None, 'json']
-        self.response_data = self.request_handler.process_request(self.method,
-                                                            self.request_data,
-                                                            raw=self.raw)
-
-    def clean(self):
-        if not self.raw:
-            return super(InvoiceGet, self).clean()
-
-        # TODO: this should not be done as part of cleaning :/
-        disposition = self.response_data.headers.get('content-disposition')
-        self.filename = get_filename(disposition)
-        self.type = self.response_data.headers.get('content-type')
-        self.data = self.response_data.content
-
-        self.cleaned = self._UbersmithFile(self.filename, self.type, self.data)
-
 
 class InvoiceList(BaseCall):
     method = _('invoice_list')

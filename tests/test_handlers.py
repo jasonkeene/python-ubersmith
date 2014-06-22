@@ -188,11 +188,6 @@ class DescribeRequestHandler:
             h.process_request('boop')
         assert str(e.value) == "Requested method is not valid."
 
-    def it_allows_for_raw_responses(self, response):
-        h = RequestHandler('')
-        h._send_request = Mock(return_value=response)
-        assert h.process_request('uber.method_list', raw=True) is response
-
 
 def test_get_set_default_handler():
     h = RequestHandler('')

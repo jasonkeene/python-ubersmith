@@ -75,12 +75,6 @@ class FileCall(BaseCall):
     """Abstract class to implement a call that returns a file."""
     _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type', 'data'])
 
-    def process_request(self):
-        """Processing the call and set response_data."""
-        self.response_data = self.request_handler.process_request(self.method,
-                                                            self.request_data,
-                                                            raw=True)
-
     def clean(self):
         disposition = self.response_data.headers.get('content-disposition')
         self.filename = get_filename(disposition)

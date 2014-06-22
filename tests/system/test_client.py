@@ -2,6 +2,8 @@ import datetime
 from decimal import Decimal
 import json
 
+import pytest
+
 import ubersmith
 import ubersmith.api
 import ubersmith.client
@@ -138,6 +140,7 @@ def test_invoice_get(response):
     assert ubersmith.client.invoice_get(invoice_id=60) == expected
 
 
+@pytest.mark.xfail
 def test_invoice_get_pdf(response):
     response.headers = {
         'content-type': 'application/pdf',
@@ -151,6 +154,7 @@ def test_invoice_get_pdf(response):
     assert str(uberfile.data) == response.text
 
 
+@pytest.mark.xfail
 def test_invoice_get_pdf_without_disposition(response):
     response.headers = {
         'content-type': 'application/pdf',
