@@ -30,42 +30,18 @@ class DescribeRequestHandler:
             'status': '200',
             'content-type': 'application/json',
         }
-        response.content = json.dumps({
+        resp_json = {
             'status': True,
             'error_code': None,
             'error_message': '',
             'data': self.test_data,
-        })
+        }
+        response.json.return_value = resp_json
+        response.content = json.dumps(resp_json)
         response.text = text_type(response.content)
         return response
 
     @pytest.fixture
-    def bad_header_response(self):
-        response = Mock()
-        response.headers = {
-            'status': '200',
-            'content-type': 'text/html',
-        }
-        response.content = json.dumps({
-            'status': True,
-            'error_code': None,
-            'error_message': '',
-            'data': self.test_data,
-        })
-        response.text = text_type(response.content)
-        return response
-
-    @pytest.fixture
-    def bad_body_response(self):
-        response = Mock()
-        response.headers = {
-            'status': '200',
-            'content-type': 'application/json',
-        }
-        response.content = json.dumps({})
-        response.text = text_type(response.content)
-        return response
-
     @pytest.fixture
     def maintenance_response(self):
         response = Mock()
@@ -73,12 +49,14 @@ class DescribeRequestHandler:
             'status': '200',
             'content-type': 'application/json',
         }
-        response.content = json.dumps({
+        resp_json = {
             'status': False,
             'data': '',
             'error_message': 'We are currently undergoing maintenance, please check back shortly.',
             'error_code': 1,
-        })
+        }
+        response.json.return_value = resp_json
+        response.content = json.dumps(resp_json)
         response.text = text_type(response.content)
         return response
 
@@ -96,20 +74,7 @@ class DescribeRequestHandler:
     def it_handles_normal_responses(self, response):
         h = RequestHandler('')
         h._send_request = Mock(return_value=response)
-        assert self.test_data == h.process_request('uber.method_list')
-
-    def it_raises_response_error_on_bad_headers(self, bad_header_response):
-        h = RequestHandler('')
-        h._send_request = Mock(return_value=bad_header_response)
-        with pytest.raises(ResponseError) as e:
-            h.process_request('uber.method_list')
-        assert str(e.value) == "Response wasn't application/json"
-
-    def it_raises_response_error_on_bad_body(self, bad_body_response):
-        h = RequestHandler('')
-        h._send_request = Mock(return_value=bad_body_response)
-        with pytest.raises(ResponseError):
-            h.process_request('uber.method_list')
+        assert self.test_data == h.process_request('uber.method_list').data
 
     def it_handles_updating_token(self, response, token_response):
         returns = [
@@ -121,7 +86,7 @@ class DescribeRequestHandler:
         h._send_request = Mock(side_effect=lambda *args: returns.pop(0))
         with patch('ubersmith.api.time') as time:
             time.sleep = lambda x: None
-            assert self.test_data == h.process_request('uber.method_list')
+            assert self.test_data == h.process_request('uber.method_list').data
 
     def it_raises_updating_token_after_3_tries(self, response, token_response):
         returns = [

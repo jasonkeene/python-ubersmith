@@ -3,6 +3,7 @@ from decimal import Decimal
 import json
 
 import pytest
+from six import text_type
 
 import ubersmith
 import ubersmith.api
@@ -22,7 +23,7 @@ def teardown_module():
 
 
 def test_get(response):
-    response.text = json.dumps({
+    resp_json = {
         "status": True,
         "error_code": None,
         "error_message": "",
@@ -42,7 +43,10 @@ def test_get(response):
             u'commission_rate': u'0.00',
             u'commission': u'0.00',
         },
-    })
+    }
+    response.json.return_value = resp_json
+    response.content = json.dumps(resp_json)
+    response.text = text_type(response.content)
     expected = {
         u'clientid': 50,
         u'access': {b'cbms': b'client'},
@@ -63,19 +67,22 @@ def test_get(response):
 
 
 def test_update(response):
-    response.text = json.dumps({
+    resp_json = {
         "status": True,
         "error_code": None,
         "error_message": "",
         "data": {},
-    })
+    }
+    response.json.return_value = resp_json
+    response.content = json.dumps(resp_json)
+    response.text = text_type(response.content)
     expected = {}
     result = ubersmith.client.get(client_id=50, email="bob@example.com")
     assert dict(result) == expected
 
 
 def test_invoice_list(response):
-    response.text = json.dumps({
+    resp_json = {
         "status": True,
         "error_code": None,
         "error_message": "",
@@ -90,7 +97,10 @@ def test_invoice_list(response):
                 u'due': u'1272400333',
             },
         },
-    })
+    }
+    response.json.return_value = resp_json
+    response.content = json.dumps(resp_json)
+    response.text = text_type(response.content)
     expected = {
         60: {
             u'invid': 60,
@@ -106,17 +116,20 @@ def test_invoice_list(response):
 
 
 def test_invoice_count(response):
-    response.text = json.dumps({
+    resp_json = {
         "status": True,
         "error_code": None,
         "error_message": "",
         "data": "42",
-    })
-    assert ubersmith.client.invoice_count(client_id=50) == 42
+    }
+    response.json.return_value = resp_json
+    response.content = json.dumps(resp_json)
+    response.text = text_type(response.content)
+    assert int(ubersmith.client.invoice_count(client_id=50)) == 42
 
 
 def test_invoice_get(response):
-    response.text = json.dumps({
+    resp_json = {
         "status": True,
         "error_code": None,
         "error_message": "",
@@ -128,7 +141,10 @@ def test_invoice_get(response):
             u'due': u'1272400333',
             u'overdue': u'1272400333',
         },
-    })
+    }
+    response.json.return_value = resp_json
+    response.content = json.dumps(resp_json)
+    response.text = text_type(response.content)
     expected = {
         u'invid': 60,
         u'clientid': 50,
@@ -137,7 +153,7 @@ def test_invoice_get(response):
         u'due': datetime.datetime.fromtimestamp(float("1272400333")),
         u'overdue': datetime.datetime.fromtimestamp(float("1272400333")),
     }
-    assert ubersmith.client.invoice_get(invoice_id=60) == expected
+    assert dict(ubersmith.client.invoice_get(invoice_id=60)) == expected
 
 
 @pytest.mark.xfail

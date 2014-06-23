@@ -3,14 +3,20 @@ import copy
 
 from six import string_types
 
-from ubersmith.api import METHODS, get_default_request_handler
+from ubersmith.api import (
+    METHODS,
+    BaseResponse,
+    DictResponse,
+    IntResponse,
+    get_default_request_handler,
+)
 from ubersmith.exceptions import ValidationError
 from ubersmith.utils import get_filename
 
 __all__ = [
     # abstract call classes
     'BaseCall',
-    'FileCall',
+    # 'FileCall',
     # generate generic calls
     'generate_generic_calls',
     # concrete call classes
@@ -35,8 +41,7 @@ class BaseCall(object):
         self.request_data = request_data or {}  # data for the request
         self.request_handler = request_handler or \
             get_default_request_handler()  # handler to fullfil the request
-        self.response_data = None  # response data is stored here
-        self.cleaned = None  # cleaned response data is stored here
+        self.response = None  # response is stored here
 
     def render(self):
         """Validate, process, clean and return the result of the call."""
@@ -46,7 +51,7 @@ class BaseCall(object):
         self.process_request()
         self.clean()
 
-        return self.cleaned
+        return self.response
 
     def validate(self):
         """Validate request data before sending it out. Return True/False."""
@@ -60,28 +65,33 @@ class BaseCall(object):
 
     def process_request(self):
         """Processing the call and set response_data."""
-        self.response_data = self.request_handler.process_request(self.method,
-                                                            self.request_data)
+        self.response = self.request_handler.process_request(
+            self.method, self.request_data)
 
     def clean(self):
-        """Clean response data."""
-        cleaned = copy.deepcopy(self.response_data)
+        """Clean response."""
+        cleaned = copy.deepcopy(self.response.data)
         if self.cleaner is not None:
             cleaned = self.cleaner(cleaned)
-        self.cleaned = cleaned
+
+        typed_response = {
+            dict: DictResponse,
+            int: IntResponse,
+        }.get(type(cleaned), BaseResponse)
+        self.response = typed_response.from_cleaned(self.response, cleaned)
 
 
-class FileCall(BaseCall):
-    """Abstract class to implement a call that returns a file."""
-    _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type', 'data'])
+# class FileCall(BaseCall):
+#     """Abstract class to implement a call that returns a file."""
+#     _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type', 'data'])
 
-    def clean(self):
-        disposition = self.response_data.headers.get('content-disposition')
-        self.filename = get_filename(disposition)
-        self.type = self.response_data.headers.get('content-type')
-        self.data = self.response_data.content
+#     def clean(self):
+#         disposition = self.response_data.headers.get('content-disposition')
+#         self.filename = get_filename(disposition)
+#         self.type = self.response_data.headers.get('content-type')
+#         self.data = self.response_data.content
 
-        self.cleaned = self._UbersmithFile(self.filename, self.type, self.data)
+#         self.cleaned = self._UbersmithFile(self.filename, self.type, self.data)
 
 
 def _get_call_class(method):

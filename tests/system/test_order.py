@@ -2,6 +2,8 @@ import datetime
 from decimal import Decimal
 import json
 
+from six import text_type
+
 import ubersmith
 import ubersmith.api
 
@@ -19,7 +21,7 @@ def teardown_module():
 
 
 def test_order_get(response):
-    response.text = json.dumps({
+    resp_json = {
         "status": True,
         "error_code": None,
         "error_message": "",
@@ -45,7 +47,10 @@ def test_order_get(response):
                 },
             },
         },
-    })
+    }
+    response.json.return_value = resp_json
+    response.content = json.dumps(resp_json)
+    response.text = text_type(response.content)
     expected = {
         u'order_id': 60,
         u'order_status': 3,
@@ -72,7 +77,7 @@ def test_order_get(response):
 
 
 def test_order_list(response):
-    response.text = json.dumps({
+    resp_json = {
         "status": True,
         "error_code": None,
         "error_message": "",
@@ -85,7 +90,10 @@ def test_order_list(response):
                 "total": "33.22",
             },
         },
-    })
+    }
+    response.json.return_value = resp_json
+    response.content = json.dumps(resp_json)
+    response.text = text_type(response.content)
     expected = {
         60: {
             u'client_id': 50,
@@ -99,7 +107,7 @@ def test_order_list(response):
 
 
 def test_order_queue_list(response):
-    response.text = json.dumps({
+    resp_json = {
         "status": True,
         "error_code": None,
         "error_message": "",
@@ -113,7 +121,10 @@ def test_order_queue_list(response):
                 },
             },
         },
-    })
+    }
+    response.json.return_value = resp_json
+    response.content = json.dumps(resp_json)
+    response.text = text_type(response.content)
     expected = {
         1: {
             u'name': u'Orders',

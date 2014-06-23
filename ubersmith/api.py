@@ -245,20 +245,38 @@ class RequestHandler(object):
         # make sure requested method is valid
         self._validate_request_method(method)
 
-        # try request 3 times
-        last_exception = None
-        for i in range(3):
-            # make the request
+        # attempt the request three times
+        attempts = range(3)
+        for i in attempts:
             response = self._send_request(method, data)
-            try:
-                # render the response as python object
-                return self._render_response(response)
-            except UpdatingTokenResponse as e:
-                # wait 4 secs before retrying request
-                time.sleep(4)
-                last_exception = e
-        # if last attempt still threw an exception, reraise it
-        raise last_exception
+
+            # handle case where ubersmith is 'updating token'
+            # see: https://github.com/jasonkeene/python-ubersmith/issues/1
+            if all([
+                response.headers.get('content-type') == 'text/html',
+                'Updating Token' in response.content,
+            ]):
+                if i != attempts[-1]:
+                    # wait 2 secs before retrying request
+                    time.sleep(2)
+                    continue
+                else:
+                    raise UpdatingTokenResponse
+
+        resp = BaseResponse(response)
+
+        # test for error in json response
+        if response.headers.get('content-type') == 'application/json':
+            if not resp.json.get('status'):
+                if all([
+                    resp.json.get('error_code') == 1,
+                    resp.json.get('error_message') == u"We are currently "
+                        "undergoing maintenance, please check back shortly.",
+                ]):
+                    raise MaintenanceResponse(response=resp.json)
+                else:
+                    raise ResponseError(response=resp.json)
+        return resp
 
     def _send_request(self, method, data):
         url = append_qs(self.base_url, {'method': method})
@@ -267,36 +285,6 @@ class RequestHandler(object):
         return requests.post(url, data=body, headers=headers,
                              auth=(self.username, self.password),
                              verify=self.verify)
-
-    def _render_response(self, response):
-        """Render response as python object.
-
-            response: requests' response object
-
-        """
-        # response isn't json
-        if response.headers.get('content-type') != 'application/json':
-            # handle case where ubersmith is 'updating token'
-            # see: https://github.com/jasonkeene/python-ubersmith/issues/1
-            if response.headers.get('content-type') == 'text/html' and \
-                'Updating Token' in response.content:
-                raise UpdatingTokenResponse
-            raise ResponseError("Response wasn't application/json")
-
-        # response is json
-        response_dict = json.loads(response.text)
-
-        # test for error in json response
-        if not response_dict.get('status'):
-            if response_dict.get('error_code') == 1 and \
-               response_dict.get('error_message') == u"We are currently " \
-                    "undergoing maintenance, please check back shortly.":
-                raise MaintenanceResponse(response=response_dict)
-            else:
-                raise ResponseError(response=response_dict)
-
-        # make sure to handle condition where empty string is sent for data :/
-        return response_dict['data'] or {}
 
     def _validate_request_method(self, method):
         """Make sure requested method is valid."""
@@ -319,29 +307,43 @@ class RequestHandler(object):
             setattr(self, name, proxy)
             return proxy
         raise AttributeError("'{0}' object has no attribute '{1}'".format(
-                                                   type(self).__name__, name))
+            type(self).__name__, name))
 
 
-class Request(object):
-    pass
-
-
-class _AbstractResponse(object):
+class BaseResponse(object):
     """Wraps response object and emulates different types."""
     def __init__(self, response):
         self.response = response  # requests' response object
 
+    @classmethod
+    def from_cleaned(cls, response, cleaned):
+        resp = cls(response.response)
+        resp.cleaned = cleaned
+        return resp
 
-class DictResponse(_AbstractResponse):
-    pass
+    @property
+    def json(self):
+        return self.response.json()
+
+    @property
+    def data(self):
+        if hasattr(self, "cleaned"):
+            return self.cleaned
+        else:
+            return self.json['data']
 
 
-class IntResponse(_AbstractResponse):
-    pass
+class DictResponse(BaseResponse):
+    def __iter__(self):
+        return iter(self.data.items())
+
+    def __getitem__(self, key):
+        return self.data[key]
 
 
-class FileResponse(_AbstractResponse):
-    pass
+class IntResponse(BaseResponse):
+    def __int__(self):
+        return self.data
 
 
 def get_default_request_handler():
