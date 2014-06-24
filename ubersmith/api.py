@@ -337,6 +337,10 @@ class BaseResponse(object):
         else:
             return self.json['data']
 
+    @property
+    def type(self):
+        return self.response.headers.get('content-type')
+
 
 class DictResponse(BaseResponse):
     def __iter__(self):
@@ -374,9 +378,6 @@ class FileResponse(BaseResponse):
         disposition = self.response.headers.get('content-disposition')
         return get_filename(disposition)
 
-    @property
-    def type(self):
-        return self.response.headers.get('content-type')
 
 
 def get_default_request_handler():

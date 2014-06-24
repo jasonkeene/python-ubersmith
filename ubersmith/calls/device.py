@@ -6,7 +6,7 @@ ubersmith.calls.BaseCall.
 
 """
 
-from ubersmith.calls import BaseCall  #, FileCall
+from ubersmith.calls import BaseCall
 from ubersmith.clean import clean
 from ubersmith.utils import prepend_base
 
@@ -55,8 +55,8 @@ class ListCall(BaseCall):
     cleaner = clean(dict, keys='int', values=_DEVICE_CLEANER)
 
 
-# class ModuleGraphCall(FileCall):
-#     method = _('module_graph')
+class ModuleGraphCall(BaseCall):
+    method = _('module_graph')
 
 
 class MonitorListCall(BaseCall):

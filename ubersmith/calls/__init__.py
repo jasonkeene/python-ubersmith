@@ -15,7 +15,6 @@ from ubersmith.exceptions import ValidationError
 __all__ = [
     # abstract call classes
     'BaseCall',
-    # 'FileCall',
     # generate generic calls
     'generate_generic_calls',
     # concrete call classes
@@ -69,22 +68,18 @@ class BaseCall(object):
 
     def clean(self):
         """Clean response."""
-        cleaned = copy.deepcopy(self.response.data)
-        if self.cleaner is not None:
-            cleaned = self.cleaner(cleaned)
+        if self.response.type == 'application/json':
+            cleaned = copy.deepcopy(self.response.data)
+            if self.cleaner is not None:
+                cleaned = self.cleaner(cleaned)
 
-        typed_response = {
-            dict: DictResponse,
-            int: IntResponse,
-        }.get(type(cleaned), BaseResponse)
-        self.response = typed_response.from_cleaned(self.response, cleaned)
-
-
-class FileCall(BaseCall):
-    """Abstract class to implement a call that returns a file."""
-
-    def clean(self):
-        self.response = FileResponse(self.response.response)
+            typed_response = {
+                dict: DictResponse,
+                int: IntResponse,
+            }.get(type(cleaned), BaseResponse)
+            self.response = typed_response.from_cleaned(self.response, cleaned)
+        else:
+            self.response = FileResponse(self.response.response)
 
 
 def _get_call_class(method):

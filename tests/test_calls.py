@@ -24,6 +24,9 @@ def setup_module(module):
 
 def make_base_response(data):
     response = Mock()
+    response.headers = {
+        'content-type': 'application/json',
+    }
     response.json.return_value = {
         "status": True,
         "error_code": None,
@@ -85,13 +88,12 @@ def test_group_call():
     assert dict(order.list.handler(handler)()) == {1: {"test": "blah"}}
 
 
-@pytest.mark.xfail
 def test_file_call():
     handler = Mock()
     response = Mock()
     response.content = 'bytes here'
     response.headers = {}
-    handler.process_request.return_value = response
+    handler.process_request.return_value = BaseResponse(response)
     uber_file = uber.documentation.handler(handler)()
     assert uber_file.data == 'bytes here'
 
