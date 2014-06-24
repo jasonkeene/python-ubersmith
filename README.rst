@@ -60,8 +60,7 @@ Alternatively you can process the request directly on the handler::
     h.process_request('client.get', data={'email': 'g.freeman@combineresearch.com'})
 
 although this will bypass any validation logic and response cleaning provided
-by the call function and just return the JSON data from the ubersmith response
-as a dict.
+by the call function and just return the BaseResponse from ubersmith.
 
 Development
 ===========
