@@ -1,8 +1,6 @@
 """Lower level API, configuration, and HTTP stuff."""
 
-import json
 import time
-from functools import partial
 
 import requests
 
@@ -220,7 +218,7 @@ class _ProxyModule(object):
             setattr(self, name, call_p)
             return call_p
         raise AttributeError("'{0}' object has no attribute '{1}'".format(
-                                                   type(self).__name__, name))
+            type(self).__name__, name))
 
 
 class RequestHandler(object):
@@ -291,12 +289,14 @@ class RequestHandler(object):
                              auth=(self.username, self.password),
                              verify=self.verify)
 
-    def _validate_request_method(self, method):
+    @staticmethod
+    def _validate_request_method(method):
         """Make sure requested method is valid."""
         if method not in METHODS:
             raise RequestError("Requested method is not valid.")
 
-    def _encode_data(self, data):
+    @staticmethod
+    def _encode_data(data):
         """URL encode data."""
         data = data if data is not None else {}
         data = to_nested_php_args(data)
@@ -377,7 +377,6 @@ class FileResponse(BaseResponse):
     def filename(self):
         disposition = self.response.headers.get('content-disposition')
         return get_filename(disposition)
-
 
 
 def get_default_request_handler():
