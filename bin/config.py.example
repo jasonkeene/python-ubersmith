@@ -1,0 +1,6 @@
+
+API = {
+    'base_url': '',
+    'username': '',
+    'password': '',
+}

@@ -84,3 +84,18 @@ To run the tests on multiple interpreters::
 To run the tests and generate a coverage report::
 
     bin/coverage.sh
+
+Console
+-------
+
+To run the dev console copy over the example config file::
+
+    cp bin/config.py.example bin/config.py
+
+Edit it with your credentials then run the console::
+
+    python -i bin/console.py
+
+From here you can run commands against your dev instance::
+
+    >>> uber.method_list()
