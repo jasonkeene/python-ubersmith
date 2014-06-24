@@ -6,7 +6,7 @@ ubersmith.calls.BaseCall.
 
 """
 
-from ubersmith.calls import BaseCall  #, FileCall
+from ubersmith.calls import BaseCall, FileCall
 from ubersmith.clean import clean
 from ubersmith.utils import prepend_base
 
@@ -15,7 +15,7 @@ __all__ = [
     'CheckLoginCall',
     'ClientWelcomeStatsCall',
     'MethodGetCall',
-    # 'DocumentationCall',
+    'DocumentationCall',
 ]
 
 _ = prepend_base(__name__.split('.')[-1])
@@ -54,5 +54,5 @@ class MethodGetCall(BaseCall):
     method = _('method_get')
 
 
-# class DocumentationCall(FileCall):
-#     method = _('documentation')
+class DocumentationCall(FileCall):
+    method = _('documentation')

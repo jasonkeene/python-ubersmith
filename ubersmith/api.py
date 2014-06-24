@@ -12,7 +12,12 @@ from ubersmith.exceptions import (
     UpdatingTokenResponse,
     MaintenanceResponse,
 )
-from ubersmith.utils import append_qs, urlencode_unicode, to_nested_php_args
+from ubersmith.utils import (
+    append_qs,
+    urlencode_unicode,
+    to_nested_php_args,
+    get_filename,
+)
 
 __all__ = [
     'METHODS',
@@ -340,10 +345,38 @@ class DictResponse(BaseResponse):
     def __getitem__(self, key):
         return self.data[key]
 
+    def keys(self):
+        return self.data.keys()
+
+    def values(self):
+        return self.data.values()
+
+    def items(self):
+        return self.data.items()
+
 
 class IntResponse(BaseResponse):
     def __int__(self):
         return self.data
+
+
+class FileResponse(BaseResponse):
+    @property
+    def json(self):
+        raise NotImplementedError
+
+    @property
+    def data(self):
+        return self.response.content
+
+    @property
+    def filename(self):
+        disposition = self.response.headers.get('content-disposition')
+        return get_filename(disposition)
+
+    @property
+    def type(self):
+        return self.response.headers.get('content-type')
 
 
 def get_default_request_handler():

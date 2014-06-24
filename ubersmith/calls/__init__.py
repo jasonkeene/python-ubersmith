@@ -1,4 +1,3 @@
-from collections import namedtuple
 import copy
 
 from six import string_types
@@ -8,10 +7,10 @@ from ubersmith.api import (
     BaseResponse,
     DictResponse,
     IntResponse,
+    FileResponse,
     get_default_request_handler,
 )
 from ubersmith.exceptions import ValidationError
-from ubersmith.utils import get_filename
 
 __all__ = [
     # abstract call classes
@@ -81,17 +80,11 @@ class BaseCall(object):
         self.response = typed_response.from_cleaned(self.response, cleaned)
 
 
-# class FileCall(BaseCall):
-#     """Abstract class to implement a call that returns a file."""
-#     _UbersmithFile = namedtuple('UbersmithFile', ['filename', 'type', 'data'])
+class FileCall(BaseCall):
+    """Abstract class to implement a call that returns a file."""
 
-#     def clean(self):
-#         disposition = self.response_data.headers.get('content-disposition')
-#         self.filename = get_filename(disposition)
-#         self.type = self.response_data.headers.get('content-type')
-#         self.data = self.response_data.content
-
-#         self.cleaned = self._UbersmithFile(self.filename, self.type, self.data)
+    def clean(self):
+        self.response = FileResponse(self.response.response)
 
 
 def _get_call_class(method):
