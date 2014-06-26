@@ -1,5 +1,6 @@
 """Lower level API, configuration, and HTTP stuff."""
 
+from functools import total_ordering
 import time
 
 import requests
@@ -349,6 +350,9 @@ class DictResponse(BaseResponse):
     def __getitem__(self, key):
         return self.data[key]
 
+    def __len__(self):
+        return len(self.data)
+
     def keys(self):
         return self.data.keys()
 
@@ -358,10 +362,79 @@ class DictResponse(BaseResponse):
     def items(self):
         return self.data.items()
 
+    def get(self, key, default=None):
+        return self.data.get(key, default)
 
+
+@total_ordering
 class IntResponse(BaseResponse):
     def __int__(self):
         return self.data
+
+    def __eq__(self, other):
+        return self.data == other
+
+    def __lt__(self, other):
+        return self.data < other
+
+    @property
+    def real(self):
+        return self.real
+
+    # Need to add all these methods to emulate numeric type
+    # __add__(self, other)
+    # __sub__(self, other)
+    # __mul__(self, other)
+    # __floordiv__(self, other)
+    # __mod__(self, other)
+    # __divmod__(self, other)
+    # __pow__(self, other[, modulo])
+    # __lshift__(self, other)
+    # __rshift__(self, other)
+    # __and__(self, other)
+    # __xor__(self, other)
+    # __or__(self, other)
+    # __div__(self, other)
+    # __truediv__(self, other)
+    # __radd__(self, other)
+    # __rsub__(self, other)
+    # __rmul__(self, other)
+    # __rdiv__(self, other)
+    # __rtruediv__(self, other)
+    # __rfloordiv__(self, other)
+    # __rmod__(self, other)
+    # __rdivmod__(self, other)
+    # __rpow__(self, other)
+    # __rlshift__(self, other)
+    # __rrshift__(self, other)
+    # __rand__(self, other)
+    # __rxor__(self, other)
+    # __ror__(self, other)
+    # __iadd__(self, other)
+    # __isub__(self, other)
+    # __imul__(self, other)
+    # __idiv__(self, other)
+    # __itruediv__(self, other)
+    # __ifloordiv__(self, other)
+    # __imod__(self, other)
+    # __ipow__(self, other[, modulo])
+    # __ilshift__(self, other)
+    # __irshift__(self, other)
+    # __iand__(self, other)
+    # __ixor__(self, other)
+    # __ior__(self, other)
+    # __neg__(self)
+    # __pos__(self)
+    # __abs__(self)
+    # __invert__(self)
+    # __complex__(self)
+    # __int__(self)
+    # __long__(self)
+    # __float__(self)
+    # __oct__(self)
+    # __hex__(self)
+    # __index__(self)
+    # __coerce__(self, other)
 
 
 class FileResponse(BaseResponse):
