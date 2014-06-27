@@ -381,58 +381,65 @@ class IntResponse(BaseResponse):
     def real(self):
         return self.real
 
-    # Need to add all these methods to emulate numeric type
-    # __add__(self, other)
-    # __sub__(self, other)
-    # __mul__(self, other)
+    def __add__(self, other):
+        return int(self) + other
+    __radd__ = __add__
+
+    def __sub__(self, other):
+        return int(self) - other
+    __rsub__ = __sub__
+
+    def __mul__(self, other):
+        return int(self) * other
+    __rmul__ = __mul__
+
+    def __div__(self, other):
+        return int(self) / other
+
+    def __rdiv__(self, other):
+        return other / int(self)
+
+    def __mod__(self, other):
+        return int(self) % other
+
+    def __rmod__(self, other):
+        return other % int(self)
+
+    def __pow__(self, other):
+        return int(self) ** other
+
+    def __rpow__(self, other):
+        return other ** int(self)
+
+    # TODO: need to add all these methods to emulate numeric type
     # __floordiv__(self, other)
-    # __mod__(self, other)
     # __divmod__(self, other)
-    # __pow__(self, other[, modulo])
     # __lshift__(self, other)
     # __rshift__(self, other)
     # __and__(self, other)
     # __xor__(self, other)
     # __or__(self, other)
-    # __div__(self, other)
-    # __truediv__(self, other)
-    # __radd__(self, other)
-    # __rsub__(self, other)
-    # __rmul__(self, other)
-    # __rdiv__(self, other)
-    # __rtruediv__(self, other)
+
     # __rfloordiv__(self, other)
-    # __rmod__(self, other)
     # __rdivmod__(self, other)
-    # __rpow__(self, other)
     # __rlshift__(self, other)
     # __rrshift__(self, other)
     # __rand__(self, other)
     # __rxor__(self, other)
     # __ror__(self, other)
-    # __iadd__(self, other)
-    # __isub__(self, other)
-    # __imul__(self, other)
-    # __idiv__(self, other)
-    # __itruediv__(self, other)
-    # __ifloordiv__(self, other)
-    # __imod__(self, other)
-    # __ipow__(self, other[, modulo])
-    # __ilshift__(self, other)
-    # __irshift__(self, other)
-    # __iand__(self, other)
-    # __ixor__(self, other)
-    # __ior__(self, other)
+
     # __neg__(self)
     # __pos__(self)
     # __abs__(self)
     # __invert__(self)
     # __complex__(self)
+
     # __int__(self)
     # __long__(self)
     # __float__(self)
     # __oct__(self)
     # __hex__(self)
+
     # __index__(self)
     # __coerce__(self, other)
 
