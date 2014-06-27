@@ -1,6 +1,6 @@
 """Lower level API, configuration, and HTTP stuff."""
 
-from functools import total_ordering
+from ubersmith.compat import total_ordering
 import time
 
 import requests
@@ -371,6 +371,9 @@ class IntResponse(BaseResponse):
     def __int__(self):
         return self.data
 
+    def __float__(self):
+        return float(self.data)
+
     def __eq__(self, other):
         return self.data == other
 
@@ -398,6 +401,18 @@ class IntResponse(BaseResponse):
 
     def __rdiv__(self, other):
         return other / int(self)
+
+    def __floordiv__(self, other):
+        return int(self) // other
+
+    def __rfloordiv__(self, other):
+        return other // int(self)
+
+    def __truediv__(self, other):
+        return float(self) / other
+
+    def __rtruediv__(self, other):
+        return other / float(self)
 
     def __mod__(self, other):
         return int(self) % other

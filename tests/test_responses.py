@@ -24,8 +24,12 @@ class DescribeIntResponse:
         assert 2 * response == 24
 
     def it_divides(self, response):
-        assert response / 2 == 6
-        assert 2 / response == 0
+        assert response / 5 == 12 / 5
+        assert 15 / response == 15 / 12
+
+    def it_floor_divides(self, response):
+        assert response // 5 == 2
+        assert 15 // response == 1
 
     def it_mods(self, response):
         assert response % 5 == 2
