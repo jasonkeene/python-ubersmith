@@ -1,8 +1,11 @@
-.. image:: https://api.travis-ci.org/jasonkeene/python-ubersmith.png?branch=master
+.. image:: https://img.shields.io/travis/jasonkeene/python-ubersmith.svg?style=flat
    :target: https://travis-ci.org/jasonkeene/python-ubersmith
 
-.. image:: https://coveralls.io/repos/jasonkeene/python-ubersmith/badge.png?branch=master
+.. image:: https://img.shields.io/coveralls/jasonkeene/python-ubersmith.svg?style=flat
    :target: https://coveralls.io/r/jasonkeene/python-ubersmith?branch=master
+
+.. image:: https://img.shields.io/pypi/v/ubersmith.svg?style=flat
+   :target: https://pypi.python.org/pypi/ubersmith
 
 Installation
 ============
