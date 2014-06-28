@@ -68,3 +68,19 @@ class DescribeIntResponse:
         response2 = IntResponse(resp)
         assert -response == -12
         assert -response2 == 12
+
+    def it_divmods(self, response):
+        assert divmod(response, 5) == (2, 2)
+        assert divmod(50, response) == (4, 2)
+
+    def it_ands(self, response):
+        assert response & 4 == 4
+        assert 8 & response == 8
+
+    def it_ors(self, response):
+        assert response | 40 == 44
+        assert 18 | response == 30
+
+    def it_xors(self, response):
+        assert response ^ 4 == 8
+        assert 8 ^ response == 4

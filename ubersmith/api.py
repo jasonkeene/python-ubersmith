@@ -439,28 +439,33 @@ class IntResponse(BaseResponse):
     def __neg__(self):
         return -self.data
 
-    # TODO: need to add all these methods to emulate numeric type
-    # __floordiv__(self, other)
-    # __rfloordiv__(self, other)
-    # __divmod__(self, other)
-    # __rdivmod__(self, other)
+    def __divmod__(self, other):
+        return self // other, self % other
 
+    def __rdivmod__(self, other):
+        return other // self, other % self
+
+    def __and__(self, other):
+        return self.data & other
+    __rand__ = __and__
+
+    def __or__(self, other):
+        return self.data | other
+    __ror__ = __or__
+
+    def __xor__(self, other):
+        return self.data ^ other
+    __rxor__ = __xor__
+
+    # TODO: need to add all these methods to emulate numeric type
     # __lshift__(self, other)
     # __rlshift__(self, other)
     # __rshift__(self, other)
     # __rrshift__(self, other)
-    # __and__(self, other)
-    # __rand__(self, other)
-    # __xor__(self, other)
-    # __rxor__(self, other)
-    # __or__(self, other)
-    # __ror__(self, other)
 
-    # __neg__(self)
     # __pos__(self)
     # __invert__(self)
     # __complex__(self)
-
     # __coerce__(self, other)
 
 
