@@ -38,3 +38,33 @@ class DescribeIntResponse:
     def it_pows(self, response):
         assert response ** 2 == 144
         assert 2 ** response == 4096
+
+    def it_converts_to_int(self, response):
+        result = int(response)
+        assert type(result) is int
+        assert result == 12
+
+    def it_converts_to_float(self, response):
+        result = float(response)
+        assert type(result) is float
+        assert result == 12.0
+
+    def it_converts_to_octal(self, response):
+        assert oct(response) in ['0o14', '014']
+
+    def it_converts_to_hex(self, response):
+        assert hex(response) == '0xc'
+
+    def it_abs(self, response):
+        resp = Mock()
+        resp.json.return_value = {'data': -12}
+        response2 = IntResponse(resp)
+        assert abs(response) == 12
+        assert abs(response2) == 12
+
+    def it_negates(self, response):
+        resp = Mock()
+        resp.json.return_value = {'data': -12}
+        response2 = IntResponse(resp)
+        assert -response == -12
+        assert -response2 == 12

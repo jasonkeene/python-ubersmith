@@ -370,9 +370,16 @@ class DictResponse(BaseResponse):
 class IntResponse(BaseResponse):
     def __int__(self):
         return self.data
+    __index__ = __int__
 
     def __float__(self):
         return float(self.data)
+
+    def __oct__(self):
+        return oct(self.data)
+
+    def __hex__(self):
+        return hex(self.data)
 
     def __eq__(self, other):
         return self.data == other
@@ -426,36 +433,34 @@ class IntResponse(BaseResponse):
     def __rpow__(self, other):
         return other ** int(self)
 
+    def __abs__(self):
+        return abs(self.data)
+
+    def __neg__(self):
+        return -self.data
+
     # TODO: need to add all these methods to emulate numeric type
     # __floordiv__(self, other)
-    # __divmod__(self, other)
-    # __lshift__(self, other)
-    # __rshift__(self, other)
-    # __and__(self, other)
-    # __xor__(self, other)
-    # __or__(self, other)
-
     # __rfloordiv__(self, other)
+    # __divmod__(self, other)
     # __rdivmod__(self, other)
+
+    # __lshift__(self, other)
     # __rlshift__(self, other)
+    # __rshift__(self, other)
     # __rrshift__(self, other)
+    # __and__(self, other)
     # __rand__(self, other)
+    # __xor__(self, other)
     # __rxor__(self, other)
+    # __or__(self, other)
     # __ror__(self, other)
 
     # __neg__(self)
     # __pos__(self)
-    # __abs__(self)
     # __invert__(self)
     # __complex__(self)
 
-    # __int__(self)
-    # __long__(self)
-    # __float__(self)
-    # __oct__(self)
-    # __hex__(self)
-
-    # __index__(self)
     # __coerce__(self, other)
 
 
