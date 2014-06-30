@@ -16,8 +16,8 @@ class DescribeIntResponse:
         assert 2 + response == 14
 
     def it_subtracts(self, response):
-        assert response - 2 == 10
-        assert 2 - response == 10
+        assert response - 3 == 9
+        assert 15 - response == 3
 
     def it_multiplies(self, response):
         assert response * 2 == 24

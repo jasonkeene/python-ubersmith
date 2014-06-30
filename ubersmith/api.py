@@ -397,7 +397,9 @@ class IntResponse(BaseResponse):
 
     def __sub__(self, other):
         return int(self) - other
-    __rsub__ = __sub__
+
+    def __rsub__(self, other):
+        return other - int(self)
 
     def __mul__(self, other):
         return int(self) * other
