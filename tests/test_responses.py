@@ -84,3 +84,11 @@ class DescribeIntResponse:
     def it_xors(self, response):
         assert response ^ 4 == 8
         assert 8 ^ response == 4
+
+    def it_lshifts(self, response):
+        assert response << 3 == 96
+        assert 1 << response == 4096
+
+    def it_rshifts(self, response):
+        assert response >> 2 == 3
+        assert 8192 >> response == 2

@@ -457,12 +457,19 @@ class IntResponse(BaseResponse):
         return self.data ^ other
     __rxor__ = __xor__
 
-    # TODO: need to add all these methods to emulate numeric type
-    # __lshift__(self, other)
-    # __rlshift__(self, other)
-    # __rshift__(self, other)
-    # __rrshift__(self, other)
+    def __lshift__(self, other):
+        return self.data << other
 
+    def __rlshift__(self, other):
+        return other << self.data
+
+    def __rshift__(self, other):
+        return self.data >> other
+
+    def __rrshift__(self, other):
+        return other >> self.data
+
+    # TODO: need to add all these methods to emulate numeric type
     # __pos__(self)
     # __invert__(self)
     # __complex__(self)
