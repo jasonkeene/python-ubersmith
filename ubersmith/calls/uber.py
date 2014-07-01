@@ -39,7 +39,7 @@ class CheckLoginCall(BaseCall):
 
 class ClientWelcomeStatsCall(BaseCall):
     method = _('client_welcome_stats')
-    required_fields = ['client_id']
+    required_fields = [('client_id', 'user_login')]
     timestamp_fields = ['client_activity']
     date_fields = ['next_inv']
     int_fields = [
