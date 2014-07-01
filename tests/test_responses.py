@@ -69,6 +69,13 @@ class DescribeIntResponse:
         assert -response == -12
         assert -response2 == 12
 
+    def it_positives(self, response):
+        resp = Mock()
+        resp.json.return_value = {'data': -12}
+        response2 = IntResponse(resp)
+        assert +response == 12
+        assert +response2 == -12
+
     def it_divmods(self, response):
         assert divmod(response, 5) == (2, 2)
         assert divmod(50, response) == (4, 2)
@@ -92,3 +99,18 @@ class DescribeIntResponse:
     def it_rshifts(self, response):
         assert response >> 2 == 3
         assert 8192 >> response == 2
+
+    def it_has_numerator(self, response):
+        assert response.numerator == 12
+
+    def it_has_denomerator(self, response):
+        assert response.denominator == 1
+
+    def it_has_real(self, response):
+        assert response.real == 12
+
+    def it_has_imag(self, response):
+        assert response.imag == 0
+
+    def it_has_bit_length(self, response):
+        assert response.bit_length() == 4

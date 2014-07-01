@@ -368,6 +368,31 @@ class DictResponse(BaseResponse):
 
 @total_ordering
 class IntResponse(BaseResponse):
+    @property
+    def numerator(self):
+        return self.data
+
+    @property
+    def denominator(self):
+        return 1
+
+    @property
+    def real(self):
+        return self.data
+
+    @property
+    def imag(self):
+        return 0
+
+    def bit_length(self):
+        if hasattr(self.data, 'bit_length'):
+            return self.data.bit_length()
+        else:
+            return len(bin(abs(self.data))) - 2
+
+    def conjugate(self):
+        return self.data
+
     def __int__(self):
         return self.data
     __index__ = __int__
@@ -386,10 +411,6 @@ class IntResponse(BaseResponse):
 
     def __lt__(self, other):
         return self.data < other
-
-    @property
-    def real(self):
-        return self.real
 
     def __add__(self, other):
         return int(self) + other
@@ -441,6 +462,9 @@ class IntResponse(BaseResponse):
     def __neg__(self):
         return -self.data
 
+    def __pos__(self):
+        return self.data
+
     def __divmod__(self, other):
         return self // other, self % other
 
@@ -472,10 +496,13 @@ class IntResponse(BaseResponse):
         return other >> self.data
 
     # TODO: need to add all these methods to emulate numeric type
-    # __pos__(self)
     # __invert__(self)
-    # __complex__(self)
     # __coerce__(self, other)
+    # __cmp__
+    # __invert__
+    # __long__
+    # __nonzero__
+    # __trunc__
 
 
 class FileResponse(BaseResponse):
