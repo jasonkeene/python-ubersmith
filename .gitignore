@@ -20,3 +20,6 @@ desktop.ini
 
 # stuff that gets generated from setup.py
 ubersmith.egg-info
+
+# rope stuff
+.ropeproject

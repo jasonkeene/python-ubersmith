@@ -6,13 +6,19 @@ ubersmith.calls.BaseCall.
 
 """
 
-# from ubersmith.calls import BaseCall, GroupCall
+from ubersmith.calls import GroupCall
 from ubersmith.utils import prepend_base
 
-__all__ = []
+__all__ = [
+    'DepartmentListCall',
+]
 
 _ = prepend_base(__name__.split('.')[-1])
 
 
-# class (BaseCall):
-#     method = _('')
+class DepartmentListCall(GroupCall):
+    method = _('department_list')
+    int_fields = [
+        'q_id',
+        'q_order',
+    ]
