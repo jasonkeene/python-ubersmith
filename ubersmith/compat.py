@@ -1,3 +1,5 @@
+from six.moves import builtins
+import io
 
 try:
     from functools import total_ordering
@@ -28,3 +30,6 @@ except ImportError:
                 opfunc.__doc__ = getattr(int, opname).__doc__
                 setattr(cls, opname, opfunc)
         return cls
+
+
+file_type = file if hasattr(builtins, 'file') else io.IOBase

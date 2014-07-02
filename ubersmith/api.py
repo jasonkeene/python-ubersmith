@@ -1,6 +1,6 @@
 """Lower level API, configuration, and HTTP stuff."""
 
-from ubersmith.compat import total_ordering
+from ubersmith.compat import total_ordering, file_type
 import time
 
 import requests
@@ -13,7 +13,6 @@ from ubersmith.exceptions import (
 )
 from ubersmith.utils import (
     append_qs,
-    urlencode_unicode,
     to_nested_php_args,
     get_filename,
 )
@@ -266,6 +265,7 @@ class RequestHandler(object):
                     continue
                 else:
                     raise UpdatingTokenResponse
+            break
 
         resp = BaseResponse(response)
 
@@ -284,9 +284,8 @@ class RequestHandler(object):
 
     def _send_request(self, method, data):
         url = append_qs(self.base_url, {'method': method})
-        body = self._encode_data(data)
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        return requests.post(url, data=body, headers=headers,
+        data, files, headers = self._encode_data(data)
+        return requests.post(url, data=data, files=files, headers=headers,
                              auth=(self.username, self.password),
                              verify=self.verify)
 
@@ -301,7 +300,12 @@ class RequestHandler(object):
         """URL encode data."""
         data = data if data is not None else {}
         data = to_nested_php_args(data)
-        return urlencode_unicode(data)
+        files = dict([
+            (key, value) for key, value in
+            data.items() if isinstance(value, file_type)])
+        for fname in files:
+            del data[fname]
+        return data, files or None, None
 
     def __getattr__(self, name):
         """If attribute accessed is a call module, return a proxy."""
