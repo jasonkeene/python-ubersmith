@@ -347,16 +347,8 @@ class BaseResponse(object):
         return self.response.headers.get('content-type')
 
 
+@total_ordering
 class DictResponse(BaseResponse):
-    def __iter__(self):
-        return iter(self.data.items())
-
-    def __getitem__(self, key):
-        return self.data[key]
-
-    def __len__(self):
-        return len(self.data)
-
     def keys(self):
         return self.data.keys()
 
@@ -368,6 +360,27 @@ class DictResponse(BaseResponse):
 
     def get(self, key, default=None):
         return self.data.get(key, default)
+
+    def has_key(self, key):
+        return self.data.has_key(key)
+
+    def __iter__(self):
+        return iter(self.data.items())
+
+    def __getitem__(self, key):
+        return self.data[key]
+
+    def __len__(self):
+        return len(self.data)
+
+    def __eq__(self, other):
+        return self.data == other
+
+    def __lt__(self, other):
+        return self.data < other
+
+    def __contains__(self, item):
+        return item in self.data
 
 
 @total_ordering
@@ -502,7 +515,6 @@ class IntResponse(BaseResponse):
     # TODO: need to add all these methods to emulate numeric type
     # __invert__(self)
     # __coerce__(self, other)
-    # __cmp__
     # __invert__
     # __long__
     # __nonzero__
