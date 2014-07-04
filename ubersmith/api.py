@@ -412,7 +412,7 @@ class IntResponse(BaseResponse):
 
     def __int__(self):
         return self.data
-    __index__ = __int__
+    __index__ = __long__ = __trunc__ = __int__
 
     def __float__(self):
         return float(self.data)
@@ -512,13 +512,11 @@ class IntResponse(BaseResponse):
     def __rrshift__(self, other):
         return other >> self.data
 
-    # TODO: need to add all these methods to emulate numeric type
-    # __invert__(self)
-    # __coerce__(self, other)
-    # __invert__
-    # __long__
-    # __nonzero__
-    # __trunc__
+    def __invert__(self):
+        return ~self.data
+
+    def __nonzero__(self):
+        return bool(self.data)
 
 
 class FileResponse(BaseResponse):
