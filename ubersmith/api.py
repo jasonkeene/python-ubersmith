@@ -365,7 +365,7 @@ class DictResponse(BaseResponse):
         return self.data.has_key(key)
 
     def __iter__(self):
-        return iter(self.data.items())
+        return iter(self.data)
 
     def __getitem__(self, key):
         return self.data[key]

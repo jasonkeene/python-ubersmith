@@ -1,7 +1,58 @@
 from mock import Mock
 import pytest
 
-from ubersmith.api import IntResponse
+from ubersmith.api import DictResponse, IntResponse
+
+
+class DescribeDictResponse:
+    @pytest.fixture
+    def response(self):
+        resp = Mock()
+        resp.json.return_value = {'data': {
+            'key1': 'value1',
+            'key2': 'value2',
+            'key3': 'value3',
+        }}
+        return DictResponse(resp)
+
+    def it_returns_keys(self, response):
+        assert sorted(response.keys()) == [
+            'key1',
+            'key2',
+            'key3',
+        ]
+
+    def it_returns_values(self, response):
+        assert sorted(response.values()) == [
+            'value1',
+            'value2',
+            'value3',
+        ]
+
+    def it_returns_items(self, response):
+        assert sorted(response.items()) == [
+            ('key1', 'value1'),
+            ('key2', 'value2'),
+            ('key3', 'value3'),
+        ]
+
+    def it_gets(self, response):
+        assert response.get("key1") == "value1"
+        assert response.get("bad-key", "default") == "default"
+
+    def it_checks_if_dict_has_key(self, response):
+        assert response.has_key("key1") is True
+        assert response.has_key("bad-key") is False
+
+    def it_iterates(self, response):
+        result = {}
+        for key in response:
+            result[key] = response[key]
+        assert result == {
+            'key1': 'value1',
+            'key2': 'value2',
+            'key3': 'value3',
+        }
 
 
 class DescribeIntResponse:
