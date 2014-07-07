@@ -29,7 +29,7 @@ __all__ = [
 
 _CLEANERS = {
     'bool': bool,
-    'int': int,
+    'int': lambda x: int(x) if x else 0,
     'decimal': lambda x: Decimal(x.replace(',', '')),
     'float': float,
     'timestamp': lambda x: datetime.datetime.fromtimestamp(float(x)),
