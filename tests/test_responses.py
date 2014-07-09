@@ -40,10 +40,6 @@ class DescribeDictResponse:
         assert response.get("key1") == "value1"
         assert response.get("bad-key", "default") == "default"
 
-    def it_checks_if_dict_has_key(self, response):
-        assert response.has_key("key1") is True
-        assert response.has_key("bad-key") is False
-
     def it_iterates(self, response):
         result = {}
         for key in response:
