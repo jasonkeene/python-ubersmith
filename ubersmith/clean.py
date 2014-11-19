@@ -1,6 +1,7 @@
 import datetime
-from decimal import Decimal
+import six
 import time
+from decimal import Decimal
 try:
     import __builtin__ as builtins
 except ImportError:  # pragma: no cover
@@ -34,12 +35,16 @@ def date(val):
 
 @cleaner
 def decimal(val):
-    return Decimal(val.replace(',', ''))
+    if isinstance(val, six.string_types):
+        val = val.replace(',', '')
+    return Decimal(val)
 
 
 @cleaner
 def int(val):
-    return builtins.int(val.replace(',', ''))
+    if isinstance(val, six.string_types):
+        val = val.replace(',', '')
+    return builtins.int(val)
 
 
 class clean(object):

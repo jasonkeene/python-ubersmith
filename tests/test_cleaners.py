@@ -143,3 +143,9 @@ class DescribeClean:
 
     def it_cleans_ints_with_commas(self):
         assert clean('int')(u'1,221') == 1221
+
+    def it_cleans_ints_as_int_type(self):
+        assert clean('int')(1) == 1
+
+    def it_cleans_decimal_as_decimal_type(self):
+        assert clean('decimal')(Decimal('1')) == Decimal('1')
