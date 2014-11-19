@@ -37,6 +37,8 @@ def date(val):
 def decimal(val):
     if isinstance(val, six.string_types):
         val = val.replace(',', '')
+        if val.strip() == '':
+            return None
     return Decimal(val)
 
 
@@ -44,6 +46,8 @@ def decimal(val):
 def int(val):
     if isinstance(val, six.string_types):
         val = val.replace(',', '')
+        if val.strip() == '':
+            return None
     return builtins.int(val)
 
 
