@@ -1,7 +1,7 @@
 """Lower level API, configuration, and HTTP stuff."""
-
-from ubersmith.compat import total_ordering, file_type
+import six
 import time
+from ubersmith.compat import total_ordering, file_type
 
 import requests
 
@@ -350,17 +350,49 @@ class BaseResponse(object):
 
 @total_ordering
 class DictResponse(BaseResponse):
+    __marker = object()
+
     def keys(self):
         return self.data.keys()
+
+    def iterkeys(self):
+        return six.iterkeys(self.data)
 
     def values(self):
         return self.data.values()
 
+    def itervalues(self):
+        return six.itervalues(self.data)
+
     def items(self):
         return self.data.items()
 
+    def iteritems(self):
+        return six.iteritems(self.data)
+
     def get(self, key, default=None):
         return self.data.get(key, default)
+
+    def update(self, d):
+        self.data.update(d)
+
+    def setdefault(self, key, value):
+        self.data.setdefault(key, value)
+
+    def pop(self, key, default=__marker):
+        if default is self.__marker:
+            return self.data.pop(key)
+        else:
+            return self.data.pop(key, default)
+
+    def popitem(self):
+        return self.data.popitem()
+
+    def clear(self):
+        self.data.clear()
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
 
     def __iter__(self):
         return iter(self.data)

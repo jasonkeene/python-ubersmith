@@ -50,6 +50,42 @@ class DescribeDictResponse:
             'key3': 'value3',
         }
 
+    class ContextFromCleaned:
+        """Allows mutations"""
+
+        @pytest.fixture
+        def response(self):
+            resp = Mock()
+            return DictResponse.from_cleaned(resp, {'data': {
+                'key1': 'value1',
+                'key2': 'value2',
+                'key3': 'value3',
+            }})
+
+        def it_mutates_like_a_dict(self, response):
+            response.update({'key4': 'value4'})
+            assert response['key4'] == 'value4'
+
+            response['key5'] = 'value5'
+            assert response['key5'] == 'value5'
+
+            response.setdefault('key6', 'value6')
+            assert response['key6'] == 'value6'
+
+            value = response.pop('key6')
+            assert value == 'value6'
+            assert 'key6' not in response
+
+            value = response.pop('key6', 'default')
+            assert value == 'default'
+
+            length = len(response)
+            response.popitem()
+            assert len(response) == length - 1
+
+            response.clear()
+            assert not response
+
 
 class DescribeIntResponse:
     @pytest.fixture
