@@ -50,6 +50,22 @@ class DescribeDictResponse:
             'key3': 'value3',
         }
 
+    def it_strs(self):
+        d = {'key': 'value'}
+        json_resp = Mock()
+        json_resp.json.return_value = {'data': d}
+        response = DictResponse(json_resp)
+
+        assert str(response) == str(d)
+
+    def it_reprs(self):
+        d = {'key': 'value'}
+        json_resp = Mock()
+        json_resp.json.return_value = {'data': d}
+        response = DictResponse(json_resp)
+
+        assert repr(response) == repr(d)
+
     class ContextFromCleaned:
         """Allows mutations"""
 
@@ -93,6 +109,12 @@ class DescribeIntResponse:
         resp = Mock()
         resp.json.return_value = {'data': 12}
         return IntResponse(resp)
+
+    def it_strs(self, response):
+        assert str(response) == '12'
+
+    def it_reprs(self, response):
+        assert repr(response) == '12'
 
     def it_adds(self, response):
         assert response + 2 == 14
