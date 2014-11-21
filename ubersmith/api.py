@@ -391,6 +391,12 @@ class DictResponse(BaseResponse):
     def clear(self):
         self.data.clear()
 
+    def __str__(self):
+        return str(self.data)
+
+    def __repr__(self):
+        return repr(self.data)
+
     def __setitem__(self, key, value):
         self.data[key] = value
 
@@ -439,6 +445,12 @@ class IntResponse(BaseResponse):
 
     def conjugate(self):
         return self.data
+
+    def __str__(self):
+        return str(self.data)
+
+    def __repr__(self):
+        return repr(self.data)
 
     def __int__(self):
         return self.data
