@@ -150,6 +150,10 @@ class DescribeClean:
     def it_cleans_decimal_as_decimal_type(self):
         assert clean('decimal')(Decimal('1')) == Decimal('1')
 
-    def it_cleans_empty_string_as_none(self):
+    def it_cleans_numerical_values_with_empty_string_as_none(self):
         assert clean('int')('') is None
         assert clean('decimal')('') is None
+
+    def it_cleans_numerical_values_with_none_as_none(self):
+        assert clean('int')(None) is None
+        assert clean('decimal')(None) is None
