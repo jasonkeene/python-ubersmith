@@ -353,6 +353,9 @@ class BaseResponse(object):
     def __repr__(self):
         return repr(self.data)
 
+    def __nonzero__(self):
+        return bool(self.data)
+
 
 @total_ordering
 class DictResponse(BaseResponse):
