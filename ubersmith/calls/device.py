@@ -55,6 +55,26 @@ class ListCall(BaseCall):
     cleaner = clean(dict, keys='int', values=_DEVICE_CLEANER)
 
 
+class IpAssignmentListCall(BaseCall):
+    method = _('ip_assignment_list')
+    cleaner = clean(dict, keys='int', values=clean(dict, values={
+        'addr_type': 'int',
+        'assign_id': 'int',
+        'client_id': 'int',
+        'created_ts': 'timestamp',
+        'device_id': 'int',
+        'group_client_id': 'int',
+        'group_id': 'int',
+        'num_ips': 'int',
+        'portable': bool,
+        'service_id': 'int',
+        'updated_ts': 'timestamp',
+        'vlan_num': 'int',
+        'vlan_range_id': 'int',
+        'vlan_type_id': 'int',
+    }))
+
+
 class ModuleGraphCall(BaseCall):
     method = _('module_graph')
 
