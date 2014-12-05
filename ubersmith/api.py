@@ -356,6 +356,23 @@ class BaseResponse(object):
     def __nonzero__(self):
         return bool(self.data)
 
+    def __json__(self):
+        """This method returns the JSON-serializable representation of the
+        Response. To utilize this, create a JSONEncoder which calls the
+        __json__ methods of supporting objects. e.g.::
+
+            import json
+            class MyJSONEncoder(json.JSONEncoder):
+                def default(self, o):
+                    if hasattr(obj, '__json__') and callable(obj.__json__):
+                        return obj.__json__()
+                    else:
+                        return super(MyJSONEncoder, self).default(o)
+
+            json.dumps(my_response, cls=MyJSONEncoder)
+        """
+        return self.data
+
 
 @total_ordering
 class DictResponse(BaseResponse):
