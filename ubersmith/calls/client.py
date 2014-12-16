@@ -21,6 +21,7 @@ __all__ = [
     'InvoiceGet',
     'InvoiceList',
     'CreditListCall',
+    'ServiceAddCall',
 ]
 
 _ = prepend_base(__name__.split('.')[-1])
@@ -108,3 +109,9 @@ class CreditListCall(BaseCall):
         'order_id': 'int',
         'date': 'timestamp',
     }))
+
+
+class ServiceAddCall(BaseCall):
+    method = _('service_add')
+    required_fields = ['client_id']
+    cleaner = clean(int)
