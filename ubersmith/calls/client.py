@@ -115,3 +115,9 @@ class ServiceAddCall(BaseCall):
     method = _('service_add')
     required_fields = ['client_id']
     cleaner = clean(int)
+
+
+class CCAddCall(BaseCall):
+    method = _('cc_add')
+    required_fields = ['client_id', 'cc_num']
+    cleaner = clean(int)

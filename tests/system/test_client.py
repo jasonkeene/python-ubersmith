@@ -81,6 +81,21 @@ def test_update(response):
     assert dict(result) == expected
 
 
+def test_cc_add(response):
+    resp_json = {
+        "status": True,
+        "error_code": None,
+        "error_message": "",
+        "data": u'123',
+    }
+    response.json.return_value = resp_json
+    response.content = json.dumps(resp_json)
+    response.text = text_type(response.content)
+    expected = 123
+    result = ubersmith.client.cc_add(cc_num='5454'*4, client_id=50)
+    assert result == expected
+
+
 def test_invoice_list(response):
     resp_json = {
         "status": True,
