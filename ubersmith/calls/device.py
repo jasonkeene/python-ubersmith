@@ -11,6 +11,7 @@ from ubersmith.clean import clean
 from ubersmith.utils import prepend_base
 
 __all__ = [
+    'ConnectionListCall',
     'GetCall',
     'ListCall',
     # 'ModuleGraphCall',
@@ -42,6 +43,30 @@ _DEVICE_CLEANER = clean(dict, values={
     'height': float,
     'width': float,
 })
+
+
+class ConnectionListCall(BaseCall):
+    method = _('connection_list')
+    required_fields = ['device_id']
+    cleaner = clean(dict, keys='int', values=clean(dict, values={
+        'connection_id': 'int',
+        'connection_type_id': 'int',
+        'connection_class_id': 'int',
+        'status': 'int',
+        'client_id': 'int',
+        'service_id': 'int',
+        'src_device_id': 'int',
+        'src_interface_id': 'int',
+        'src_node_type_id': 'int',
+        'dst_device_id': 'int',
+        'dst_interface_id': 'int',
+        'dst_node_type_id': 'int',
+        'num_links': 'int',
+        'start_ts': 'timestamp',
+        'end_ts': 'timestamp',
+        'created_ts': 'timestamp',
+        'updated_ts': 'timestamp',
+    }))
 
 
 class GetCall(BaseCall):

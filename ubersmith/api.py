@@ -95,6 +95,7 @@ METHODS = {
     u'client.update': u'Update a Client',
     u'device.add': u'Add a New Device',
     u'device.comment_list': u"List a Device's Comments",
+    u'device.connection_list': u"List a Device's Connections",
     u'device.cpanel_add': u'Add a cPanel Account',
     u'device.delete': u'Delete a Device',
     u'device.event_list': u'List Device Events',
