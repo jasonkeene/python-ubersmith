@@ -42,7 +42,6 @@ class DescribeRequestHandler:
         return response
 
     @pytest.fixture
-    @pytest.fixture
     def maintenance_response(self):
         response = Mock()
         response.headers = {
