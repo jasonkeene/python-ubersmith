@@ -250,18 +250,15 @@ class RequestHandler(object):
         # make sure requested method is valid
         self._validate_request_method(method)
 
-        # attempt the request three times
-        attempts = range(3)
-        for i in attempts:
+        # attempt the request multiple times
+        attempts = 3
+        for i in range(attempts):
             response = self._send_request(method, data)
 
             # handle case where ubersmith is 'updating token'
             # see: https://github.com/jasonkeene/python-ubersmith/issues/1
-            if all([
-                response.headers.get('content-type') == 'text/html',
-                'Updating Token' in response.content,
-            ]):
-                if i != attempts[-1]:
+            if self._is_token_response(response):
+                if i < attempts - 1:
                     # wait 2 secs before retrying request
                     time.sleep(2)
                     continue
@@ -283,6 +280,11 @@ class RequestHandler(object):
                 else:
                     raise ResponseError(response=resp.json)
         return resp
+
+    @staticmethod
+    def _is_token_response(response):
+        return ('text/html' in response.headers.get('content-type', '') and
+                'Updating Token' in response.content)
 
     def _send_request(self, method, data):
         url = append_qs(self.base_url, {'method': method})
