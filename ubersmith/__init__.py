@@ -1,4 +1,16 @@
 from ubersmith.api import RequestHandler, set_default_request_handler
+from ubersmith import (
+    api,
+    exceptions,
+    utils,
+    calls,
+    client,
+    device,
+    order,
+    sales,
+    support,
+    uber,
+)
 
 __all__ = [
     # package modules
