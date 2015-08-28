@@ -21,6 +21,7 @@ desktop.ini
 
 # stuff that gets generated from setup.py
 ubersmith.egg-info
+dist/
 
 # dev console config
 bin/config.py
