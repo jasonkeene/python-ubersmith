@@ -5,18 +5,18 @@ import ubersmith.api
 
 
 @pytest.fixture
-def requests(monkeypatch):
-    requests = Mock()
-    monkeypatch.setattr(ubersmith.api, 'requests', requests)
-    return requests
+def session(monkeypatch):
+    session = Mock()
+    monkeypatch.setattr(ubersmith.api.RequestHandler, 'session', session)
+    return session
 
 
 @pytest.fixture
-def response(requests):
+def response(session):
     response = Mock()
     response.headers = {
         'content-type': 'application/json',
     }
     response.text = u""
-    requests.post.return_value = response
+    session.post.return_value = response
     return response

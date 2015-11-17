@@ -158,17 +158,17 @@ class DescribeRequestHandler:
 
     def it_validates_ssl(self, response):
         h = RequestHandler('')
-        with patch('ubersmith.api.requests') as requests:
-            requests.post.return_value = response
+        with patch('ubersmith.api.RequestHandler.session') as session:
+            session.post.return_value = response
             h.process_request('uber.method_list')
-            assert requests.post.call_args[1]['verify'] is True
+            assert session.post.call_args[1]['verify'] is True
 
     def it_can_disable_ssl_validation(self, response):
         h = RequestHandler('', verify=False)
-        with patch('ubersmith.api.requests') as requests:
-            requests.post.return_value = response
+        with patch('ubersmith.api.RequestHandler.session') as session:
+            session.post.return_value = response
             h.process_request('uber.method_list')
-            assert requests.post.call_args[1]['verify'] is False
+            assert session.post.call_args[1]['verify'] is False
 
     def it_validates_bad_methods(self):
         h = RequestHandler('')

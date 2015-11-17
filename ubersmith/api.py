@@ -239,6 +239,11 @@ class RequestHandler(object):
         self.username = username
         self.password = password
         self.verify = verify
+        self._session = requests.session()
+
+    @property
+    def session(self):
+        return self._session
 
     def process_request(self, method, data=None):
         """Process request over HTTP to ubersmith instance.
@@ -289,9 +294,9 @@ class RequestHandler(object):
     def _send_request(self, method, data):
         url = append_qs(self.base_url, {'method': method})
         data, files, headers = self._encode_data(data)
-        return requests.post(url, data=data, files=files, headers=headers,
-                             auth=(self.username, self.password),
-                             verify=self.verify)
+        return self.session.post(url, data=data, files=files, headers=headers,
+                                 auth=(self.username, self.password),
+                                 verify=self.verify)
 
     @staticmethod
     def _validate_request_method(method):
