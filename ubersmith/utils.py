@@ -1,17 +1,20 @@
 """Utility functions used throughout ubersmith library."""
-import inspect
 try:
     from collections.abc import MutableSequence, MutableMapping
 except ImportError:  # pragma: no cover
     from collections import MutableSequence, MutableMapping
 try:
-    from urllib import parse as urlparse
-except ImportError:  # pragma: no cover
-    import urlparse
-try:
-    from urllib.parse import urlencode
-except ImportError:  # pragma: no cover
+    # Python 2.x
     from urllib import urlencode
+    from urlparse import parse_qsl
+    from urlparse import urlsplit
+    from urlparse import urlunsplit
+except ImportError:
+    # Python 3.x
+    from urllib.parse import parse_qsl
+    from urllib.parse import urlencode
+    from urllib.parse import urlsplit
+    from urllib.parse import urlunsplit
 
 from six import string_types, text_type
 
@@ -37,13 +40,13 @@ def append_qs(url, query_string):
         * a list of tuples: [('test3', 'val1'), ('test3', 'val2')]
 
     """
-    parsed_url = urlparse.urlsplit(url)
-    parsed_qs = urlparse.parse_qsl(parsed_url.query, True)
+    parsed_url = urlsplit(url)
+    parsed_qs = parse_qsl(parsed_url.query, True)
 
     if isstr(query_string):
-        parsed_qs += urlparse.parse_qsl(query_string)
+        parsed_qs += parse_qsl(query_string)
     elif isdict(query_string):
-        for item in query_string.items():
+        for item in list(query_string.items()):
             if islist(item[1]):
                 for val in item[1]:
                     parsed_qs.append((item[0], val))
@@ -54,7 +57,7 @@ def append_qs(url, query_string):
     else:
         raise TypeError('Unexpected query_string type')
 
-    return urlparse.urlunsplit((
+    return urlunsplit((
         parsed_url.scheme,
         parsed_url.netloc,
         parsed_url.path,
@@ -67,7 +70,7 @@ def urlencode_unicode(data, doseq=0):
     """urllib.urlencode can't handle unicode, this is a hack to fix it."""
     data_iter = None
     if isdict(data):
-        data_iter = data.items()
+        data_iter = list(data.items())
     elif islist(data):
         data_iter = data
 
@@ -108,7 +111,7 @@ def to_nested_php_args(data, prefix_key=None):
         data_iter = data if is_root else enumerate(data)
         new_data = [] if is_root else {}
     elif isdict(data):
-        data_iter = data.items()
+        data_iter = list(data.items())
         new_data = {}
     else:
         raise TypeError('expected dict or list, got {0}'.format(type(data)))
@@ -117,7 +120,7 @@ def to_nested_php_args(data, prefix_key=None):
         def data_set(k, v):
             new_data.append((k, v))
         def data_update(d):
-            for k, v in d.items():
+            for k, v in list(d.items()):
                 new_data.append((k, v))
     else:
         def data_set(k, v):
