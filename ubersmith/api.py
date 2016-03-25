@@ -226,20 +226,25 @@ class _ProxyModule(object):
 class RequestHandler(object):
     """Handles HTTP requests and authentication."""
 
-    def __init__(self, base_url, username=None, password=None, verify=True):
+    def __init__(self, base_url, username=None, password=None, verify=True,
+                 session=None):
         """Initialize HTTP request handler with optional authentication.
 
             base_url: URL to send API requests
             username: Username for API access
             password: Password for API access
             verify: Verify HTTPS certificate
+            session: requests.Session to send requests with
 
         """
         self.base_url = base_url
         self.username = username
         self.password = password
         self.verify = verify
-        self._session = requests.session()
+
+        if session is None:
+            session = requests.session()
+        self._session = session
 
     @property
     def session(self):

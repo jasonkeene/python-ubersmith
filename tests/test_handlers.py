@@ -81,6 +81,12 @@ class DescribeRequestHandler:
         response.text = text_type(response.content)
         return response
 
+    def it_uses_passed_session(self):
+        session = Mock()
+        h = RequestHandler('', session=session)
+        h._send_request('uber.method_list', {})
+        assert session.post.called
+
     def it_handles_normal_responses(self, response):
         h = RequestHandler('')
         h._send_request = Mock(return_value=response)
